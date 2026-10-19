@@ -1,5 +1,8 @@
 # This .gitignore file should be placed at the root of your Unity project directory
 #
+# The Unity project is in GridAura/, so the root-only folder rules below
+# are repeated for that directory.
+#
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 # Recommended: add any editor/OS/tool-specific ignore rules from the Global/ templates as needed.
@@ -107,3 +110,24 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Generated folders inside the GridAura Unity project
+GridAura/[Ll]ibrary/
+GridAura/[Tt]emp/
+GridAura/[Oo]bj/
+GridAura/[Bb]uild/
+GridAura/[Bb]uilds/
+GridAura/[Ll]ogs/
+GridAura/[Uu]ser[Ss]ettings/
+GridAura/[Mm]emoryCaptures/
+GridAura/[Rr]ecordings/
+GridAura/.utmp/
+GridAura/.vs/
+GridAura/.gradle/
+GridAura/.consulo/
+GridAura/ExportedObj/
+GridAura/UIElementsSchema/
+GridAura/ServerData
+GridAura/sysinfo.txt
+GridAura/crashlytics-build.properties
+GridAura/InitTestScene*.unity*
