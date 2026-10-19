@@ -1,0 +1,4688 @@
+{
+ "gridSize": 8,
+ "coordinates": "0-indexed, row 0 = top, col 0 = left. black blocks and solution pieces use top-left row/col plus oriented h (rows) and w (cols).",
+ "blackShapes": [
+  {
+   "id": "K1",
+   "h": 1,
+   "w": 1
+  },
+  {
+   "id": "K2",
+   "h": 1,
+   "w": 2
+  },
+  {
+   "id": "K3",
+   "h": 1,
+   "w": 3
+  }
+ ],
+ "pieces": [
+  {
+   "id": "A",
+   "h": 1,
+   "w": 4,
+   "area": 4,
+   "color": "red"
+  },
+  {
+   "id": "B",
+   "h": 1,
+   "w": 5,
+   "area": 5,
+   "color": "blue"
+  },
+  {
+   "id": "C",
+   "h": 2,
+   "w": 2,
+   "area": 4,
+   "color": "yellow"
+  },
+  {
+   "id": "D",
+   "h": 3,
+   "w": 3,
+   "area": 9,
+   "color": "white"
+  },
+  {
+   "id": "E",
+   "h": 2,
+   "w": 3,
+   "area": 6,
+   "color": "blue"
+  },
+  {
+   "id": "F",
+   "h": 2,
+   "w": 4,
+   "area": 8,
+   "color": "yellow"
+  },
+  {
+   "id": "G",
+   "h": 2,
+   "w": 5,
+   "area": 10,
+   "color": "red"
+  },
+  {
+   "id": "H",
+   "h": 3,
+   "w": 4,
+   "area": 12,
+   "color": "white"
+  }
+ ],
+ "levels": [
+  {
+   "id": 1,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 8
+    },
+    {
+     "row": 3,
+     "col": 0,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "row": 3,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 8
+    }
+   ],
+   "solution": [
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    }
+   ],
+   "solutionGrid": [
+    "########",
+    "########",
+    "########",
+    "###CC###",
+    "###CC###",
+    "########",
+    "########",
+    "########"
+   ],
+   "solverNodes": 76
+  },
+  {
+   "id": 2,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 1,
+     "col": 3,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 3,
+     "col": 0,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 5,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 2,
+     "col": 3,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 1,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "DDDBBBBB",
+    "DDD###GG",
+    "DDDEEAGG",
+    "#CCEEAGG",
+    "#CCEEAGG",
+    "HHHH#AGG",
+    "HHHHFFFF",
+    "HHHHFFFF"
+   ],
+   "solverNodes": 158
+  },
+  {
+   "id": 3,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 1,
+     "col": 0,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 1,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 2,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 1,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "AAAAHHHH",
+    "#EEEHHHH",
+    "#EEEHHHH",
+    "##B#CCGG",
+    "FFB#CCGG",
+    "FFBDDDGG",
+    "FFBDDDGG",
+    "FFBDDDGG"
+   ],
+   "solverNodes": 205
+  },
+  {
+   "id": 4,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 1,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 5,
+     "col": 5,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 1,
+     "col": 5,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 6,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 2,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "DDDBBBBB",
+    "DDDCCA##",
+    "DDDCCAFF",
+    "GG###AFF",
+    "GGHHHAFF",
+    "GGHHH#FF",
+    "GGHHHEEE",
+    "GGHHHEEE"
+   ],
+   "solverNodes": 229
+  },
+  {
+   "id": 5,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 2,
+     "col": 2,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 1,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 2,
+     "col": 4,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "###BBBBB",
+    "CCAAAAFF",
+    "CC##EEFF",
+    "HHHHEEFF",
+    "HHHHEEFF",
+    "HHHH#DDD",
+    "GGGGGDDD",
+    "GGGGGDDD"
+   ],
+   "solverNodes": 303
+  },
+  {
+   "id": 6,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 1,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 4,
+     "col": 2,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 5,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 2,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "BBBBBEEE",
+    "FF###EEE",
+    "FFCCHHHH",
+    "FFCCHHHH",
+    "FF##HHHH",
+    "AAAA#DDD",
+    "GGGGGDDD",
+    "GGGGGDDD"
+   ],
+   "solverNodes": 319
+  },
+  {
+   "id": 7,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "BBBBBHHH",
+    "EE#CCHHH",
+    "EE#CCHHH",
+    "EE###HHH",
+    "AAAAFFFF",
+    "DDD#FFFF",
+    "DDDGGGGG",
+    "DDDGGGGG"
+   ],
+   "solverNodes": 348
+  },
+  {
+   "id": 8,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 2,
+     "col": 3,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 4,
+     "col": 6,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 6,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 3,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "DDDEEEAB",
+    "DDDEEEAB",
+    "DDD###AB",
+    "GG##CCAB",
+    "GGFFCC#B",
+    "GGFFHHHH",
+    "GGFFHHHH",
+    "GGFFHHHH"
+   ],
+   "solverNodes": 377
+  },
+  {
+   "id": 9,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 1,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 4,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 5,
+     "col": 1,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 2,
+     "col": 2,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "BBBBBEEE",
+    "FF###EEE",
+    "FFHHHHCC",
+    "FFHHHHCC",
+    "FFHHHH##",
+    "#AAAADDD",
+    "GGGGGDDD",
+    "GGGGGDDD"
+   ],
+   "solverNodes": 423
+  },
+  {
+   "id": 10,
+   "difficulty": "easy",
+   "black": [
+    {
+     "row": 0,
+     "col": 6,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EEAAAA#B",
+    "EEGGGGGB",
+    "EEGGGGGB",
+    "DDD##CCB",
+    "DDD##CCB",
+    "DDD#HHHH",
+    "FFFFHHHH",
+    "FFFFHHHH"
+   ],
+   "solverNodes": 471
+  },
+  {
+   "id": 11,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 2,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 4,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 5,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 1,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 2,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EEE###FF",
+    "EEEDDDFF",
+    "GG#DDDFF",
+    "GG#DDDFF",
+    "GG#BBBBB",
+    "GGCCHHHH",
+    "GGCCHHHH",
+    "AAAAHHHH"
+   ],
+   "solverNodes": 482
+  },
+  {
+   "id": 12,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 1,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 4,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 5,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EE###DDD",
+    "EECC#DDD",
+    "EECCADDD",
+    "HHHHAB##",
+    "HHHHABFF",
+    "HHHHABFF",
+    "GGGGGBFF",
+    "GGGGGBFF"
+   ],
+   "solverNodes": 524
+  },
+  {
+   "id": 13,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 2,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 1,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 1,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 2,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EE#DDDFF",
+    "EE#DDDFF",
+    "EE#DDDFF",
+    "B#GGCCFF",
+    "BAGGCC##",
+    "BAGGHHHH",
+    "BAGGHHHH",
+    "BAGGHHHH"
+   ],
+   "solverNodes": 556
+  },
+  {
+   "id": 14,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 6,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 4,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "EEEDDD#A",
+    "EEEDDD#A",
+    "CC#DDD#A",
+    "CCBBBBBA",
+    "HHHGGGGG",
+    "HHHGGGGG",
+    "HHH#FFFF",
+    "HHH#FFFF"
+   ],
+   "solverNodes": 598
+  },
+  {
+   "id": 15,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 2,
+     "col": 7,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 0,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 6,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 2,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 2,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EEEDDDCC",
+    "EEEDDDCC",
+    "###DDDA#",
+    "##HHHHAB",
+    "FFHHHHAB",
+    "FFHHHHAB",
+    "FFGGGGGB",
+    "FFGGGGGB"
+   ],
+   "solverNodes": 683
+  },
+  {
+   "id": 16,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 6,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 3,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 2,
+     "col": 4,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "GGFF#CCB",
+    "GGFF#CCB",
+    "GGFFEE#B",
+    "GGFFEE#B",
+    "GG#AEE#B",
+    "DDDAHHHH",
+    "DDDAHHHH",
+    "DDDAHHHH"
+   ],
+   "solverNodes": 723
+  },
+  {
+   "id": 17,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 0,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 4,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 4,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 5,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 2,
+     "col": 1,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "GGGGGDDD",
+    "GGGGGDDD",
+    "#EECCDDD",
+    "#EECCB##",
+    "#EE#ABFF",
+    "HHHHABFF",
+    "HHHHABFF",
+    "HHHHABFF"
+   ],
+   "solverNodes": 751
+  },
+  {
+   "id": 18,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 3,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 5,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 1,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 4,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 1,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 4,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "BEEEADDD",
+    "BEEEADDD",
+    "BCC#ADDD",
+    "BCC#A#GG",
+    "B###FFGG",
+    "HHHHFFGG",
+    "HHHHFFGG",
+    "HHHHFFGG"
+   ],
+   "solverNodes": 786
+  },
+  {
+   "id": 19,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 2,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 5,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 3,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 4,
+     "col": 4,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "GGCCHHHH",
+    "GGCCHHHH",
+    "GG#AHHHH",
+    "GG#A###B",
+    "GG#AEEEB",
+    "DDDAEEEB",
+    "DDDFFFFB",
+    "DDDFFFFB"
+   ],
+   "solverNodes": 843
+  },
+  {
+   "id": 20,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "HHH#EECC",
+    "HHH#EECC",
+    "HHH#EE##",
+    "HHHBBBBB",
+    "AAAAFFFF",
+    "DDD#FFFF",
+    "DDDGGGGG",
+    "DDDGGGGG"
+   ],
+   "solverNodes": 939
+  },
+  {
+   "id": 21,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 0,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 3,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 5,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "EEE#DDDB",
+    "EEE#DDDB",
+    "#CC#DDDB",
+    "#CCFFFFB",
+    "HHHFFFFB",
+    "HHHGGGGG",
+    "HHHGGGGG",
+    "HHH#AAAA"
+   ],
+   "solverNodes": 983
+  },
+  {
+   "id": 22,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 6,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 4,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 3,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 1,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "AGGDDD#B",
+    "AGGDDD#B",
+    "AGGDDD#B",
+    "AGGFFFFB",
+    "#GGFFFFB",
+    "HHHH##EE",
+    "HHHHCCEE",
+    "HHHHCCEE"
+   ],
+   "solverNodes": 1043
+  },
+  {
+   "id": 23,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 1,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 2,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "BBBBBHHH",
+    "FFEE#HHH",
+    "FFEE#HHH",
+    "FFEE#HHH",
+    "FFAAAACC",
+    "DDD###CC",
+    "DDDGGGGG",
+    "DDDGGGGG"
+   ],
+   "solverNodes": 1204
+  },
+  {
+   "id": 24,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 5,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 4,
+     "col": 6,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 1,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 1,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "GGGGGDDD",
+    "GGGGGDDD",
+    "#FFFFDDD",
+    "BFFFF###",
+    "BHHHCC#A",
+    "BHHHCC#A",
+    "BHHHEEEA",
+    "BHHHEEEA"
+   ],
+   "solverNodes": 1243
+  },
+  {
+   "id": 25,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 0,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 5,
+     "col": 3,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 2,
+     "col": 1,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 2,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "FFFFHHHH",
+    "FFFFHHHH",
+    "#DDDHHHH",
+    "#DDD#CCB",
+    "#DDD#CCB",
+    "EE#AAAAB",
+    "EEGGGGGB",
+    "EEGGGGGB"
+   ],
+   "solverNodes": 1329
+  },
+  {
+   "id": 26,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 2,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 6,
+     "col": 5,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 4,
+     "col": 2,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 2,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "HHHHFFFF",
+    "HHHHFFFF",
+    "HHHH#EEE",
+    "GG###EEE",
+    "GGDDDCCA",
+    "GGDDDCCA",
+    "GGDDD##A",
+    "GGBBBBBA"
+   ],
+   "solverNodes": 1394
+  },
+  {
+   "id": 27,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 2,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 6,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 4,
+     "col": 3,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "CC#GGGGG",
+    "CC#GGGGG",
+    "AAAAFFFF",
+    "DDD#FFFF",
+    "DDDEEHHH",
+    "DDDEEHHH",
+    "###EEHHH",
+    "BBBBBHHH"
+   ],
+   "solverNodes": 1477
+  },
+  {
+   "id": 28,
+   "difficulty": "medium",
+   "black": [
+    {
+     "row": 0,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "DDD#EEEA",
+    "DDD#EEEA",
+    "DDD##CCA",
+    "GGFF#CCA",
+    "GGFFHHHH",
+    "GGFFHHHH",
+    "GGFFHHHH",
+    "GG#BBBBB"
+   ],
+   "solverNodes": 1524
+  },
+  {
+   "id": 29,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 0,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 4,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 7,
+     "col": 6,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 2,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 5,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 2,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "CCHHHDDD",
+    "CCHHHDDD",
+    "##HHHDDD",
+    "GGHHHFFB",
+    "GG###FFB",
+    "GGEEEFFB",
+    "GGEEEFFB",
+    "GGAAAA#B"
+   ],
+   "solverNodes": 1652
+  },
+  {
+   "id": 30,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 2,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 4,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 2,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "EEGGGGGA",
+    "EEGGGGGA",
+    "EE###CCA",
+    "DDD#BCCA",
+    "DDD#BHHH",
+    "DDD#BHHH",
+    "FFFFBHHH",
+    "FFFFBHHH"
+   ],
+   "solverNodes": 1691
+  },
+  {
+   "id": 31,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 7,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 0,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 3,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 2,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 2,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 2,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "GGEEFFFF",
+    "GGEEFFFF",
+    "GGEEDDD#",
+    "GGB#DDD#",
+    "GGBADDD#",
+    "##BAHHHH",
+    "CCBAHHHH",
+    "CCBAHHHH"
+   ],
+   "solverNodes": 1815
+  },
+  {
+   "id": 32,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 4,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 3,
+     "col": 7,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 7,
+     "h": 3,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "HHHHCCEE",
+    "HHHHCCEE",
+    "HHHH##EE",
+    "GGBBBBB#",
+    "GGFFAAAA",
+    "GGFFDDD#",
+    "GGFFDDD#",
+    "GGFFDDD#"
+   ],
+   "solverNodes": 2039
+  },
+  {
+   "id": 33,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 7,
+     "col": 5,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 3,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 5,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 3,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "GGGGGDDD",
+    "GGGGGDDD",
+    "FFFF#DDD",
+    "FFFF###B",
+    "HHHAAAAB",
+    "HHHEECCB",
+    "HHHEECCB",
+    "HHHEE##B"
+   ],
+   "solverNodes": 2164
+  },
+  {
+   "id": 34,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 6,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 3,
+     "col": 1,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 2,
+     "col": 3,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "DDDGGGGG",
+    "DDDGGGGG",
+    "DDDHHH##",
+    "#EEHHHFF",
+    "#EEHHHFF",
+    "#EEHHHFF",
+    "CCAAAAFF",
+    "CC#BBBBB"
+   ],
+   "solverNodes": 2312
+  },
+  {
+   "id": 35,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 4,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 1,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "AGGGGGEE",
+    "AGGGGGEE",
+    "ACC###EE",
+    "ACC#DDDB",
+    "HHH#DDDB",
+    "HHH#DDDB",
+    "HHHFFFFB",
+    "HHHFFFFB"
+   ],
+   "solverNodes": 2368
+  },
+  {
+   "id": 36,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 0,
+     "col": 1,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 7,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 3,
+     "col": 3,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 3,
+     "col": 4,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 2,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "B#HHHHGG",
+    "B#HHHHGG",
+    "B#HHHHGG",
+    "BCCAEEGG",
+    "BCCAEEGG",
+    "DDDAEE##",
+    "DDDAFFFF",
+    "DDD#FFFF"
+   ],
+   "solverNodes": 2674
+  },
+  {
+   "id": 37,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 2,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 3,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 4,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "DDDGGGGG",
+    "DDDGGGGG",
+    "DDD#FFFF",
+    "AAAAFFFF",
+    "BBBBBHHH",
+    "EE###HHH",
+    "EE#CCHHH",
+    "EE#CCHHH"
+   ],
+   "solverNodes": 2850
+  },
+  {
+   "id": 38,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 3,
+     "col": 0,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 4,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 2,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 2,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 5,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EEAGGGGG",
+    "EEAGGGGG",
+    "EEACCDDD",
+    "##ACCDDD",
+    "HHHH#DDD",
+    "HHHHFFFF",
+    "HHHHFFFF",
+    "###BBBBB"
+   ],
+   "solverNodes": 3273
+  },
+  {
+   "id": 39,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 3,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 5,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 1,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 4,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 6,
+     "col": 1,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 4,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "HHHHFFGG",
+    "HHHHFFGG",
+    "HHHHFFGG",
+    "BCC#FFGG",
+    "BCC#A#GG",
+    "B###ADDD",
+    "BEEEADDD",
+    "BEEEADDD"
+   ],
+   "solverNodes": 3475
+  },
+  {
+   "id": 40,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 6,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 2,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 4,
+     "col": 4,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 5,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "GGGGGHHH",
+    "GGGGGHHH",
+    "DDD##HHH",
+    "DDD##HHH",
+    "DDD#EEEA",
+    "FFFFEEEA",
+    "FFFF#CCA",
+    "BBBBBCCA"
+   ],
+   "solverNodes": 4536
+  },
+  {
+   "id": 41,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 2,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 6,
+     "col": 6,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 1,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 2,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 1,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 1,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "BDDDFFFF",
+    "BDDDFFFF",
+    "BDDD#EEE",
+    "BHHHHEEE",
+    "BHHHHCCA",
+    "#HHHHCCA",
+    "#GGGGG#A",
+    "#GGGGG#A"
+   ],
+   "solverNodes": 5125
+  },
+  {
+   "id": 42,
+   "difficulty": "hard",
+   "black": [
+    {
+     "row": 4,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 5,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 5,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 3,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 1,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "AHHHHFFB",
+    "AHHHHFFB",
+    "AHHHHFFB",
+    "ACCGGFFB",
+    "#CCGG##B",
+    "DDDGG#EE",
+    "DDDGG#EE",
+    "DDDGG#EE"
+   ],
+   "solverNodes": 5981
+  },
+  {
+   "id": 43,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 4,
+     "col": 1,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 6,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 7,
+     "h": 3,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 1,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 2,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "FFGGHHHB",
+    "FFGGHHHB",
+    "FFGGHHHB",
+    "FFGGHHHB",
+    "A#GGCC#B",
+    "ADDDCC##",
+    "ADDDEEE#",
+    "ADDDEEE#"
+   ],
+   "solverNodes": 7969
+  },
+  {
+   "id": 44,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 4,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 6,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 1,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 1,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 0,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 3,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "GGFFAAAA",
+    "GGFFDDDB",
+    "GGFFDDDB",
+    "GGFFDDDB",
+    "GG#HHH#B",
+    "EEEHHH#B",
+    "EEEHHHCC",
+    "###HHHCC"
+   ],
+   "solverNodes": 8667
+  },
+  {
+   "id": 45,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 0,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 4,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 4,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 1,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 2,
+     "col": 1,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "BGGGGG##",
+    "BGGGGGEE",
+    "BHHHCCEE",
+    "BHHHCCEE",
+    "BHHHDDDA",
+    "#HHHDDDA",
+    "FFFFDDDA",
+    "FFFF###A"
+   ],
+   "solverNodes": 10300
+  },
+  {
+   "id": 46,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 3,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 4,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 6,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 2,
+     "col": 5,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 2,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 6,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "GGDDDEEE",
+    "GGDDDEEE",
+    "GGDDDBFF",
+    "GGCC#BFF",
+    "GGCC#BFF",
+    "HHHH#BFF",
+    "HHHH#B##",
+    "HHHHAAAA"
+   ],
+   "solverNodes": 11685
+  },
+  {
+   "id": 47,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 5,
+     "col": 7,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 1,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 4,
+     "col": 1,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 2,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 2,
+     "col": 4,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "##GGGGGB",
+    "EEGGGGGB",
+    "EECCHHHB",
+    "EECCHHHB",
+    "ADDDHHHB",
+    "ADDDHHH#",
+    "ADDDFFFF",
+    "A###FFFF"
+   ],
+   "solverNodes": 13135
+  },
+  {
+   "id": 48,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 4,
+     "col": 2,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 6,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 7,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 3,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 3,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 3,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "HHHGGDDD",
+    "HHHGGDDD",
+    "HHHGGDDD",
+    "HHHGGCCA",
+    "FF#GGCCA",
+    "FF#EEE#A",
+    "FF#EEE#A",
+    "FFBBBBB#"
+   ],
+   "solverNodes": 14703
+  },
+  {
+   "id": 49,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 5,
+     "col": 1,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 1,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 2,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 2,
+     "col": 1,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 2,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "FFFFHHHH",
+    "FFFFHHHH",
+    "BDDDHHHH",
+    "BDDDCCGG",
+    "BDDDCCGG",
+    "B#EEE#GG",
+    "B#EEE#GG",
+    "#AAAA#GG"
+   ],
+   "solverNodes": 20090
+  },
+  {
+   "id": 50,
+   "difficulty": "expert",
+   "black": [
+    {
+     "row": 6,
+     "col": 0,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 7,
+     "col": 5,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 5,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 3,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 5,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 2,
+     "col": 1,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "GGGGGDDD",
+    "GGGGGDDD",
+    "AHHHHDDD",
+    "AHHHHFFB",
+    "AHHHHFFB",
+    "ACCEEFFB",
+    "#CCEEFFB",
+    "###EE##B"
+   ],
+   "solverNodes": 40010
+  }
+ ]
+}
