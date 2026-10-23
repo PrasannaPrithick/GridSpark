@@ -45,7 +45,7 @@
    "h": 3,
    "w": 3,
    "area": 9,
-   "color": "white"
+   "color": "violet"
   },
   {
    "id": "E",
@@ -73,7 +73,7 @@
    "h": 3,
    "w": 4,
    "area": 12,
-   "color": "white"
+   "color": "violet"
   }
  ],
  "levels": [

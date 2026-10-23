@@ -1,0 +1,1739 @@
+{
+ "gridSize": 8,
+ "coordinates": "0-indexed, row 0 = top, col 0 = left. black blocks and solution pieces use top-left row/col plus oriented h (rows) and w (cols).",
+ "blackShapes": [
+  {
+   "id": "K1",
+   "h": 1,
+   "w": 1
+  },
+  {
+   "id": "K2",
+   "h": 1,
+   "w": 2
+  },
+  {
+   "id": "K3",
+   "h": 1,
+   "w": 3
+  }
+ ],
+ "pieces": [
+  {
+   "id": "A",
+   "h": 1,
+   "w": 4,
+   "area": 4,
+   "color": "red"
+  },
+  {
+   "id": "B",
+   "h": 1,
+   "w": 5,
+   "area": 5,
+   "color": "blue"
+  },
+  {
+   "id": "C",
+   "h": 2,
+   "w": 2,
+   "area": 4,
+   "color": "yellow"
+  },
+  {
+   "id": "D",
+   "h": 3,
+   "w": 3,
+   "area": 9,
+   "color": "violet"
+  },
+  {
+   "id": "E",
+   "h": 2,
+   "w": 3,
+   "area": 6,
+   "color": "blue"
+  },
+  {
+   "id": "F",
+   "h": 2,
+   "w": 4,
+   "area": 8,
+   "color": "yellow"
+  },
+  {
+   "id": "G",
+   "h": 2,
+   "w": 5,
+   "area": 10,
+   "color": "red"
+  },
+  {
+   "id": "H",
+   "h": 3,
+   "w": 4,
+   "area": 12,
+   "color": "violet"
+  }
+ ],
+ "note": "Tutorial levels. 'preplaced' pieces start locked on the board. Only 'toPlace' pieces appear in the tray, each in its default orientation from 'pieces'. 'rotationNeeded' lists tray pieces whose solution orientation is the rotated form.",
+ "levels": [
+  {
+   "id": 1,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 1,
+     "col": 4,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 3,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "A",
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "toPlace": [
+    "D"
+   ],
+   "rotationNeeded": [],
+   "tutorial": {
+    "phase": "place",
+    "rotationEnabled": false,
+    "aids": [
+     "fingerDrag",
+     "targetOutline"
+    ],
+    "coachText": "Drag the piece into the glowing gap."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 3,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 5,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "FF#BBBBB",
+    "FFCC#EEE",
+    "FFCC#EEE",
+    "FFAAAAGG",
+    "HHH###GG",
+    "HHHDDDGG",
+    "HHHDDDGG",
+    "HHHDDDGG"
+   ]
+  },
+  {
+   "id": 2,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 6,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 4,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 3,
+     "col": 5,
+     "h": 3,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "A",
+     "row": 1,
+     "col": 6,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 2,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 2,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    }
+   ],
+   "toPlace": [
+    "C",
+    "H"
+   ],
+   "rotationNeeded": [],
+   "tutorial": {
+    "phase": "place",
+    "rotationEnabled": false,
+    "aids": [
+     "targetOutline"
+    ],
+    "coachText": "Two pieces this time. Fill both gaps."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 1,
+     "col": 6,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 4,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 2,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 5,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 2,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "HHHHCC#B",
+    "HHHHCCAB",
+    "HHHH##AB",
+    "GGDDD#AB",
+    "GGDDD#AB",
+    "GGDDD#EE",
+    "GGFFFFEE",
+    "GGFFFFEE"
+   ]
+  },
+  {
+   "id": 3,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 5,
+     "col": 0,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 6,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 6,
+     "col": 3,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    }
+   ],
+   "toPlace": [
+    "B",
+    "D",
+    "H"
+   ],
+   "rotationNeeded": [],
+   "tutorial": {
+    "phase": "place",
+    "rotationEnabled": false,
+    "aids": [
+     "regionGlow"
+    ],
+    "coachText": "Match each piece to the gap with its shape."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 0,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 6,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 2,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "BBBBBDDD",
+    "FFEEEDDD",
+    "FFEEEDDD",
+    "FFHHHHGG",
+    "FFHHHHGG",
+    "##HHHHGG",
+    "CC####GG",
+    "CCAAAAGG"
+   ]
+  },
+  {
+   "id": 4,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 3,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 1,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "toPlace": [
+    "B",
+    "C",
+    "F",
+    "G"
+   ],
+   "rotationNeeded": [],
+   "tutorial": {
+    "phase": "place",
+    "rotationEnabled": false,
+    "aids": [
+     "regionGlow"
+    ],
+    "coachText": "Fill every gap. Made a mistake? Tap Undo."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 1,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 3,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 1,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 4,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "#EE#AAAA",
+    "#EEBBBBB",
+    "#EE#FFFF",
+    "DDD#FFFF",
+    "DDDCCHHH",
+    "DDDCCHHH",
+    "GGGGGHHH",
+    "GGGGGHHH"
+   ]
+  },
+  {
+   "id": 5,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 2,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 3,
+     "col": 0,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 6,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 4,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "toPlace": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "F"
+   ],
+   "rotationNeeded": [],
+   "tutorial": {
+    "phase": "place",
+    "rotationEnabled": false,
+    "aids": [
+     "regionGlow"
+    ],
+    "coachText": "Stuck? Tap the lightbulb for a hint."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 4,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 3,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 2,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 4,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 4,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "EE##HHHH",
+    "EECCHHHH",
+    "EECCHHHH",
+    "###BBBBB",
+    "GGGGGDDD",
+    "GGGGGDDD",
+    "FFFF#DDD",
+    "FFFFAAAA"
+   ]
+  },
+  {
+   "id": 6,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 1,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 6,
+     "col": 7,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 7,
+     "col": 4,
+     "h": 1,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    }
+   ],
+   "toPlace": [
+    "A",
+    "C",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "rotationNeeded": [],
+   "tutorial": {
+    "phase": "place",
+    "rotationEnabled": false,
+    "aids": [],
+    "coachText": "Fill all the gaps to finish."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 7,
+     "col": 0,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 6,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 1,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 5,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "B###HHHH",
+    "BEEEHHHH",
+    "BEEEHHHH",
+    "BFFFFDDD",
+    "BFFFFDDD",
+    "GGGGGDDD",
+    "GGGGGCC#",
+    "AAAA#CC#"
+   ]
+  },
+  {
+   "id": 7,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 1,
+     "col": 0,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 4,
+     "col": 4,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 3,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "toPlace": [
+    "C",
+    "G"
+   ],
+   "rotationNeeded": [
+    "G"
+   ],
+   "tutorial": {
+    "phase": "rotate",
+    "rotationEnabled": true,
+    "aids": [
+     "fingerTap",
+     "rotateArrow",
+     "targetOutline"
+    ],
+    "coachText": "This piece needs to turn. Tap it to rotate, then drag it into the gap."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 4,
+     "col": 7,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 1,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 4,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 3,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 4,
+     "col": 2,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 3,
+     "col": 0,
+     "h": 5,
+     "w": 2
+    },
+    {
+     "piece": "H",
+     "row": 0,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "BBBBBHHH",
+    "#CCEEHHH",
+    "#CCEEHHH",
+    "GG#EEHHH",
+    "GGFF###A",
+    "GGFFDDDA",
+    "GGFFDDDA",
+    "GGFFDDDA"
+   ]
+  },
+  {
+   "id": 8,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 4,
+     "h": 1,
+     "w": 2
+    },
+    {
+     "row": 0,
+     "col": 6,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 1,
+     "h": 1,
+     "w": 3
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 1,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "toPlace": [
+    "B",
+    "E",
+    "F"
+   ],
+   "rotationNeeded": [
+    "B"
+   ],
+   "tutorial": {
+    "phase": "rotate",
+    "rotationEnabled": true,
+    "aids": [
+     "regionGlow"
+    ],
+    "coachText": "Tap a piece to rotate it before placing."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 7,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 5,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 4,
+     "h": 2,
+     "w": 3
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 1,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "FFFF###B",
+    "FFFFEEEB",
+    "A###EEEB",
+    "AHHHHCCB",
+    "AHHHHCCB",
+    "AHHHHDDD",
+    "GGGGGDDD",
+    "GGGGGDDD"
+   ]
+  },
+  {
+   "id": 9,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 1,
+     "h": 2,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 5,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "h": 3,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "toPlace": [
+    "A",
+    "B",
+    "E",
+    "F"
+   ],
+   "rotationNeeded": [
+    "B",
+    "E"
+   ],
+   "tutorial": {
+    "phase": "rotate",
+    "rotationEnabled": true,
+    "aids": [
+     "regionGlow"
+    ],
+    "coachText": "Two pieces need turning here."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 2,
+     "col": 1,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 0,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 3,
+     "col": 1,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 5,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 2,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 3,
+     "col": 4,
+     "h": 3,
+     "w": 4
+    }
+   ],
+   "solutionGrid": [
+    "B#FFFFEE",
+    "B#FFFFEE",
+    "BAAAA#EE",
+    "BCC#HHHH",
+    "BCC#HHHH",
+    "DDD#HHHH",
+    "DDDGGGGG",
+    "DDDGGGGG"
+   ]
+  },
+  {
+   "id": 10,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 1,
+     "col": 5,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 1,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 3,
+     "col": 6,
+     "h": 1,
+     "w": 2
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "toPlace": [
+    "A",
+    "B",
+    "D",
+    "E",
+    "F"
+   ],
+   "rotationNeeded": [
+    "A",
+    "E"
+   ],
+   "tutorial": {
+    "phase": "rotate",
+    "rotationEnabled": true,
+    "aids": [],
+    "coachText": "Only rotate a piece when it needs it."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 1
+    },
+    {
+     "piece": "B",
+     "row": 0,
+     "col": 1,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 4,
+     "col": 0,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 2,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 6,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 1,
+     "col": 1,
+     "h": 2,
+     "w": 4
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "ABBBBBEE",
+    "AFFFF#EE",
+    "AFFFF#EE",
+    "A#DDD###",
+    "CCDDDHHH",
+    "CCDDDHHH",
+    "GGGGGHHH",
+    "GGGGGHHH"
+   ]
+  },
+  {
+   "id": 11,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 0,
+     "col": 2,
+     "h": 3,
+     "w": 1
+    },
+    {
+     "row": 0,
+     "col": 7,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 5,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    }
+   ],
+   "toPlace": [
+    "A",
+    "B",
+    "D",
+    "E",
+    "F",
+    "H"
+   ],
+   "rotationNeeded": [
+    "E",
+    "F",
+    "H"
+   ],
+   "tutorial": {
+    "phase": "rotate",
+    "rotationEnabled": true,
+    "aids": [],
+    "coachText": "Almost ready for full puzzles."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 3,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 1,
+     "col": 3,
+     "h": 1,
+     "w": 5
+    },
+    {
+     "piece": "C",
+     "row": 2,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 0,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 0,
+     "col": 0,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 2,
+     "col": 3,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 0,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 5,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "EE#AAAA#",
+    "EE#BBBBB",
+    "EE#FF#CC",
+    "DDDFF#CC",
+    "DDDFFHHH",
+    "DDDFFHHH",
+    "GGGGGHHH",
+    "GGGGGHHH"
+   ]
+  },
+  {
+   "id": 12,
+   "difficulty": "learn",
+   "black": [
+    {
+     "row": 1,
+     "col": 5,
+     "h": 1,
+     "w": 1
+    },
+    {
+     "row": 2,
+     "col": 5,
+     "h": 1,
+     "w": 3
+    },
+    {
+     "row": 4,
+     "col": 3,
+     "h": 2,
+     "w": 1
+    }
+   ],
+   "preplaced": [
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "toPlace": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "rotationNeeded": [
+    "B",
+    "E",
+    "F"
+   ],
+   "tutorial": {
+    "phase": "rotate",
+    "rotationEnabled": true,
+    "aids": [],
+    "coachText": "Last practice! Next: puzzles with all 8 pieces."
+   },
+   "solution": [
+    {
+     "piece": "A",
+     "row": 0,
+     "col": 2,
+     "h": 1,
+     "w": 4
+    },
+    {
+     "piece": "B",
+     "row": 1,
+     "col": 4,
+     "h": 5,
+     "w": 1
+    },
+    {
+     "piece": "C",
+     "row": 0,
+     "col": 6,
+     "h": 2,
+     "w": 2
+    },
+    {
+     "piece": "D",
+     "row": 3,
+     "col": 5,
+     "h": 3,
+     "w": 3
+    },
+    {
+     "piece": "E",
+     "row": 1,
+     "col": 2,
+     "h": 3,
+     "w": 2
+    },
+    {
+     "piece": "F",
+     "row": 0,
+     "col": 0,
+     "h": 4,
+     "w": 2
+    },
+    {
+     "piece": "G",
+     "row": 6,
+     "col": 3,
+     "h": 2,
+     "w": 5
+    },
+    {
+     "piece": "H",
+     "row": 4,
+     "col": 0,
+     "h": 4,
+     "w": 3
+    }
+   ],
+   "solutionGrid": [
+    "FFAAAACC",
+    "FFEEB#CC",
+    "FFEEB###",
+    "FFEEBDDD",
+    "HHH#BDDD",
+    "HHH#BDDD",
+    "HHHGGGGG",
+    "HHHGGGGG"
+   ]
+  }
+ ]
+}

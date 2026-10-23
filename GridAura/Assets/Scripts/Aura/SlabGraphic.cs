@@ -12,6 +12,7 @@ namespace Aura
         public float corner = 10f;
         public float bevel = 7f;
         public bool rim;
+        public bool flat;
 
         public void SetColors(Color faceColor, Color highlightColor, Color shadeColor, bool lightRim)
         {
@@ -27,6 +28,11 @@ namespace Aura
             vh.Clear();
             Rect rect = GetPixelAdjustedRect();
             float radius = Mathf.Clamp(corner, 2f, Mathf.Min(rect.width, rect.height) * 0.45f);
+            if (flat)
+            {
+                AddRounded(vh, rect, radius, face, face);
+                return;
+            }
             float lip = Mathf.Min(bevel, rect.height * 0.22f);
             var body = new Rect(rect.x, rect.y + lip, rect.width, rect.height - lip);
             AddRounded(vh, new Rect(rect.x, rect.y, rect.width, rect.height - lip * 0.15f), radius, shade, shade);

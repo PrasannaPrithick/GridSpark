@@ -27,6 +27,19 @@ namespace Aura
         public string difficulty;
         public BlockPlacement[] black;
         public SolutionPlacement[] solution;
+        public SolutionPlacement[] preplaced;
+        public string[] toPlace;
+        public string[] rotationNeeded;
+        public TutorialInfo tutorial;
+    }
+
+    [Serializable]
+    public class TutorialInfo
+    {
+        public string phase;
+        public bool rotationEnabled;
+        public string[] aids;
+        public string coachText;
     }
 
     [Serializable]
