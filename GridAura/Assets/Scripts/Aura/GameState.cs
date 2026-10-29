@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Aura
 {
@@ -22,11 +23,17 @@ namespace Aura
         public int h;
         public int w;
         public int trayTurns;
+        public bool spentMove;
     }
 
     public class GameState
     {
         public const int Size = 8;
+        static readonly string[] ColorA = { "A", "G" };
+        static readonly string[] ColorB = { "B", "E" };
+        static readonly string[] ColorC = { "C", "F" };
+        static readonly string[] ColorD = { "D", "H" };
+
         public PieceDef[] pieces;
         public LevelDef level;
         public readonly Dictionary<string, PlacedPiece> placed = new Dictionary<string, PlacedPiece>();
@@ -36,15 +43,43 @@ namespace Aura
         public readonly Stack<UndoStep> undo = new Stack<UndoStep>();
         public int hintsLeft = 3;
         public int hintsUsed;
+        public int moveLimit;
+        public int movesLeft;
+        bool tutorialPack;
 
         public bool IsTutorial
         {
-            get { return level != null && level.tutorial != null; }
+            get { return tutorialPack; }
+        }
+
+        public bool IsColor
+        {
+            get { return level != null && level.type == "color"; }
+        }
+
+        public bool IsDecoy
+        {
+            get { return level != null && level.type == "decoy"; }
+        }
+
+        public bool IsRescue
+        {
+            get { return level != null && level.type == "rescue"; }
+        }
+
+        public bool HasMoveLimit
+        {
+            get { return moveLimit > 0; }
+        }
+
+        public bool OutOfMoves
+        {
+            get { return HasMoveLimit && movesLeft <= 0 && !IsComplete(); }
         }
 
         public bool RotationEnabled
         {
-            get { return level == null || level.tutorial == null || level.tutorial.rotationEnabled; }
+            get { return !IsTutorial || level == null || level.tutorial == null || level.tutorial.rotationEnabled; }
         }
 
         public bool FreeHints
@@ -54,7 +89,7 @@ namespace Aura
 
         public bool GuidedDrag
         {
-            get { return IsTutorial && level.id <= 5; }
+            get { return IsTutorial && level.id <= 3; }
         }
 
         public string NextGuideId()
@@ -67,10 +102,11 @@ namespace Aura
             return null;
         }
 
-        public void Begin(LevelDef next, PieceDef[] catalog)
+        public void Begin(LevelDef next, PieceDef[] catalog, bool tutorial = false)
         {
             pieces = catalog;
             level = next;
+            tutorialPack = tutorial;
             placed.Clear();
             trayTurns.Clear();
             preplacedIds.Clear();
@@ -78,6 +114,8 @@ namespace Aura
             undo.Clear();
             hintsLeft = int.MaxValue;
             hintsUsed = 0;
+            moveLimit = next != null ? Math.Max(0, next.moveLimit) : 0;
+            movesLeft = moveLimit;
             if (pieces != null)
             {
                 foreach (var piece in pieces)
@@ -88,14 +126,30 @@ namespace Aura
             if (next != null && next.preplaced != null)
             {
                 foreach (var step in next.preplaced)
-                {
-                    if (step == null || string.IsNullOrEmpty(step.piece))
-                        continue;
-                    if (!TryPlace(step.piece, step.row, step.col, step.h, step.w, false))
-                        continue;
-                    placed[step.piece].locked = true;
-                    preplacedIds.Add(step.piece);
-                }
+                    PlaceLocked(step);
+            }
+            PlaceInitial();
+        }
+
+        void PlaceLocked(SolutionPlacement step)
+        {
+            if (step == null || string.IsNullOrEmpty(step.piece))
+                return;
+            if (!TryPlace(step.piece, step.row, step.col, step.h, step.w, false))
+                return;
+            placed[step.piece].locked = true;
+            preplacedIds.Add(step.piece);
+        }
+
+        void PlaceInitial()
+        {
+            if (level == null || level.initial == null)
+                return;
+            foreach (var step in level.initial)
+            {
+                if (step == null || string.IsNullOrEmpty(step.piece))
+                    continue;
+                TryPlace(step.piece, step.row, step.col, step.h, step.w, false);
             }
         }
 
@@ -114,17 +168,39 @@ namespace Aura
         public IList<string> TrayIds()
         {
             var ids = new List<string>();
-            if (level != null && level.toPlace != null && level.toPlace.Length > 0)
+            var seen = new HashSet<string>();
+            AddIds(ids, seen, level != null ? level.toPlace : null);
+            if (level != null && level.initial != null)
             {
-                ids.AddRange(level.toPlace);
-                return ids;
+                foreach (var step in level.initial)
+                {
+                    if (step != null)
+                        AddId(ids, seen, step.piece);
+                }
             }
-            if (pieces != null)
+            if (level != null)
+                AddId(ids, seen, level.unused);
+            if (ids.Count == 0 && pieces != null)
             {
                 foreach (var piece in pieces)
-                    ids.Add(piece.id);
+                    AddId(ids, seen, piece.id);
             }
             return ids;
+        }
+
+        static void AddIds(List<string> ids, HashSet<string> seen, string[] more)
+        {
+            if (more == null)
+                return;
+            foreach (var id in more)
+                AddId(ids, seen, id);
+        }
+
+        static void AddId(List<string> ids, HashSet<string> seen, string id)
+        {
+            if (string.IsNullOrEmpty(id) || !seen.Add(id))
+                return;
+            ids.Add(id);
         }
 
         public bool HasAid(string name)
@@ -151,12 +227,98 @@ namespace Aura
             return false;
         }
 
-        public bool MustRotate(string id)
+        public bool CanRotate(string id)
         {
-            if (!RotationEnabled || string.IsNullOrEmpty(id) || placed.ContainsKey(id))
+            if (!RotationEnabled || string.IsNullOrEmpty(id))
+                return false;
+            if (placed.ContainsKey(id) && placed[id].locked)
+                return false;
+            var def = Find(id);
+            return def != null && def.h != def.w;
+        }
+
+        public bool CanRotateBoard(string id)
+        {
+            int row;
+            int col;
+            int h;
+            int w;
+            return FindBoardRotation(id, out row, out col, out h, out w);
+        }
+
+        public bool RotateBoard(string id)
+        {
+            int row;
+            int col;
+            int h;
+            int w;
+            if (!FindBoardRotation(id, out row, out col, out h, out w))
+                return false;
+            var piece = placed[id];
+            PushUndo(id);
+            placed[id] = new PlacedPiece
+            {
+                id = piece.id,
+                row = row,
+                col = col,
+                h = h,
+                w = w,
+                locked = piece.locked
+            };
+            SyncTrayTurns(placed[id]);
+            return true;
+        }
+
+        public bool FindBoardRotation(string id, out int row, out int col, out int h, out int w)
+        {
+            row = 0;
+            col = 0;
+            h = 0;
+            w = 0;
+            if (!IsPlaced(id) || placed[id].locked)
                 return false;
             var def = Find(id);
             if (def == null || def.h == def.w)
+                return false;
+            var piece = placed[id];
+            h = piece.w;
+            w = piece.h;
+            if (FitsBoard(id, piece.row, piece.col, h, w))
+            {
+                row = piece.row;
+                col = piece.col;
+                return true;
+            }
+            int best = 0;
+            bool found = false;
+            int rowMin = Mathf.Max(0, piece.row - h + 1);
+            int rowMax = Mathf.Min(Size - h, piece.row + piece.h - 1);
+            int colMin = Mathf.Max(0, piece.col - w + 1);
+            int colMax = Mathf.Min(Size - w, piece.col + piece.w - 1);
+            for (int r = rowMin; r <= rowMax; r++)
+            {
+                for (int c = colMin; c <= colMax; c++)
+                {
+                    if (!FitsBoard(id, r, c, h, w))
+                        continue;
+                    int overlapH = Mathf.Min(r + h, piece.row + piece.h) - Mathf.Max(r, piece.row);
+                    int overlapW = Mathf.Min(c + w, piece.col + piece.w) - Mathf.Max(c, piece.col);
+                    int overlap = Mathf.Max(0, overlapH) * Mathf.Max(0, overlapW);
+                    if (overlap > best)
+                    {
+                        best = overlap;
+                        row = r;
+                        col = c;
+                        found = true;
+                    }
+                }
+            }
+            return found;
+        }
+
+        public bool MustRotate(string id)
+        {
+            if (!CanRotate(id))
                 return false;
             var solution = SolutionOf(id);
             if (solution == null)
@@ -181,9 +343,47 @@ namespace Aura
         public void Oriented(string id, int turns, out int h, out int w)
         {
             var piece = Find(id);
+            if (piece == null)
+            {
+                h = 1;
+                w = 1;
+                return;
+            }
             bool swap = (turns & 1) == 1;
             h = swap ? piece.w : piece.h;
             w = swap ? piece.h : piece.w;
+        }
+
+        public void SyncTrayTurns(PlacedPiece piece)
+        {
+            if (piece == null || string.IsNullOrEmpty(piece.id))
+                return;
+            var def = Find(piece.id);
+            if (def == null)
+                return;
+            if (piece.h == def.h && piece.w == def.w)
+                trayTurns[piece.id] = 0;
+            else if (piece.h == def.w && piece.w == def.h)
+                trayTurns[piece.id] = 1;
+        }
+
+        public bool MatchesSolution(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !placed.ContainsKey(id))
+                return false;
+            var sol = SolutionOf(id);
+            return sol != null && Matches(placed[id], sol);
+        }
+
+        public int PlayerPlacedCount()
+        {
+            int n = 0;
+            foreach (var pair in placed)
+            {
+                if (!pair.Value.locked)
+                    n++;
+            }
+            return n;
         }
 
         public bool IsPlaced(string id)
@@ -227,7 +427,18 @@ namespace Aura
             return ids;
         }
 
-        public bool CanPlace(string id, int row, int col, int h, int w)
+        public bool CanPlace(string id, int row, int col, int h, int w, bool requireMoves = true)
+        {
+            if (requireMoves && OutOfMoves)
+                return false;
+            if (!FitsBoard(id, row, col, h, w))
+                return false;
+            if (TouchesColorPartner(id, row, col, h, w))
+                return false;
+            return true;
+        }
+
+        public bool FitsBoard(string id, int row, int col, int h, int w)
         {
             if (row < 0 || col < 0 || row + h > Size || col + w > Size)
                 return false;
@@ -240,6 +451,52 @@ namespace Aura
                 }
             }
             return true;
+        }
+
+        public bool BlockedOnlyByColor(string id, int row, int col, int h, int w)
+        {
+            return FitsBoard(id, row, col, h, w) && TouchesColorPartner(id, row, col, h, w);
+        }
+
+        public string ColorPartner(string id)
+        {
+            if (id == ColorA[0]) return ColorA[1];
+            if (id == ColorA[1]) return ColorA[0];
+            if (id == ColorB[0]) return ColorB[1];
+            if (id == ColorB[1]) return ColorB[0];
+            if (id == ColorC[0]) return ColorC[1];
+            if (id == ColorC[1]) return ColorC[0];
+            if (id == ColorD[0]) return ColorD[1];
+            if (id == ColorD[1]) return ColorD[0];
+            return null;
+        }
+
+        public bool TouchesColorPartner(string id, int row, int col, int h, int w)
+        {
+            if (!IsColor)
+                return false;
+            string partner = ColorPartner(id);
+            if (string.IsNullOrEmpty(partner) || !placed.ContainsKey(partner))
+                return false;
+            var other = placed[partner];
+            for (int r = row; r < row + h; r++)
+            {
+                for (int c = col; c < col + w; c++)
+                {
+                    if (AdjacentToRect(r, c, other.row, other.col, other.h, other.w))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        static bool AdjacentToRect(int r, int c, int row, int col, int h, int w)
+        {
+            bool left = c + 1 == col && r >= row && r < row + h;
+            bool right = c - 1 == col + w - 1 && r >= row && r < row + h;
+            bool up = r + 1 == row && c >= col && c < col + w;
+            bool down = r - 1 == row + h - 1 && c >= col && c < col + w;
+            return left || right || up || down;
         }
 
         public string CellOwner(int row, int col, string ignoreId)
@@ -260,17 +517,34 @@ namespace Aura
             return null;
         }
 
-        public bool TryPlace(string id, int row, int col, int h, int w, bool recordUndo)
+        public bool TryPlace(string id, int row, int col, int h, int w, bool recordUndo, bool countMove = false)
         {
-            if (!CanPlace(id, row, col, h, w))
+            if (!CanPlace(id, row, col, h, w, countMove))
                 return false;
             if (recordUndo)
-                PushUndo(id);
+                PushUndo(id, countMove);
             placed[id] = new PlacedPiece { id = id, row = row, col = col, h = h, w = w };
+            if (countMove)
+                SpendMove();
             return true;
         }
 
-        public void Remember(PlacedPiece piece)
+        public void RestorePlaced(PlacedPiece piece)
+        {
+            if (piece == null || string.IsNullOrEmpty(piece.id))
+                return;
+            placed[piece.id] = new PlacedPiece
+            {
+                id = piece.id,
+                row = piece.row,
+                col = piece.col,
+                h = piece.h,
+                w = piece.w,
+                locked = preplacedIds.Contains(piece.id)
+            };
+        }
+
+        public void Remember(PlacedPiece piece, bool countMove = false)
         {
             if (piece == null)
                 return;
@@ -282,8 +556,11 @@ namespace Aura
                 col = piece.col,
                 h = piece.h,
                 w = piece.w,
-                trayTurns = trayTurns.ContainsKey(piece.id) ? trayTurns[piece.id] : 0
+                trayTurns = trayTurns.ContainsKey(piece.id) ? trayTurns[piece.id] : 0,
+                spentMove = countMove
             });
+            if (countMove)
+                SpendMove();
         }
 
         public void ReturnToTray(string id, bool recordUndo)
@@ -297,8 +574,10 @@ namespace Aura
 
         public bool RotateTray(string id)
         {
-            if (!RotationEnabled || placed.ContainsKey(id))
+            if (placed.ContainsKey(id) || !CanRotate(id))
                 return false;
+            if (!trayTurns.ContainsKey(id))
+                trayTurns[id] = 0;
             trayTurns[id] = (trayTurns[id] + 1) & 3;
             return true;
         }
@@ -309,6 +588,8 @@ namespace Aura
                 return;
             var step = undo.Pop();
             trayTurns[step.id] = step.trayTurns;
+            if (step.spentMove && HasMoveLimit && movesLeft < moveLimit)
+                movesLeft++;
             if (step.wasPlaced)
             {
                 placed[step.id] = new PlacedPiece
@@ -336,6 +617,8 @@ namespace Aura
                     placed.Remove(id);
             }
             undo.Clear();
+            movesLeft = moveLimit;
+            PlaceInitial();
             if (pieces == null)
                 return;
             foreach (var piece in pieces)
@@ -443,14 +726,25 @@ namespace Aura
             return CommitHint(next);
         }
 
+        void SpendMove()
+        {
+            if (HasMoveLimit && movesLeft > 0)
+                movesLeft--;
+        }
+
         static bool Matches(PlacedPiece piece, SolutionPlacement step)
         {
             return piece.row == step.row && piece.col == step.col && piece.h == step.h && piece.w == step.w;
         }
 
-        void PushUndo(string id)
+        void PushUndo(string id, bool spentMove = false)
         {
-            var step = new UndoStep { id = id, trayTurns = trayTurns.ContainsKey(id) ? trayTurns[id] : 0 };
+            var step = new UndoStep
+            {
+                id = id,
+                trayTurns = trayTurns.ContainsKey(id) ? trayTurns[id] : 0,
+                spentMove = spentMove
+            };
             if (placed.ContainsKey(id))
             {
                 var current = placed[id];

@@ -24,10 +24,26 @@ namespace Aura
     public class LevelDef
     {
         public int id;
+        public string key;
+        public string source;
+        public string type;
+        public string tag;
         public string difficulty;
+        public int global;
+        public int world;
+        public string worldName;
+        public int posInWorld;
+        public int par;
+        public int moveLimit;
+        public bool intro;
+        public string coachText;
+        public string unused;
+        public string[] rules;
+        public string[] wrongPieces;
         public BlockPlacement[] black;
         public SolutionPlacement[] solution;
         public SolutionPlacement[] preplaced;
+        public SolutionPlacement[] initial;
         public string[] toPlace;
         public string[] rotationNeeded;
         public TutorialInfo tutorial;
@@ -59,5 +75,48 @@ namespace Aura
         public int col;
         public int h;
         public int w;
+    }
+
+    [Serializable]
+    public class CampaignFile
+    {
+        public string[] worldNames;
+        public CampaignEntry[] levels;
+    }
+
+    [Serializable]
+    public class CampaignEntry
+    {
+        public int global;
+        public string source;
+        public string id;
+        public string tag;
+        public int par;
+        public int moveLimit;
+        public int world;
+        public string worldName;
+        public int posInWorld;
+        public bool intro;
+        public string coachText;
+    }
+
+    [Serializable]
+    public class SpecialCatalog
+    {
+        public SpecialLevelDef[] levels;
+    }
+
+    [Serializable]
+    public class SpecialLevelDef
+    {
+        public string id;
+        public string type;
+        public string[] rules;
+        public BlockPlacement[] black;
+        public string[] toPlace;
+        public SolutionPlacement[] solution;
+        public SolutionPlacement[] initial;
+        public string unused;
+        public string[] wrongPieces;
     }
 }

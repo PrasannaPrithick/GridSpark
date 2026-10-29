@@ -37,7 +37,30 @@ Each level JSON defines:
 - `rotationNeeded` — tray pieces whose solution orientation is rotated
 - `tutorial` — optional coach text and on-screen aids
 
-**Playable pack today:** 12 tutorial levels + 50 main levels = **62 sequential levels**. Daily levels exist as data (25) but are not in the live play loop yet.
+**Playable pack today:** 92 campaign levels from `campaign.json` (12 tutorial + 50 classic + 10 color + 10 decoy + 10 rescue). Daily levels exist as data (25) but are not in the live play loop yet.
+
+Campaign worlds 1–8 (levels 13–92) follow a Candy Crush wave: **easy, medium, easy, medium, hard, easy, medium, easy, hard, boss**. Each world is a little harder than the one before. Hard and boss levels flash a banner. The level after a boss is always easy.
+
+After two classic openers (13–14), new rules start **early**: color at 15, decoy at 23, rescue at 33. Classic packing returns as Deep Pack and Grand Finale.
+
+| World | Name | Mix |
+| --- | --- | --- |
+| 1 (13–22) | Color Clash | 13–14 classic, then color from 15 |
+| 2 (23–32) | Odd One Out | Decoy + classic |
+| 3 (33–42) | Rescue Mission | Rescue + classic |
+| 4–6 (43–72) | Mix It Up / II / Mastery | Color, decoy, rescue, classic mixed |
+| 7 (73–82) | Deep Pack | Classic packing |
+| 8 (83–92) | Grand Finale | Hardest classic pack |
+
+### Special types
+
+- **Color** — same-color partners may not share an edge (A–G, B–E, C–F, D–H). Corners are fine. Illegal drop toasts “Same colors can't touch”.
+- **Decoy** — 8 pieces in the tray, only 7 fit. Leave the spare. Board complete with one piece left. Label: “Use 7 of 8 pieces”.
+- **Rescue** — some pieces start on the board unlocked, a few in the wrong place. Reset restores that start, not an empty board.
+
+### Moves
+
+From level 13, each level has a move limit (`par` + slack: easy +6, medium +4, hard +3, boss +2). A move is a finished drop onto the board. Rotate, return to tray, hint, and undo-refund cost nothing. At 0 moves with a gap still open: **Out of moves** with Retry / Home. Tutorial levels have no limit.
 
 ---
 
@@ -45,21 +68,23 @@ Each level JSON defines:
 
 Top to bottom:
 
-1. **Hint button** (left) with bulb + infinity badge  
-2. **Level pill** (center) — “Level” + number  
+1. **Hint button** (left) with bulb + infinity badge — hidden on levels 1–3, enabled from level 4 after the board intro  
+2. **Level pill** (center) — “Level” + number, tinted by wave tag (green easy, yellow medium, orange hard, red boss)  
 3. **Settings gear** (right)  
-4. **Coach banner** (tutorial only) — tap to dismiss  
-5. **Board** — 8×8 inside a frame, with row/column numbers  
-6. **Tray** — remaining pieces (one or two rows)  
-7. **Undo** and **Reset** candy buttons  
-8. **Message line** — short feedback  
+4. **Moves / stars row** (from level 13) — LevelPill sprite, “Moves N”, and the StarClear icon plus a number (no ★ character). On campaign levels this row first pops in the **middle of the board** as a briefing card (game type + move count), then flies up into the header.  
+5. **Coach banner** — tutorial, new-rule intros, and the first visit to a world  
+6. **Board** — 8×8 inside a frame, with row/column numbers  
+7. **Tray** — remaining pieces (one or two rows)  
+8. **Undo** and **Reset** candy buttons  
+9. **Message line** — short feedback 
 
-During a drag, a **Rotate** button can appear if that piece must be turned to match the solution.
+No Rotate chip on placed pieces. Tap a piece on the board to turn it if the new rectangle still fits; if not, it shakes, a miss haptic plays, and the toast says “Rotate is not possible”. While dragging a rotatable piece over the board, a Rotate button sits under the board so a second finger can tap it.
 
 Popups sit on a dim overlay:
 
-- **Hint** — “Need a Hint?” + Use Hint / Get More Hints  
-- **Level Complete** — title art, 3 stars, hints used, Next Level, Replay  
+- **Hint** — only when you have no hints left (“Need a Hint?” + Get More Hints)  
+- **Level Complete** — title art, 3 stars, hints used, lifetime star total / next chest, Next Level, Replay  
+- **Out of moves** — Retry / Home (from level 13)  
 - **Reset confirm** — Reset / Cancel  
 
 ---
@@ -79,16 +104,17 @@ Popups sit on a dim overlay:
    - Invalid from board: piece eases back to its old cell.
    - Dropped on the tray: piece returns to the tray (undoable).
 
-Tap a placed (unlocked) piece with no drag to send it back to the tray.
+Tap a placed non-square piece to rotate it in place. If the turn does not fit, the piece shakes back, vibrates, and shows “Rotate is not possible”. Tap a square (or a piece that cannot rotate) to send it back to the tray. Drag a piece onto the tray to return it.
 
 ### Rotate
 
-Square pieces do not rotate. Non-square pieces that need a different orientation:
+Square pieces do not rotate. Non-square pieces can turn 90°:
 
-- Tap the tray piece (tutorial), or
-- Use the Rotate button while dragging.
+- Tap the tray piece, or
+- Tap the piece on the board, or
+- While dragging over the board, tap the Rotate button under the board (works with a second finger).
 
-Each tap turns 90°. A “TURN” badge can appear on the tray slot.
+Each tap turns 90° with a short spin if the new rectangle still overlaps its old cells and fits. If it cannot fit, the piece shakes, stays where it was, and toasts “Rotate is not possible”. Rotate, return to tray, and undo do not spend a move. TURN badges show on levels 7–10 only on pieces that still need a turn. The tap-hand plays on that first lesson only. While dragging, TURN stays hidden.
 
 ### Undo
 
@@ -96,21 +122,23 @@ Reverts the last recorded move (place, rotate-related tray change, or return to 
 
 ### Reset
 
-If any unlocked pieces are on the board, a confirm card appears. Confirming clears unlocked pieces and the undo stack. Locked / preplaced pieces stay.
+If any unlocked pieces are on the board, a confirm card appears. Confirming clears unlocked pieces and the undo stack, and restores the move count. Rescue levels put the starting arrangement back. Locked / preplaced pieces stay.
 
 ### Hint
 
-1. Tap the header hint button → hint popup scales in.
-2. Tap **Use Hint**.
-3. Popup fades out.
+The hint button is hidden on levels 1–3 (hand + glowing gaps teach placement). It appears from **level 4**, but stays disabled while the board intro is playing.
+
+1. Tap the header hint button. If you still have hints (including unlimited), the hint runs immediately — no popup.
+2. If you have **no** hints left, the “Need a Hint?” card opens so you can get more.
+3. A large bulb flies from the header to the center of the screen, pulses, then fades.
 4. The next unsolved solution piece is chosen (largest area first).
 5. Wrong pieces sitting on that target return to the tray if they are not locked.
-6. Target cells glow yellow.
-7. The piece **flies in an arc** from the tray to the cell, grows slightly in mid-air, then punches on landing.
+6. If the piece needs turning, it **spins to the solution orientation first**, then flies. No yellow target highlight.
+7. The piece **lifts slowly from the tray**, arcs to the cell, then **sits** onto the spot.
 8. That piece is **locked** (hint badge on the corner). You cannot move it again.
-9. If that placement finishes the board, the win popup plays after the punch.
+9. If that placement finishes the board, the win popup plays after the sit.
 
-Tutorial levels 1–3 treat hints as unlimited and do not count against stars.
+Tutorial levels 1–3 treat hints as unlimited and do not count against stars, but the button is not shown yet.
 
 ---
 
@@ -124,6 +152,8 @@ On Level Complete:
 | 1 | 2 |
 | 2+ | 1 |
 
+Moves left do not change stars. Best stars per level are saved. The win card also shows the lifetime total and how many stars remain until the next **star chest** (25, 50, 75, 100, 150, 200, 250). Chests unlock named cosmetics (board / piece / tile packs); applying those skins is not in the live loop yet.
+
 Title art is a fixed **545×196** graphic, inset from the top of the card on every resolution. Next Level / Replay use Nunito Black via TextMeshPro, size 80. Hints-used copy is size 50.
 
 ---
@@ -132,12 +162,12 @@ Title art is a fixed **545×196** graphic, inset from the top of the card on eve
 
 | Level | What it teaches | Aids |
 | --- | --- | --- |
-| 1–3 | Drag pieces onto highlighted cells | Coach text, target outline, looping finger-drag demo, free hints |
-| 4 | Undo | Undo button pulses once |
-| 5 | Hint | Hint button pulses once |
-| Later tutorial | Rotation, less hand-holding | TURN badge, rotate arrow, coach |
+| 1–3 | Drag pieces onto highlighted cells | Coach text, target outline, looping finger-drag demo. Hint button hidden. |
+| 4 | Undo, hint button appears | Undo pulses, then hint button pulses |
+| 5 | Hint reminder | Hint button pulses; coach: tap the lightbulb |
+| 7–10 | Rotation | TURN only on pieces that still need a turn; tap-hand on level 7 only |
 
-Guided drag (levels 1–5): only the next unplaced piece is highlighted, with a looping ghost that travels from tray to the solution cell. The demo stops as soon as the player starts a real drag.
+Guided drag (levels 1–3): only the next unplaced piece is highlighted, with a looping ghost that travels from tray to the solution cell. The demo stops as soon as the player starts a real drag.
 
 Coach banner can be tapped away. It comes back when the level is shown again.
 
@@ -160,32 +190,38 @@ Coach banner can be tapped away. It comes back when the level is shown again.
 
 ### Level start
 
-- Empty cells sit in on a diagonal wave (drop from above, squash, settle).
-- Locked / preplaced blocks sit in after the empty cells.
-- Placement is locked and the tutorial hand stays hidden until the intro finishes.
-- Tray pieces wait until the board has settled, then slide in from the left at full size (fade + side arc, not the board sit).
+- Tutorial levels 1–12: empty cells sit in on a diagonal wave, then locked blocks, then tray pieces slide in from the left. Placement is locked until that intro finishes.
+- Main levels (13+): no boarding intro — the board is ready immediately.
 
-### Place / undo / fail drop
+### Rotate
+
+- Tray tap or drag Rotate button: piece spins −90° in ~0.2s with a scale pulse, small spark, light haptic, then settles at the new size. No instant snap.
 
 - Dragged piece **eases** to the snapped cell or back to origin (~0.16s, ease-out cubic).
-- Successful place: impact squash, expanding shockwave ring, board punch, medium haptic. SFX later.
+- Successful place: Epic Toon FX spark explosion, squash, board punch, medium haptic. SFX later.
 
 ### Hint (single-step guide)
 
-1. Hide popup (fade).
-2. Brief pause if blockers were cleared.
-3. Tray piece dims.
-4. Target outline appears and pulses.
-5. Piece flies tray → board on an arc (~0.42s).
-6. Land impact (squash, shockwave, medium haptic). SFX later.
-7. Piece locks with a hint bulb badge.
-8. If the board is full, win popup starts **after** this motion.
+1. Header tap with hints left starts the guide immediately (no confirm card). Out of hints: shop popup only. Button is off during intro and hidden on levels 1–3.
+2. Hint bulb flies from the header to screen center, pulses, and fades.
+3. Brief pause if blockers were cleared.
+4. Tray piece dims. If it needs a turn, it spins first. No target-cell highlight.
+5. Piece lifts slowly from the tray (~0.4s), arcs to the cell (~0.78s), then sits onto the spot.
+6. Spark on the locked piece, medium haptic. SFX later.
+7. If the board is full, win popup starts **after** this motion.
 
 ### Level Complete
 
 - Card pops in as above.
-- Three stars fall from the camera onto the card one by one: middle, then left, then right. Center star is larger.
-- Each landing: squash, card punch, heavy haptic if earned. Unearned stars stay dim. SFX later.
+- Only earned stars appear. They fall from the camera one by one: middle, then left, then right. Center star is larger. Unearned slots stay empty — no faded ghosts.
+- Each landing: toon burst using the game star art, squash, card punch, haptic. SFX later.
+- Static confetti art is gone; rainbow confetti particles play when the card opens.
+
+### Fit cheers
+
+- A correct mid-level place can pop a random line (Nice!, Great!, Super!, Awesome!, Yes!).
+- The last piece that fills the board does **not** show encourage text.
+- Off-solution places: no text.
 - Star glow keeps pulsing while the card is open.
 
 ### Reset confirm
@@ -207,13 +243,16 @@ Coach banner can be tapped away. It comes back when the level is shown again.
 
 ## 9. Haptics
 
-Light tap on:
+Distinct pulses (editor / desktop: no-op):
 
-- Successful place
-- Hint landing
-- Each earned star pop
+- **Place** — click when a piece lands on the board
+- **Intro chain** — light ticks as empty cells and locked blocks sit in
+- **Miss** — error buzz when an invalid drop returns to the tray or old cell
+- **Hint** — double-pulse when the hint bulb plays
+- **Stars** — a pulse each time an earned star lands
+- **Confetti** — no extra rumble; haptics follow the stars
 
-iOS uses a native plugin. Android uses `performHapticFeedback`. Editor / desktop: no-op.
+iOS uses Core Haptics + UIKit generators. Android uses the Vibrator / VibratorManager APIs (`VIBRATE` permission). Tapping Next clears leftover star particles and stops rumble.
 
 ---
 
@@ -223,7 +262,7 @@ iOS uses a native plugin. Android uses `performHapticFeedback`. Editor / desktop
 - UI is built in code (`GameScreen`), not a prefab layout.
 - Fonts: Nunito Black / ExtraBold / Bold / SemiBold, created as TMP assets at runtime.
 - Portrait only, reference 1080×1920, CanvasScaler match width/height by aspect.
-- Levels load from `Resources/Data/tutorial_levels.json` then `levels.json`.
+- Levels load from `Resources/Data/campaign.json`, which points at `tutorial_levels.json`, `levels.json`, and `special_levels.json`.
 
 ### Main scripts
 
@@ -237,9 +276,13 @@ iOS uses a native plugin. Android uses `performHapticFeedback`. Editor / desktop
 
 ---
 
-## 11. Not in the live loop yet
+## 11. App shell (current candy UI, polish later)
 
-- Daily challenge playlist (`daily_levels.json` is on disk)
-- Settings gear action
-- Hint shop (“Get More Hints”)
-- Hint count other than unlimited (badge shows ∞)
+- **Splash** then **Home**: Play / Continue, Levels, Daily (soon), Themes, Settings
+- **Levels**: scroll of 92 tiles, sequential unlock, star counts
+- **Settings**: haptics on/off, jump debug, hint shop stub
+- **Themes**: Classic plus chest cosmetics (Sunset Board … Midnight Board). Unlocked names can be equipped; they tint board, tiles, or pieces. Art packs later.
+- **Home** from out-of-moves / last-level Next returns to Home, not level 1
+- Gear on the play screen opens Settings (Back resumes the level)
+
+Still later: daily playlist, hint shop, world map art, full theme packs.

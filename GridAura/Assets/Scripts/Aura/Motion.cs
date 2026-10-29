@@ -185,6 +185,26 @@ namespace Aura
                 target.localScale = Vector3.one;
         }
 
+        public static IEnumerator Lift(RectTransform target, float height, float peakScale, float duration)
+        {
+            if (target == null)
+                yield break;
+            Vector2 rest = target.anchoredPosition;
+            Vector2 up = rest + new Vector2(0f, height);
+            yield return Tween(duration, u =>
+            {
+                if (target == null)
+                    return;
+                float k = OutCubic(u);
+                target.anchoredPosition = Vector2.LerpUnclamped(rest, up, k);
+                target.localScale = Vector3.one * Mathf.LerpUnclamped(1f, peakScale, k);
+            });
+            if (target == null)
+                yield break;
+            target.anchoredPosition = up;
+            target.localScale = Vector3.one * peakScale;
+        }
+
         public static IEnumerator Sit(RectTransform target, float duration = 0.3f, float drop = 18f, float twist = 6f)
         {
             if (target == null)
@@ -276,6 +296,26 @@ namespace Aura
                 target.localRotation = Quaternion.Euler(0f, 0f, to);
         }
 
+        public static IEnumerator SpinTurn(RectTransform target, Vector2 toSize, float duration = 0.2f, float angle = -90f)
+        {
+            if (target == null)
+                yield break;
+            yield return Tween(duration, u =>
+            {
+                if (target == null)
+                    return;
+                float k = OutCubic(u);
+                target.localRotation = Quaternion.Euler(0f, 0f, angle * k);
+                float pulse = 1f + 0.16f * Mathf.Sin(k * Mathf.PI);
+                target.localScale = Vector3.one * pulse;
+            });
+            if (target == null)
+                yield break;
+            target.localRotation = Quaternion.identity;
+            target.sizeDelta = toSize;
+            target.localScale = Vector3.one;
+        }
+
         public static IEnumerator Arc(RectTransform target, Vector2 from, Vector2 to, Vector2 fromSize, Vector2 toSize, float lift, float duration)
         {
             if (target == null)
@@ -313,7 +353,7 @@ namespace Aura
                 target.anchoredPosition = origin;
         }
 
-        static IEnumerator Tween(float duration, Action<float> step)
+        public static IEnumerator Tween(float duration, Action<float> step)
         {
             float t = 0f;
             duration = Mathf.Max(0.01f, duration);

@@ -23,6 +23,15 @@ namespace Aura
         readonly List<LevelDef> allLevels = new List<LevelDef>();
         PieceDef[] catalogPieces;
         int levelIndex;
+        int tutorialCount;
+        int firstRotateId = 7;
+        static readonly int[] ChestAt = { 25, 50, 75, 100, 150, 200, 250 };
+        static readonly string[] ChestRewards =
+        {
+            "Sunset Board", "Ocean Pieces", "Chime Tiles",
+            "Forest Board", "Candy Pieces", "Pop Tiles",
+            "Midnight Board"
+        };
         Font font;
         Font fontBlack;
         Font fontExtraBold;
@@ -35,6 +44,7 @@ namespace Aura
         TMP_FontAsset tmpSemiBold;
         Canvas canvas;
         CanvasScaler scaler;
+        CanvasScaler cheerScaler;
         RectTransform root;
         RectTransform boardFrame;
         RectTransform grid;
@@ -71,13 +81,63 @@ namespace Aura
         Sprite starSprite;
         Sprite starGlowSprite;
         Sprite hintGlowSprite;
+        GameObject starBurstFx;
+        GameObject starPoofFx;
+        GameObject sparkImpactFx;
+        GameObject confettiBlastFx;
+        GameObject confettiShowerFx;
         TextMeshProUGUI levelWord;
         TextMeshProUGUI levelNumber;
         TextMeshProUGUI hintText;
         TextMeshProUGUI messageText;
         TextMeshProUGUI nextLabel;
         TextMeshProUGUI hintsUsedText;
+        TextMeshProUGUI starsTotalText;
         TextMeshProUGUI useHintLabel;
+        TextMeshProUGUI movesLabel;
+        TextMeshProUGUI headerStars;
+        Image headerStarIcon;
+        TextMeshProUGUI bannerLabel;
+        RectTransform briefing;
+        CanvasGroup briefingGroup;
+        TextMeshProUGUI briefingType;
+        TextMeshProUGUI briefingBody;
+        TextMeshProUGUI briefingMoves;
+        TextMeshProUGUI briefingStars;
+        bool briefingSkip;
+        bool briefingDocked;
+        bool hudLanded;
+        const float DragSlop = 56f;
+        const string PrefLastLevel = "GridAura.LastLevel";
+        const string PrefTheme = "GridAura.Theme";
+        const string PrefHaptics = "GridAura.Haptics";
+        RectTransform menuRoot;
+        RectTransform splashPanel;
+        RectTransform homePanel;
+        RectTransform levelsPanel;
+        RectTransform settingsPanel;
+        RectTransform themesPanel;
+        RectTransform levelsContent;
+        TextMeshProUGUI homePlayLabel;
+        TextMeshProUGUI homeStatus;
+        TextMeshProUGUI homeStarLabel;
+        TextMeshProUGUI hapticsLabel;
+        Image soundIcon;
+        readonly List<RectTransform> levelTiles = new List<RectTransform>();
+        readonly List<TextMeshProUGUI> themeLabels = new List<TextMeshProUGUI>();
+        bool menuOpen;
+        bool settingsFromPlay;
+        int equippedTheme;
+        RectTransform movesPill;
+        RectTransform banner;
+        RectTransform movesPanel;
+        RectTransform debugPanel;
+        TMP_InputField debugLevelInput;
+        TextMeshProUGUI debugStatus;
+        CanvasGroup bannerGroup;
+        Image movesPillImage;
+        Image bannerImage;
+        Coroutine bannerRoutine;
         RectTransform overlay;
         CanvasGroup overlayGroup;
         RectTransform winPanel;
@@ -93,6 +153,9 @@ namespace Aura
         RectTransform coach;
         TextMeshProUGUI coachLabel;
         RectTransform aidLayer;
+        RectTransform cheerRoot;
+        RectTransform transitionCover;
+        RectTransform transitionBar;
         readonly List<TraySlot> slots = new List<TraySlot>();
         bool coachHidden;
         bool fingerDragStopped;
@@ -104,6 +167,12 @@ namespace Aura
         Coroutine dragRoutine;
         Coroutine introRoutine;
         Coroutine rotateRoutine;
+        Coroutine confettiRoutine;
+        Coroutine starRoutine;
+        GameObject confettiLive;
+        Transform fxRoot;
+        static readonly string[] PlaceCheers = { "Nice!", "Great!", "Super!", "Awesome!", "Yes!" };
+        int lastTransition = -1;
         bool motionBusy;
         bool celebrating;
         bool rotating;
@@ -111,6 +180,7 @@ namespace Aura
         CanvasGroup rootGroup;
         CanvasGroup coachGroup;
         CanvasGroup undoGroup;
+        CanvasGroup hintGroup;
         RectTransform dragShadow;
         int ghostCol = -99;
         int ghostRow = -99;
@@ -118,13 +188,13 @@ namespace Aura
         Vector2 ghostTo;
         float ghostBlend = 1f;
         readonly List<CanvasGroup> aidPulses = new List<CanvasGroup>();
-        Sprite impactRingSprite;
 
         float pitch;
         float gap;
         Vector2 lastScreen;
         bool dragging;
         bool moved;
+        bool pendingEndDrag;
         PieceControl active;
         CanvasGroup hiddenGroup;
         PlacedPiece lifted;
@@ -195,17 +265,25 @@ namespace Aura
             starSprite = Resources.Load<Sprite>("Art/StarClear");
             starGlowSprite = Resources.Load<Sprite>("Art/StarGlow");
             hintGlowSprite = Resources.Load<Sprite>("Art/HintGlow");
+            starBurstFx = Resources.Load<GameObject>("Vfx/StarBurst2D");
+            starPoofFx = Resources.Load<GameObject>("Vfx/StarPoof");
+            sparkImpactFx = Resources.Load<GameObject>("Vfx/SparkExplosion2D");
+            confettiBlastFx = Resources.Load<GameObject>("Vfx/ConfettiBlastRainbow");
+            confettiShowerFx = Resources.Load<GameObject>("Vfx/ConfettiShowerRainbow");
             emptySprite = Resources.Load<Sprite>("Art/TileEmpty");
             redSprite = Resources.Load<Sprite>("Art/TileRed");
             blueSprite = Resources.Load<Sprite>("Art/TileBlue");
             yellowSprite = Resources.Load<Sprite>("Art/TileYellow");
             blackSprite = Resources.Load<Sprite>("Art/TileBlack");
             LoadCatalogs();
+            equippedTheme = PlayerPrefs.GetInt(PrefTheme, 0);
+            Haptics.Enabled = PlayerPrefs.GetInt(PrefHaptics, 1) == 1;
             var camera = Camera.main;
             if (camera != null)
             {
                 camera.clearFlags = CameraClearFlags.SolidColor;
                 camera.backgroundColor = Color.black;
+                camera.orthographic = true;
             }
             Build();
         }
@@ -213,24 +291,36 @@ namespace Aura
         IEnumerator Start()
         {
             yield return null;
+            Canvas.ForceUpdateCanvases();
             if (allLevels.Count == 0)
             {
-                messageText.text = "Could not load levels.";
+                if (messageText != null)
+                    messageText.text = "Could not load levels.";
                 yield break;
             }
-            ShowLevel(0);
-            Layout();
+            yield return ShowSplashThenHome();
+        }
+
+        Camera UiCamera()
+        {
+            if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                return null;
+            return canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
         }
 
         void Update()
         {
             float aspect = (float)Screen.width / Mathf.Max(1, Screen.height);
             scaler.matchWidthOrHeight = aspect > ReferenceWidth / ReferenceHeight ? 1f : 0f;
+            if (cheerScaler != null)
+                cheerScaler.matchWidthOrHeight = scaler.matchWidthOrHeight;
             var size = new Vector2(Screen.width, Screen.height);
             if (size != lastScreen)
             {
                 lastScreen = size;
-                if (boardIntroActive)
+                if (menuOpen)
+                    LayoutMenus();
+                else if (boardIntroActive)
                     Layout();
                 else if (state.level != null)
                     Refresh();
@@ -240,7 +330,11 @@ namespace Aura
             if (!motionBusy && dragging && !Input.GetMouseButton(0) && Input.touchCount == 0)
                 EndDrag();
             if (dragging)
+            {
                 StepGhost();
+                if (active != null)
+                    PulseColorPartner(active.pieceId, state.IsColor);
+            }
             float pulse = 0.35f + 0.4f * (Mathf.Sin(Time.unscaledTime * 3.2f) * 0.5f + 0.5f);
             for (int i = 0; i < aidPulses.Count; i++)
             {
@@ -249,6 +343,7 @@ namespace Aura
             }
             AnimateGlows();
             BreatheHint();
+            UpdateHintButton();
         }
 
         void Build()
@@ -259,10 +354,20 @@ namespace Aura
                 events.AddComponent<EventSystem>();
                 events.AddComponent<StandaloneInputModule>();
             }
+            if (EventSystem.current != null)
+                EventSystem.current.pixelDragThreshold = 12;
 
             var canvasGo = new GameObject("GameCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvas = canvasGo.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            if (Camera.main != null)
+            {
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = Camera.main;
+                canvas.planeDistance = 10f;
+            }
+            else
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 0;
             scaler = canvasGo.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
@@ -270,6 +375,21 @@ namespace Aura
             root = MakeRect("Root", canvasGo.transform);
             Stretch(root);
             rootGroup = root.gameObject.AddComponent<CanvasGroup>();
+
+            transitionCover = MakeRect("TransitionCover", canvasGo.transform);
+            transitionCover.anchorMin = transitionCover.anchorMax = new Vector2(0.5f, 0.5f);
+            transitionCover.pivot = new Vector2(0.5f, 0.5f);
+            var coverImage = transitionCover.gameObject.AddComponent<Image>();
+            coverImage.color = Hex("12151C");
+            coverImage.raycastTarget = true;
+            var coverCanvas = transitionCover.gameObject.AddComponent<Canvas>();
+            coverCanvas.overrideSorting = true;
+            coverCanvas.sortingOrder = 220;
+            transitionBar = MakeRect("Edge", transitionCover);
+            var barImage = transitionBar.gameObject.AddComponent<Image>();
+            barImage.color = Hex("FFD21F");
+            barImage.raycastTarget = false;
+            transitionCover.gameObject.SetActive(false);
 
             var background = root.gameObject.AddComponent<Image>();
             background.color = Color.black;
@@ -295,6 +415,7 @@ namespace Aura
             badgeImage.sprite = hintBadgeSprite;
             badgeImage.raycastTarget = false;
             hintText = MakeText(badge, "∞", 32, Color.white, fontBlack);
+            hintGroup = hint.gameObject.AddComponent<CanvasGroup>();
 
             var pill = MakeRect("Level", root);
             var pillImage = pill.gameObject.AddComponent<Image>();
@@ -361,6 +482,18 @@ namespace Aura
             aidBlock.color = Color.clear;
             aidBlock.raycastTarget = false;
 
+            var cheerGo = new GameObject("CheerCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+            var cheerCanvas = cheerGo.GetComponent<Canvas>();
+            cheerCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            cheerCanvas.sortingOrder = 80;
+            cheerCanvas.pixelPerfect = false;
+            cheerScaler = cheerGo.GetComponent<CanvasScaler>();
+            cheerScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            cheerScaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
+            cheerScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            cheerRoot = MakeRect("Root", cheerGo.transform);
+            Stretch(cheerRoot);
+
             var tray = MakeRect("Tray", root);
             trayImage = tray.gameObject.AddComponent<Image>();
             trayImage.raycastTarget = true;
@@ -418,6 +551,9 @@ namespace Aura
             rotateText.text = "Rotate";
             rotateText.color = Hex("1A1A1A");
             BindButton(rotateButton.gameObject, RotateDragged);
+            var rotatePress = rotateButton.GetComponent<TapPress>();
+            if (rotatePress != null)
+                rotatePress.fireOnDown = true;
             rotateButton.gameObject.SetActive(false);
 
             messageText = MakeText(root, "", 36, Color.white, fontBold);
@@ -432,14 +568,119 @@ namespace Aura
             noText.color = Color.white;
             BindButton(no.gameObject, CancelReset);
             confirmPanel.gameObject.SetActive(false);
-            BindButton(Find("Hint").gameObject, ShowHintPopup);
+            movesPill = MakeRect("Moves", root);
+            movesPillImage = movesPill.gameObject.AddComponent<Image>();
+            if (levelSprite != null)
+            {
+                movesPillImage.sprite = levelSprite;
+                movesPillImage.type = Image.Type.Sliced;
+                movesPillImage.color = Color.white;
+            }
+            else
+                movesPillImage.color = Hex("1E222A");
+            movesPillImage.raycastTarget = false;
+            movesLabel = MakeText(movesPill, "Moves 0", 32, Hex("2B2B2B"), fontBlack);
+            PinLabel(movesLabel.rectTransform);
+            var starHold = MakeRect("StarIcon", movesPill);
+            headerStarIcon = starHold.gameObject.AddComponent<Image>();
+            headerStarIcon.sprite = starSprite;
+            headerStarIcon.preserveAspect = true;
+            headerStarIcon.raycastTarget = false;
+            headerStars = MakeText(movesPill, "0", 32, Hex("1A1A1A"), fontBlack);
+            PinLabel(headerStars.rectTransform);
+            movesPill.gameObject.SetActive(false);
+
+            briefing = MakeRect("Briefing", root);
+            var briefingImage = briefing.gameObject.AddComponent<Image>();
+            if (popupCardSprite != null)
+            {
+                briefingImage.sprite = popupCardSprite;
+                briefingImage.type = Image.Type.Sliced;
+                briefingImage.color = Color.white;
+            }
+            else
+                briefingImage.color = Hex("1A1A1A");
+            briefingImage.raycastTarget = true;
+            briefingGroup = briefing.gameObject.AddComponent<CanvasGroup>();
+            briefingType = MakeText(briefing, "Classic", 56, Hex("1A1A1A"), fontBlack);
+            briefingType.alignment = TextAlignmentOptions.Center;
+            briefingBody = MakeText(briefing, "Fill every empty cell", 32, Hex("3A3A3A"), fontBold);
+            briefingBody.alignment = TextAlignmentOptions.Center;
+            briefingBody.enableWordWrapping = true;
+            var movesChip = MakeRect("MovesChip", briefing);
+            var chipImage = movesChip.gameObject.AddComponent<Image>();
+            if (yellowButtonSprite != null)
+            {
+                chipImage.sprite = yellowButtonSprite;
+                chipImage.type = Image.Type.Sliced;
+                chipImage.color = Color.white;
+            }
+            else
+                chipImage.color = Hex("FFD21F");
+            briefingMoves = MakeText(movesChip, "Moves 14", 36, Hex("1A1A1A"), fontBlack);
+            briefingMoves.alignment = TextAlignmentOptions.Center;
+            Stretch(briefingMoves.rectTransform, 8f);
+            var briefStar = MakeRect("Star", briefing);
+            var briefStarImage = briefStar.gameObject.AddComponent<Image>();
+            briefStarImage.sprite = starSprite;
+            briefStarImage.preserveAspect = true;
+            briefStarImage.raycastTarget = false;
+            briefingStars = MakeText(briefing, "0", 34, Hex("1A1A1A"), fontBlack);
+            briefingStars.alignment = TextAlignmentOptions.MidlineLeft;
+            BindButton(briefing.gameObject, () => briefingSkip = true);
+            briefing.gameObject.SetActive(false);
+
+            banner = MakeRect("Banner", root);
+            bannerImage = banner.gameObject.AddComponent<Image>();
+            bannerImage.raycastTarget = false;
+            bannerLabel = MakeText(banner, "", 40, Color.white, fontExtraBold);
+            bannerLabel.alignment = TextAlignmentOptions.Center;
+            Stretch(bannerLabel.rectTransform, 12f);
+            bannerGroup = banner.gameObject.AddComponent<CanvasGroup>();
+            banner.gameObject.SetActive(false);
+
+            movesPanel = MakePopup(overlay, "Out of moves!", out var movesBody);
+            movesBody.text = "Retry this level, or go back to the start.";
+            var retry = MakeButton(movesPanel, "Retry", "yellow", out var retryText);
+            retryText.text = "Retry";
+            retryText.color = Hex("1A1A1A");
+            BindButton(retry.gameObject, ReplayLevel);
+            var home = MakeButton(movesPanel, "Home", "blue", out var homeText);
+            homeText.text = "Home";
+            homeText.color = Color.white;
+            BindButton(home.gameObject, GoHome);
+            retry.anchorMin = new Vector2(0.08f, 0.08f);
+            retry.anchorMax = new Vector2(0.48f, 0.32f);
+            retry.offsetMin = retry.offsetMax = Vector2.zero;
+            home.anchorMin = new Vector2(0.52f, 0.08f);
+            home.anchorMax = new Vector2(0.92f, 0.32f);
+            home.offsetMin = home.offsetMax = Vector2.zero;
+            movesPanel.gameObject.SetActive(false);
+
+            BindButton(Find("Hint").gameObject, OnHint);
             BindButton(Find("Gear").gameObject, OnGear);
+            BuildMenus();
             yes.anchorMin = new Vector2(0.08f, 0.08f);
             yes.anchorMax = new Vector2(0.48f, 0.32f);
             yes.offsetMin = yes.offsetMax = Vector2.zero;
             no.anchorMin = new Vector2(0.52f, 0.08f);
             no.anchorMax = new Vector2(0.92f, 0.32f);
             no.offsetMin = no.offsetMax = Vector2.zero;
+        }
+
+        bool HintUnlocked
+        {
+            get { return levelIndex >= 3; }
+        }
+
+        void OnHint()
+        {
+            if (boardIntroActive || !HintUnlocked || motionBusy || rotating || dragging || state.level == null || state.IsComplete())
+                return;
+            if (state.FreeHints || state.hintsLeft > 0)
+                UseHint();
+            else
+                ShowHintPopup();
         }
 
         void ShowHintPopup()
@@ -452,7 +693,7 @@ namespace Aura
 
         void UseHint()
         {
-            if (motionBusy)
+            if (motionBusy || (!state.FreeHints && state.hintsLeft <= 0))
                 return;
             if (hintRoutine != null)
                 StopCoroutine(hintRoutine);
@@ -461,9 +702,227 @@ namespace Aura
 
         void ReplayLevel()
         {
-            if (motionBusy)
+            if (motionBusy && (movesPanel == null || !movesPanel.gameObject.activeSelf))
                 return;
             StartCoroutine(ChangeLevelRoutine(levelIndex));
+        }
+
+        void GoHome()
+        {
+            StopTransientFx();
+            HideOverlayNow();
+            celebrating = false;
+            dragging = false;
+            rotating = false;
+            motionBusy = false;
+            ShowMenu(homePanel);
+        }
+
+        IEnumerator ShowSplashThenHome()
+        {
+            ShowMenu(splashPanel);
+            yield return Motion.Wait(1.1f);
+            ShowMenu(homePanel);
+        }
+
+        void ShowMenu(RectTransform panel)
+        {
+            menuOpen = true;
+            HideOverlayNow();
+            if (menuRoot == null)
+                return;
+            menuRoot.gameObject.SetActive(true);
+            menuRoot.SetAsLastSibling();
+            if (splashPanel != null)
+                splashPanel.gameObject.SetActive(panel == splashPanel);
+            if (homePanel != null)
+                homePanel.gameObject.SetActive(panel == homePanel);
+            if (levelsPanel != null)
+                levelsPanel.gameObject.SetActive(panel == levelsPanel);
+            if (settingsPanel != null)
+                settingsPanel.gameObject.SetActive(panel == settingsPanel);
+            if (themesPanel != null)
+                themesPanel.gameObject.SetActive(panel == themesPanel);
+            if (panel == homePanel)
+                FillHome();
+            if (panel == levelsPanel)
+                RefreshLevelSelect();
+            if (panel == themesPanel)
+                RefreshThemes();
+            if (panel == settingsPanel)
+                FillHapticsLabel();
+            LayoutMenus();
+        }
+
+        void HideMenu()
+        {
+            menuOpen = false;
+            if (menuRoot != null)
+                menuRoot.gameObject.SetActive(false);
+        }
+
+        void PlayContinue()
+        {
+            settingsFromPlay = false;
+            HideMenu();
+            StartCoroutine(ChangeLevelRoutine(ContinueIndex()));
+        }
+
+        void OpenLevels()
+        {
+            settingsFromPlay = false;
+            ShowMenu(levelsPanel);
+        }
+
+        void OpenThemes()
+        {
+            settingsFromPlay = false;
+            ShowMenu(themesPanel);
+        }
+
+        void OpenSettingsFromHome()
+        {
+            settingsFromPlay = false;
+            ShowMenu(settingsPanel);
+        }
+
+        void BackFromMenu()
+        {
+            if (settingsFromPlay)
+            {
+                HideMenu();
+                settingsFromPlay = false;
+                Layout();
+                return;
+            }
+            ShowMenu(homePanel);
+        }
+
+        void DailySoon()
+        {
+            if (homeStatus != null)
+                homeStatus.text = "Daily coming soon";
+        }
+
+        void ShopSoon()
+        {
+            if (homeStatus != null)
+                homeStatus.text = "Shop coming soon";
+        }
+
+        int GlobalOf(int index)
+        {
+            if (index < 0 || index >= allLevels.Count || allLevels[index] == null)
+                return index + 1;
+            return allLevels[index].global > 0 ? allLevels[index].global : index + 1;
+        }
+
+        int StarsAt(int index)
+        {
+            return PlayerPrefs.GetInt("GridAura.BestStars." + GlobalOf(index), 0);
+        }
+
+        bool LevelUnlocked(int index)
+        {
+            if (index <= 0)
+                return true;
+            return StarsAt(index - 1) > 0;
+        }
+
+        int ContinueIndex()
+        {
+            int last = PlayerPrefs.GetInt(PrefLastLevel, 0);
+            last = Mathf.Clamp(last, 0, Mathf.Max(0, allLevels.Count - 1));
+            if (LevelUnlocked(last) && StarsAt(last) == 0)
+                return last;
+            for (int i = 0; i < allLevels.Count; i++)
+            {
+                if (LevelUnlocked(i) && StarsAt(i) == 0)
+                    return i;
+            }
+            return last;
+        }
+
+        void FillHome()
+        {
+            int next = ContinueIndex();
+            int shown = GlobalOf(next);
+            if (homePlayLabel != null)
+                homePlayLabel.text = "Level " + shown;
+            if (homeStarLabel != null)
+                homeStarLabel.text = TotalStars().ToString();
+            if (homeStatus != null)
+                homeStatus.text = "";
+            if (soundIcon != null)
+                soundIcon.color = Haptics.Enabled ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+        }
+
+        void FillHapticsLabel()
+        {
+            if (hapticsLabel != null)
+                hapticsLabel.text = Haptics.Enabled ? "Haptics On" : "Haptics Off";
+        }
+
+        void ToggleHaptics()
+        {
+            Haptics.Enabled = !Haptics.Enabled;
+            PlayerPrefs.SetInt(PrefHaptics, Haptics.Enabled ? 1 : 0);
+            PlayerPrefs.Save();
+            FillHapticsLabel();
+            FillHome();
+            if (Haptics.Enabled)
+                Haptics.Tick();
+        }
+
+        int ChestsUnlockedCount()
+        {
+            return Mathf.Clamp(PlayerPrefs.GetInt("GridAura.ChestsClaimed", 0), 0, ChestRewards.Length);
+        }
+
+        bool ThemeUnlocked(int theme)
+        {
+            return theme <= 0 || theme <= ChestsUnlockedCount();
+        }
+
+        void EquipTheme(int theme)
+        {
+            if (!ThemeUnlocked(theme))
+                return;
+            equippedTheme = theme;
+            PlayerPrefs.SetInt(PrefTheme, theme);
+            PlayerPrefs.Save();
+            RefreshThemes();
+            if (state != null && state.level != null && !menuOpen)
+                Refresh();
+        }
+
+        void PlayLevelFromSelect(int index)
+        {
+            if (!LevelUnlocked(index))
+                return;
+            settingsFromPlay = false;
+            HideMenu();
+            StartCoroutine(ChangeLevelRoutine(index));
+        }
+
+        RectTransform ActiveOverlayPanel()
+        {
+            if (winPanel != null && winPanel.gameObject.activeSelf)
+                return winPanel;
+            if (hintPanel != null && hintPanel.gameObject.activeSelf)
+                return hintPanel;
+            if (movesPanel != null && movesPanel.gameObject.activeSelf)
+                return movesPanel;
+            if (debugPanel != null && debugPanel.gameObject.activeSelf)
+                return debugPanel;
+            return null;
+        }
+
+        bool OverlayBusy()
+        {
+            if (menuOpen)
+                return true;
+            return overlay != null && overlay.gameObject.activeSelf;
         }
 
         void HideOverlay()
@@ -485,6 +944,7 @@ namespace Aura
                 StopCoroutine(overlayRoutine);
                 overlayRoutine = null;
             }
+            StopConfetti();
             if (winPanel != null)
             {
                 winPanel.gameObject.SetActive(false);
@@ -494,6 +954,16 @@ namespace Aura
             {
                 hintPanel.gameObject.SetActive(false);
                 hintPanel.localScale = Vector3.one;
+            }
+            if (movesPanel != null)
+            {
+                movesPanel.gameObject.SetActive(false);
+                movesPanel.localScale = Vector3.one;
+            }
+            if (debugPanel != null)
+            {
+                debugPanel.gameObject.SetActive(false);
+                debugPanel.localScale = Vector3.one;
             }
             if (overlay != null)
                 overlay.gameObject.SetActive(false);
@@ -512,6 +982,10 @@ namespace Aura
                 winPanel.gameObject.SetActive(panel == winPanel);
             if (hintPanel != null)
                 hintPanel.gameObject.SetActive(panel == hintPanel);
+            if (movesPanel != null)
+                movesPanel.gameObject.SetActive(panel == movesPanel);
+            if (debugPanel != null)
+                debugPanel.gameObject.SetActive(panel == debugPanel);
             overlay.gameObject.SetActive(true);
             overlay.SetAsLastSibling();
             if (overlayGroup != null)
@@ -548,7 +1022,7 @@ namespace Aura
                 HideOverlayNow();
                 yield break;
             }
-            var panel = winPanel != null && winPanel.gameObject.activeSelf ? winPanel : hintPanel;
+            var panel = ActiveOverlayPanel();
             float from = overlayGroup.alpha;
             Vector3 fromScale = panel != null ? panel.localScale : Vector3.one;
             overlayGroup.blocksRaycasts = false;
@@ -570,6 +1044,7 @@ namespace Aura
             if (state.level == null)
             {
                 HideOverlay();
+                hintRoutine = null;
                 yield break;
             }
             var step = state.PeekHint();
@@ -582,6 +1057,7 @@ namespace Aura
             }
 
             motionBusy = true;
+            UpdateHintButton();
             if (overlayRoutine != null)
             {
                 StopCoroutine(overlayRoutine);
@@ -594,6 +1070,7 @@ namespace Aura
                 aidRoutine = null;
             }
             yield return HideOverlayRoutine();
+            yield return PlayHintBulbBurst();
 
             var blockers = new List<string>();
             for (int r = step.row; r < step.row + step.h; r++)
@@ -634,45 +1111,52 @@ namespace Aura
                 trayGroup.alpha = 0.18f;
             }
 
-            var mark = MakeRect("HintTarget", grid);
-            PlaceOnGrid(mark, step.col, step.row, step.w, step.h);
-            var markFill = MakeRect("Fill", mark);
-            Stretch(markFill);
-            var fillImage = markFill.gameObject.AddComponent<Image>();
-            fillImage.color = new Color(1f, 0.82f, 0.12f, 0.28f);
-            fillImage.raycastTarget = false;
-            float thick = Mathf.Max(5f, pitch * 0.08f);
-            AddTargetEdge(mark, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -thick));
-            AddTargetEdge(mark, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, thick));
-            AddTargetEdge(mark, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(thick, 0f));
-            AddTargetEdge(mark, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(-thick, 0f));
-            var markGroup = mark.gameObject.AddComponent<CanvasGroup>();
-            markGroup.blocksRaycasts = false;
-            aidPulses.Add(markGroup);
-
             var flyer = MakeRect("HintFly", root);
             flyer.anchorMin = flyer.anchorMax = new Vector2(0.5f, 0.5f);
             flyer.pivot = new Vector2(0.5f, 0.5f);
             flyer.sizeDelta = fromSize;
             flyer.anchoredPosition = from;
+            flyer.localScale = Vector3.one;
             flyer.SetAsLastSibling();
             var flyerImage = flyer.gameObject.AddComponent<Image>();
             flyerImage.raycastTarget = false;
             SetPiece(flyerImage, ColorOf(step.piece));
             var flyerGroup = flyer.gameObject.AddComponent<CanvasGroup>();
             flyerGroup.blocksRaycasts = false;
-            flyerGroup.alpha = 0.95f;
+            flyerGroup.alpha = 1f;
 
-            for (int i = 0; i < 3; i++)
+            int turns = 0;
+            state.Oriented(step.piece, state.trayTurns.ContainsKey(step.piece) ? state.trayTurns[step.piece] : 0, out int orientH, out int orientW);
+            while ((orientH != step.h || orientW != step.w) && turns < 4)
             {
-                yield return Motion.Alpha(markGroup, 1f, 0.08f);
-                yield return Motion.Alpha(markGroup, 0.35f, 0.08f);
+                if (!state.RotateTray(step.piece))
+                    break;
+                state.Oriented(step.piece, state.trayTurns[step.piece], out orientH, out orientW);
+                Vector2 spun = slot != null ? TraySlabSize(slot, orientH, orientW) : new Vector2(Span(orientW), Span(orientH));
+                Haptics.Tick();
+                yield return Motion.SpinTurn(flyer, spun, 0.2f);
+                if (slot != null)
+                {
+                    slot.label.text = orientH + " × " + orientW;
+                    FitTraySlab(slot, orientH, orientW);
+                    var trayGroup = slot.slabRect.GetComponent<CanvasGroup>();
+                    if (trayGroup != null)
+                        trayGroup.alpha = 0.18f;
+                }
+                fromSize = spun;
+                turns++;
             }
-            markGroup.alpha = 1f;
-            yield return Motion.Arc(flyer, from, to, fromSize, toSize, 48f, 0.42f);
 
-            if (mark != null)
-                Destroy(mark.gameObject);
+            yield return Motion.Lift(flyer, 42f, 1.16f, 0.4f);
+            yield return Motion.Wait(0.08f);
+            yield return Motion.Arc(flyer, flyer.anchoredPosition, to, flyer.sizeDelta, toSize, 64f, 0.78f);
+            if (flyer != null)
+            {
+                flyer.anchoredPosition = to;
+                flyer.sizeDelta = toSize;
+                yield return Motion.Sit(flyer, 0.34f, 22f, 6f);
+            }
+
             if (flyer != null)
                 Destroy(flyer.gameObject);
 
@@ -683,30 +1167,113 @@ namespace Aura
             Refresh();
             var landed = placedLayer.Find(step.piece) as RectTransform;
             if (landed != null)
-                yield return PlayLandImpact(landed);
+            {
+                PlayToonFx(sparkImpactFx, landed, ToonScale(landed, 1.35f));
+            }
             if (state.IsComplete())
                 ShowWin();
             motionBusy = false;
             hintRoutine = null;
+            UpdateHintButton();
+        }
+
+        IEnumerator PlayHintBulbBurst()
+        {
+            ClearHintBurst();
+            if (root == null)
+                yield break;
+            var header = Find("Hint");
+            if (header != null)
+                StartCoroutine(Motion.Punch(header, 1.14f, 0.16f));
+            Haptics.Hint();
+
+            var burst = MakeRect("HintBurst", root);
+            burst.anchorMin = burst.anchorMax = new Vector2(0.5f, 0.5f);
+            burst.pivot = new Vector2(0.5f, 0.5f);
+            burst.sizeDelta = new Vector2(300f, 300f);
+            burst.anchoredPosition = header != null ? PointInRoot(header) : Vector2.zero;
+            burst.localScale = Vector3.one * 0.22f;
+            burst.SetAsLastSibling();
+            AddGlowStack(burst, hintGlowSprite, hintBulbSprite);
+            LayoutStackedGlow(burst, 0.12f);
+            var group = burst.gameObject.AddComponent<CanvasGroup>();
+            group.blocksRaycasts = false;
+            group.alpha = 0f;
+
+            Vector2 start = burst.anchoredPosition;
+            yield return Motion.Tween(0.34f, u =>
+            {
+                if (burst == null)
+                    return;
+                float k = Motion.OutBack(u);
+                burst.anchoredPosition = Vector2.LerpUnclamped(start, Vector2.zero, Motion.OutCubic(u));
+                burst.localScale = Vector3.one * Mathf.LerpUnclamped(0.22f, 1.12f, k);
+                group.alpha = Mathf.Clamp01(u * 1.4f);
+            });
+            if (burst == null)
+                yield break;
+            burst.anchoredPosition = Vector2.zero;
+            burst.localScale = Vector3.one * 1.12f;
+            group.alpha = 1f;
+            PlayToonFx(starPoofFx, burst, 0.7f, false, 0.9f, false, 0.45f, 0.75f);
+            yield return Motion.Punch(burst, 1.22f, 0.2f);
+            yield return Motion.Punch(burst, 1.16f, 0.16f);
+            yield return Motion.Tween(0.22f, u =>
+            {
+                if (burst == null)
+                    return;
+                burst.localScale = Vector3.one * Mathf.Lerp(1.12f, 1.45f, u);
+                group.alpha = 1f - u;
+            });
+            if (burst != null)
+                Destroy(burst.gameObject);
+        }
+
+        void ClearHintBurst()
+        {
+            if (root == null)
+                return;
+            var localBurst = root.Find("HintBurst");
+            if (localBurst != null)
+                Destroy(localBurst.gameObject);
         }
 
         public void PointerDown(PieceControl control, PointerEventData eventData)
         {
-            if (boardIntroActive || motionBusy)
+            if (menuOpen || boardIntroActive || motionBusy || rotating || OverlayBusy())
                 return;
             if (dragging)
                 EndDrag();
             active = control;
             pointerStart = eventData.position;
+            lastPointer = eventData.position;
             moved = false;
             dragging = false;
+        }
+
+        public void PointerBeginDrag(PieceControl control, PointerEventData eventData)
+        {
+            if (menuOpen || boardIntroActive || motionBusy || rotating || OverlayBusy())
+                return;
+            if (active != control)
+                PointerDown(control, eventData);
+            if (dragging || rotating || !control.onBoard)
+                return;
+            moved = true;
+            BeginDrag(control, eventData);
         }
 
         public void PointerDrag(PieceControl control, PointerEventData eventData)
         {
             if (motionBusy || active != control)
                 return;
-            if (!moved && Vector2.Distance(eventData.position, pointerStart) > 12f)
+            if (rotating)
+            {
+                lastPointer = eventData.position;
+                return;
+            }
+            float slop = control.onBoard ? 16f : DragSlop;
+            if (!moved && Vector2.Distance(eventData.position, pointerStart) > slop)
             {
                 moved = true;
                 BeginDrag(control, eventData);
@@ -715,25 +1282,97 @@ namespace Aura
                 MoveDrag(eventData);
         }
 
+        public void PointerEndDrag(PieceControl control, PointerEventData eventData)
+        {
+            FinishBoardDrag(control);
+        }
+
         public void PointerUp(PieceControl control, PointerEventData eventData)
         {
-            if (motionBusy || active != control)
+            if (FinishBoardDrag(control))
                 return;
-            if (dragging || moved)
-                EndDrag();
-            else if (control.onBoard)
-                StartCoroutine(TapReturnToTray(control));
-            else if (state.MustRotate(control.pieceId) && state.RotateTray(control.pieceId))
+            if (active != control)
+                return;
+            if (motionBusy || rotating)
             {
-                fingerTapStopped = true;
-                Refresh();
+                active = null;
+                return;
             }
+            if (moved)
+            {
+                active = null;
+                return;
+            }
+            if (control.onBoard)
+            {
+                if (state.IsPlaced(control.pieceId) && state.placed[control.pieceId].locked)
+                {
+                    if (messageText != null)
+                        messageText.text = "This piece is locked";
+                    Haptics.Miss();
+                }
+                else if (state.CanRotate(control.pieceId) && state.IsPlaced(control.pieceId))
+                {
+                    if (state.CanRotateBoard(control.pieceId))
+                        rotateRoutine = StartCoroutine(RotateBoardRoutine(control.pieceId));
+                    else
+                        StartCoroutine(RejectBoardRotate(control.pieceId));
+                }
+                else
+                    StartCoroutine(TapReturnToTray(control));
+            }
+            else if (state.CanRotate(control.pieceId) && !state.IsPlaced(control.pieceId))
+                rotateRoutine = StartCoroutine(RotateTraySlotRoutine(control.pieceId));
             active = null;
+        }
+
+        bool FinishBoardDrag(PieceControl control)
+        {
+            if (active != control || !dragging)
+                return false;
+            if (rotating)
+                pendingEndDrag = true;
+            else if (!motionBusy)
+                EndDrag();
+            active = null;
+            return true;
+        }
+
+        void AbortDrag()
+        {
+            dragging = false;
+            moved = false;
+            pendingEndDrag = false;
+            ghost.gameObject.SetActive(false);
+            if (rotateButton != null)
+                rotateButton.gameObject.SetActive(false);
+            if (drag != null)
+                drag.gameObject.SetActive(false);
+            PulseColorPartner(null, false);
+            if (hiddenGroup != null)
+            {
+                hiddenGroup.alpha = 1f;
+                hiddenGroup.blocksRaycasts = true;
+                hiddenGroup = null;
+            }
+            if (lifted != null)
+            {
+                state.RestorePlaced(lifted);
+                lifted = null;
+            }
+            Refresh();
         }
 
         void BeginDrag(PieceControl control, PointerEventData eventData)
         {
             if (control.onBoard && state.placed.ContainsKey(control.pieceId) && state.placed[control.pieceId].locked)
+            {
+                if (messageText != null)
+                    messageText.text = "This piece is locked";
+                Haptics.Miss();
+                return;
+            }
+            if (string.IsNullOrEmpty(control.pieceId) || state.Find(control.pieceId) == null)
                 return;
             fingerDragStopped = true;
             if (aidRoutine != null)
@@ -746,7 +1385,9 @@ namespace Aura
                 for (int i = aidLayer.childCount - 1; i >= 0; i--)
                     Destroy(aidLayer.GetChild(i).gameObject);
             }
-            dragging = true;
+            pendingEndDrag = false;
+            if (messageText != null && (messageText.text == "Rotate is not possible" || messageText.text == "This piece is locked"))
+                messageText.text = LevelHintLine();
             int h;
             int w;
             if (control.onBoard && state.placed.ContainsKey(control.pieceId))
@@ -755,18 +1396,27 @@ namespace Aura
                 h = placed.h;
                 w = placed.w;
                 Vector2 local = BoardLocal(eventData.position);
-                grabCol = Mathf.Clamp(Mathf.FloorToInt(local.x / pitch) - placed.col, 0, w - 1);
-                grabRow = Mathf.Clamp(Mathf.FloorToInt(-local.y / pitch) - placed.row, 0, h - 1);
+                int cellCol = Mathf.FloorToInt(local.x / Mathf.Max(1f, pitch));
+                int cellRow = Mathf.FloorToInt(-local.y / Mathf.Max(1f, pitch));
+                grabCol = Mathf.Clamp(cellCol - placed.col, 0, w - 1);
+                grabRow = Mathf.Clamp(cellRow - placed.row, 0, h - 1);
                 lifted = new PlacedPiece { id = placed.id, row = placed.row, col = placed.col, h = placed.h, w = placed.w };
+                state.SyncTrayTurns(placed);
                 state.placed.Remove(control.pieceId);
+                var boardCell = placedLayer.Find(control.pieceId) as RectTransform;
+                if (boardCell != null)
+                    boardCell.gameObject.SetActive(false);
                 RevealCells(lifted.col, lifted.row, lifted.w, lifted.h);
             }
             else
             {
+                if (!state.trayTurns.ContainsKey(control.pieceId))
+                    state.trayTurns[control.pieceId] = 0;
                 state.Oriented(control.pieceId, state.trayTurns[control.pieceId], out h, out w);
                 grabCol = w / 2;
                 grabRow = h / 2;
             }
+            dragging = true;
             dragH = h;
             dragW = w;
             drag.sizeDelta = new Vector2(Span(w), Span(h));
@@ -780,33 +1430,46 @@ namespace Aura
             ghostBlend = 1f;
             var slot = SlotOf(control);
             var hide = slot != null ? slot.slabRect : HideTarget(control);
+            if (hide == null)
+            {
+                dragging = false;
+                if (lifted != null)
+                {
+                    state.RestorePlaced(lifted);
+                    lifted = null;
+                    Refresh();
+                }
+                return;
+            }
             var group = hide.GetComponent<CanvasGroup>();
             if (group == null)
                 group = hide.gameObject.AddComponent<CanvasGroup>();
             group.alpha = slot != null ? 0.28f : 0f;
             group.blocksRaycasts = false;
             hiddenGroup = group;
-            rotateButton.gameObject.SetActive(!control.onBoard && state.MustRotate(control.pieceId));
-            rotateButton.SetAsLastSibling();
+            ClearSlotDecorations();
+            rotateButton.gameObject.SetActive(false);
             MoveDrag(eventData);
         }
 
         void MoveDrag(PointerEventData eventData)
         {
             lastPointer = eventData.position;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, eventData.position, null, out var pointer);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, eventData.position, UiCamera(), out var pointer);
             float cellsW = Mathf.Max(1, dragW);
             float cellsH = Mathf.Max(1, dragH);
             drag.anchorMin = drag.anchorMax = new Vector2(0.5f, 0.5f);
             drag.pivot = new Vector2((grabCol + 0.5f) / cellsW, 1f - (grabRow + 0.5f) / cellsH);
             drag.anchoredPosition = pointer + new Vector2(0f, pitch * 0.8f);
 
-            Vector2 topLeft = BoardLocal(RectTransformUtility.WorldToScreenPoint(null, drag.TransformPoint(new Vector3(drag.rect.xMin, drag.rect.yMax, 0f))));
+            Vector2 topLeft = BoardLocal(RectTransformUtility.WorldToScreenPoint(UiCamera(), drag.TransformPoint(new Vector3(drag.rect.xMin, drag.rect.yMax, 0f))));
             int col = Mathf.RoundToInt(topLeft.x / pitch);
             int row = Mathf.RoundToInt(-topLeft.y / pitch);
-            bool valid = state.CanPlace(active.pieceId, row, col, dragH, dragW);
+            bool valid = state.CanPlace(active.pieceId, row, col, dragH, dragW, lifted == null);
             bool overBoard = row < GameState.Size && col < GameState.Size && row + dragH > 0 && col + dragW > 0;
+            UpdateDragRotateButton(overBoard);
             ghost.gameObject.SetActive(overBoard);
+            PulseColorPartner(active.pieceId, overBoard && state.IsColor);
             if (!overBoard)
                 return;
             SetPiece(ghostImage, ColorOf(active.pieceId));
@@ -828,6 +1491,21 @@ namespace Aura
                 ghostRow = row;
             }
             StepGhost();
+        }
+
+        void PulseColorPartner(string id, bool on)
+        {
+            string partner = on ? state.ColorPartner(id) : null;
+            foreach (Transform child in placedLayer)
+            {
+                var group = child.GetComponent<CanvasGroup>();
+                if (group == null)
+                    continue;
+                if (partner != null && child.name == partner)
+                    group.alpha = 0.55f + 0.45f * (Mathf.Sin(Time.unscaledTime * 6f) * 0.5f + 0.5f);
+                else
+                    group.alpha = 1f;
+            }
         }
 
         Vector2 GhostAnchor(int col, int row, int w, int h)
@@ -853,12 +1531,23 @@ namespace Aura
             var piece = active;
             var origin = lifted;
             lifted = null;
-            Vector2 topLeft = BoardLocal(RectTransformUtility.WorldToScreenPoint(null, drag.TransformPoint(new Vector3(drag.rect.xMin, drag.rect.yMax, 0f))));
-            int col = Mathf.RoundToInt(topLeft.x / pitch);
-            int row = Mathf.RoundToInt(-topLeft.y / pitch);
+            int col;
+            int row;
+            if (ghostCol > -50 && ghostRow > -50)
+            {
+                col = ghostCol;
+                row = ghostRow;
+            }
+            else
+            {
+                Vector2 topLeft = BoardLocal(RectTransformUtility.WorldToScreenPoint(UiCamera(), drag.TransformPoint(new Vector3(drag.rect.xMin, drag.rect.yMax, 0f))));
+                col = Mathf.RoundToInt(topLeft.x / pitch);
+                row = Mathf.RoundToInt(-topLeft.y / pitch);
+            }
             dragging = false;
             ghost.gameObject.SetActive(false);
             rotateButton.gameObject.SetActive(false);
+            PulseColorPartner(null, false);
             if (dragRoutine != null)
                 StopCoroutine(dragRoutine);
             dragRoutine = StartCoroutine(SettleDrag(piece, origin, row, col));
@@ -868,7 +1557,7 @@ namespace Aura
         {
             motionBusy = true;
             bool onTray = ReleasedOnTray();
-            bool canPlace = piece != null && state.CanPlace(piece.pieceId, row, col, dragH, dragW);
+            bool canPlace = piece != null && !onTray && state.CanPlace(piece.pieceId, row, col, dragH, dragW, origin == null);
             Vector2 dest = PointInRoot(drag);
             if (piece != null && origin != null && onTray)
             {
@@ -894,6 +1583,7 @@ namespace Aura
             drag.localScale = Vector3.one;
             if (!canPlace && !onTray)
             {
+                Haptics.Miss();
                 yield return Motion.ShakeX(drag, 10f, 0.1f);
                 yield return Motion.ColorTo(dragImage, new Color(1f, 0.4f, 0.42f, 1f), 0.06f);
             }
@@ -918,27 +1608,47 @@ namespace Aura
                 yield break;
             }
             if (origin != null && onTray)
-                state.Remember(origin);
-            else
             {
-                bool placed = state.TryPlace(piece.pieceId, row, col, dragH, dragW, origin == null);
+                state.Remember(origin);
+                state.SyncTrayTurns(origin);
+            }
+            else if (!onTray && canPlace)
+            {
+                bool movedSpot = origin == null || row != origin.row || col != origin.col || dragH != origin.h || dragW != origin.w;
+                bool placed = state.TryPlace(piece.pieceId, row, col, dragH, dragW, origin == null, origin == null && movedSpot);
                 if (placed)
                 {
-                    if (origin != null && (row != origin.row || col != origin.col || dragH != origin.h || dragW != origin.w))
-                        state.Remember(origin);
+                    if (origin != null && movedSpot)
+                        state.Remember(origin, false);
                 }
                 else if (origin != null)
-                    state.TryPlace(origin.id, origin.row, origin.col, origin.h, origin.w, false);
+                    state.RestorePlaced(origin);
             }
+            else if (origin != null)
+            {
+                state.RestorePlaced(origin);
+                if (piece != null && state.BlockedOnlyByColor(piece.pieceId, row, col, dragH, dragW))
+                    messageText.text = "Same colors can't touch";
+            }
+            else if (piece != null && state.BlockedOnlyByColor(piece.pieceId, row, col, dragH, dragW))
+                messageText.text = "Same colors can't touch";
             Refresh();
             if (canPlace && !onTray && piece != null)
             {
                 var landed = placedLayer.Find(piece.pieceId) as RectTransform;
+                bool last = state.IsComplete();
+                string cheer = null;
+                if (!last && state.MatchesSolution(piece.pieceId))
+                    cheer = PlaceCheers[Random.Range(0, PlaceCheers.Length)];
                 if (landed != null)
-                    yield return PlayLandImpact(landed);
+                    yield return PlayLandImpact(landed, cheer);
+                if (last)
+                    yield return Motion.Wait(0.16f);
             }
             if (state.IsComplete())
                 ShowWin();
+            else if (state.OutOfMoves)
+                ShowOutOfMoves();
             motionBusy = false;
             dragRoutine = null;
         }
@@ -946,7 +1656,7 @@ namespace Aura
         bool ReleasedOnTray()
         {
             var tray = Find("Tray");
-            return tray != null && RectTransformUtility.RectangleContainsScreenPoint(tray, lastPointer, null);
+            return tray != null && RectTransformUtility.RectangleContainsScreenPoint(tray, lastPointer, UiCamera());
         }
 
         void RevealCells(int col, int row, int w, int h)
@@ -972,45 +1682,131 @@ namespace Aura
             image.raycastTarget = false;
             image.sprite = emptySprite;
             image.type = Image.Type.Sliced;
+            image.color = EmptyTint();
             FitSlice(image, 18f);
         }
 
         void RotateDragged()
         {
-            if (motionBusy || rotating || active == null || active.onBoard || !state.MustRotate(active.pieceId))
+            if (motionBusy || rotating || active == null || !dragging || !state.CanRotate(active.pieceId))
             {
-                if (active == null || active.onBoard)
+                if (active == null || !dragging)
                     rotateButton.gameObject.SetActive(false);
                 return;
             }
-            if (rotateRoutine != null)
-                StopCoroutine(rotateRoutine);
             rotateRoutine = StartCoroutine(RotateDragRoutine());
+        }
+
+        IEnumerator RotateTraySlotRoutine(string id)
+        {
+            var slot = SlotById(id);
+            if (slot == null || slot.slabRect == null || rotating)
+            {
+                rotateRoutine = null;
+                yield break;
+            }
+            rotating = true;
+            motionBusy = true;
+            if (!state.RotateTray(id))
+            {
+                rotating = false;
+                motionBusy = false;
+                rotateRoutine = null;
+                yield break;
+            }
+            MarkRotateTaught();
+            state.Oriented(id, state.trayTurns[id], out int h, out int w);
+            Vector2 toSize = TraySlabSize(slot, h, w);
+            Haptics.Tick();
+            PlayToonFx(sparkImpactFx, slot.slabRect, 0.42f, false, 0.7f, false, 0.28f, 0.55f);
+            yield return Motion.SpinTurn(slot.slabRect, toSize, 0.2f);
+            slot.label.text = h + " × " + w;
+            FitTraySlab(slot, h, w);
+            yield return Motion.Punch(slot.slabRect, 1.08f, 0.1f);
+            DrawTutorialAids();
+            rotating = false;
+            motionBusy = false;
+            rotateRoutine = null;
+        }
+
+        IEnumerator RotateBoardRoutine(string id)
+        {
+            var cell = placedLayer.Find(id) as RectTransform;
+            if (cell == null || rotating || !state.CanRotateBoard(id))
+            {
+                rotateRoutine = null;
+                yield break;
+            }
+            rotating = true;
+            motionBusy = true;
+            PinPivotCenter(cell);
+            state.FindBoardRotation(id, out _, out _, out int nextH, out int nextW);
+            Vector2 toSize = new Vector2(Span(nextW), Span(nextH));
+            Haptics.Tick();
+            PlayToonFx(sparkImpactFx, cell, 0.5f, false, 0.7f, false, 0.3f, 0.6f);
+            yield return Motion.SpinTurn(cell, toSize, 0.2f);
+            if (!state.RotateBoard(id))
+            {
+                Haptics.Miss();
+                rotating = false;
+                motionBusy = false;
+                rotateRoutine = null;
+                Refresh();
+                yield break;
+            }
+            Refresh();
+            rotating = false;
+            motionBusy = false;
+            rotateRoutine = null;
         }
 
         IEnumerator RotateDragRoutine()
         {
             rotating = true;
             if (state.RotateTray(active.pieceId))
-                fingerTapStopped = true;
-            yield return Motion.RotateZ(drag, 0f, -90f, 0.14f);
+                MarkRotateTaught();
+            PinPivotCenter(drag);
             state.Oriented(active.pieceId, state.trayTurns[active.pieceId], out dragH, out dragW);
-            drag.sizeDelta = new Vector2(Span(dragW), Span(dragH));
-            drag.localRotation = Quaternion.identity;
+            Vector2 toSize = new Vector2(Span(dragW), Span(dragH));
+            Haptics.Tick();
+            PlayToonFx(sparkImpactFx, drag, 0.5f, false, 0.7f, false, 0.3f, 0.6f);
+            if (rotateButton != null && rotateButton.gameObject.activeSelf)
+                StartCoroutine(Motion.Punch(rotateButton, 1.1f, 0.12f));
+            yield return Motion.SpinTurn(drag, toSize, 0.2f);
+            if (active == null)
+            {
+                rotating = false;
+                rotateRoutine = null;
+                pendingEndDrag = false;
+                yield break;
+            }
             SetPiece(dragImage, ColorOf(active.pieceId));
             grabCol = Mathf.Clamp(grabCol, 0, dragW - 1);
             grabRow = Mathf.Clamp(grabRow, 0, dragH - 1);
             ghostCol = -99;
-            rotateButton.gameObject.SetActive(state.MustRotate(active.pieceId));
             var data = new PointerEventData(EventSystem.current) { position = lastPointer };
             MoveDrag(data);
             rotating = false;
             rotateRoutine = null;
+            if (pendingEndDrag)
+            {
+                pendingEndDrag = false;
+                EndDrag();
+            }
+        }
+
+        void PinPivotCenter(RectTransform rect)
+        {
+            if (rect == null)
+                return;
+            Vector3 world = rect.TransformPoint(rect.rect.center);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.position = world;
         }
 
         void OnUndo()
         {
-            if (motionBusy || !state.CanUndo)
+            if (motionBusy || OverlayBusy() || !state.CanUndo)
                 return;
             StartCoroutine(UndoRoutine());
         }
@@ -1061,7 +1857,7 @@ namespace Aura
 
         void ShowReset()
         {
-            if (motionBusy || !state.HasMovablePlaced())
+            if (motionBusy || OverlayBusy() || !state.HasMovablePlaced())
                 return;
             confirmPanel.gameObject.SetActive(true);
             confirmPanel.SetAsLastSibling();
@@ -1150,6 +1946,60 @@ namespace Aura
             var icon = gear.Find("Icon");
             if (icon != null)
                 StartCoroutine(GearNudge(icon));
+            settingsFromPlay = true;
+            ShowMenu(settingsPanel);
+        }
+
+        void ShowDebugPanel()
+        {
+            if (debugPanel == null || motionBusy)
+                return;
+            if (debugLevelInput != null)
+            {
+                int shown = state.level != null && state.level.global > 0 ? state.level.global : levelIndex + 1;
+                debugLevelInput.text = shown.ToString();
+            }
+            if (debugStatus != null)
+                debugStatus.text = "Levels 1–" + Mathf.Max(1, allLevels.Count);
+            ShowOverlay(debugPanel);
+        }
+
+        void JumpDebugLevel()
+        {
+            if (debugLevelInput == null || allLevels.Count == 0)
+                return;
+            string raw = debugLevelInput.text != null ? debugLevelInput.text.Trim() : "";
+            if (!int.TryParse(raw, out int global) || global < 1)
+            {
+                if (debugStatus != null)
+                    debugStatus.text = "Enter a level number";
+                return;
+            }
+            int index = IndexOfGlobal(global);
+            if (index < 0)
+            {
+                if (debugStatus != null)
+                    debugStatus.text = "No level " + global + " (1–" + allLevels.Count + ")";
+                return;
+            }
+            if (debugStatus != null)
+                debugStatus.text = "Jumping to " + global;
+            HideMenu();
+            StartCoroutine(ChangeLevelRoutine(index));
+        }
+
+        int IndexOfGlobal(int global)
+        {
+            for (int i = 0; i < allLevels.Count; i++)
+            {
+                var lvl = allLevels[i];
+                int id = lvl != null && lvl.global > 0 ? lvl.global : i + 1;
+                if (id == global)
+                    return i;
+            }
+            if (global >= 1 && global <= allLevels.Count)
+                return global - 1;
+            return -1;
         }
 
         IEnumerator GearNudge(Transform icon)
@@ -1176,7 +2026,9 @@ namespace Aura
         void BreatheHint()
         {
             var hint = Find("Hint");
-            if (hint == null)
+            if (hint == null || !hint.gameObject.activeSelf)
+                return;
+            if (hintGroup != null && !hintGroup.blocksRaycasts)
                 return;
             var bulb = hint.Find("Bulb");
             if (bulb == null)
@@ -1185,25 +2037,155 @@ namespace Aura
             bulb.localScale = Vector3.one * s;
         }
 
+        void UpdateHintButton()
+        {
+            var hint = Find("Hint");
+            if (hint == null)
+                return;
+            bool unlocked = HintUnlocked;
+            hint.gameObject.SetActive(unlocked);
+            if (hintGroup == null)
+                hintGroup = hint.GetComponent<CanvasGroup>();
+            if (hintGroup == null)
+                hintGroup = hint.gameObject.AddComponent<CanvasGroup>();
+            bool canTap = unlocked && !boardIntroActive && !celebrating && !OverlayBusy() && (state.level == null || !state.IsComplete());
+            hintGroup.alpha = canTap ? 1f : 0.4f;
+            hintGroup.blocksRaycasts = canTap;
+            hintGroup.interactable = canTap;
+        }
+
         void NextLevel()
         {
             if (motionBusy)
                 return;
-            int next = levelIndex >= allLevels.Count - 1 ? 0 : levelIndex + 1;
-            StartCoroutine(ChangeLevelRoutine(next));
+            if (levelIndex >= allLevels.Count - 1)
+            {
+                GoHome();
+                return;
+            }
+            StartCoroutine(ChangeLevelRoutine(levelIndex + 1));
         }
 
         IEnumerator ChangeLevelRoutine(int index)
         {
             motionBusy = true;
+            StopTransientFx();
             yield return HideOverlayRoutine();
+            StopConfetti();
+            if (root != null)
+                root.anchoredPosition = Vector2.zero;
+            int dir = NextTransition();
+            SizeTransitionCover();
+            PlaceTransitionBar(dir);
+            Vector2 rest = Vector2.zero;
+            Vector2 from = TransitionOffset(dir);
+            Vector2 away = OppositeTransitionOffset(dir);
+            if (transitionCover != null)
+            {
+                transitionCover.gameObject.SetActive(true);
+                transitionCover.SetAsLastSibling();
+                transitionCover.anchoredPosition = from;
+                yield return Motion.Move(transitionCover, rest, 0.32f);
+            }
             ShowLevel(index);
+            yield return Motion.Wait(0.06f);
+            if (transitionCover != null)
+            {
+                yield return Motion.Move(transitionCover, away, 0.34f);
+                transitionCover.anchoredPosition = rest;
+                transitionCover.gameObject.SetActive(false);
+            }
+        }
+
+        Vector2 TransitionOffset(int dir)
+        {
+            float w = transitionCover != null ? transitionCover.rect.width : ReferenceWidth;
+            float h = transitionCover != null ? transitionCover.rect.height : ReferenceHeight;
+            if (dir == 0)
+                return new Vector2(-w, 0f);
+            if (dir == 1)
+                return new Vector2(w, 0f);
+            if (dir == 2)
+                return new Vector2(0f, -h);
+            return new Vector2(0f, h);
+        }
+
+        Vector2 OppositeTransitionOffset(int dir)
+        {
+            return -TransitionOffset(dir);
+        }
+
+        void SizeTransitionCover()
+        {
+            if (transitionCover == null || canvas == null)
+                return;
+            var canvasRect = canvas.GetComponent<RectTransform>();
+            float w = canvasRect.rect.width;
+            float h = canvasRect.rect.height;
+            if (w < 8f)
+            {
+                w = ReferenceWidth;
+                h = ReferenceHeight;
+            }
+            transitionCover.sizeDelta = new Vector2(w, h);
+        }
+
+        void PlaceTransitionBar(int dir)
+        {
+            if (transitionBar == null)
+                return;
+            float thick = 22f;
+            if (dir == 0)
+            {
+                transitionBar.anchorMin = new Vector2(1f, 0f);
+                transitionBar.anchorMax = new Vector2(1f, 1f);
+                transitionBar.pivot = new Vector2(1f, 0.5f);
+                transitionBar.sizeDelta = new Vector2(thick, 0f);
+                transitionBar.anchoredPosition = Vector2.zero;
+            }
+            else if (dir == 1)
+            {
+                transitionBar.anchorMin = new Vector2(0f, 0f);
+                transitionBar.anchorMax = new Vector2(0f, 1f);
+                transitionBar.pivot = new Vector2(0f, 0.5f);
+                transitionBar.sizeDelta = new Vector2(thick, 0f);
+                transitionBar.anchoredPosition = Vector2.zero;
+            }
+            else if (dir == 2)
+            {
+                transitionBar.anchorMin = new Vector2(0f, 1f);
+                transitionBar.anchorMax = new Vector2(1f, 1f);
+                transitionBar.pivot = new Vector2(0.5f, 1f);
+                transitionBar.sizeDelta = new Vector2(0f, thick);
+                transitionBar.anchoredPosition = Vector2.zero;
+            }
+            else
+            {
+                transitionBar.anchorMin = new Vector2(0f, 0f);
+                transitionBar.anchorMax = new Vector2(1f, 0f);
+                transitionBar.pivot = new Vector2(0.5f, 0f);
+                transitionBar.sizeDelta = new Vector2(0f, thick);
+                transitionBar.anchoredPosition = Vector2.zero;
+            }
+        }
+
+        int NextTransition()
+        {
+            int dir = Random.Range(0, 4);
+            if (dir == lastTransition)
+                dir = (dir + 1 + Random.Range(0, 3)) % 4;
+            lastTransition = dir;
+            return dir;
         }
 
         void ShowLevel(int index)
         {
             levelIndex = Mathf.Clamp(index, 0, Mathf.Max(0, allLevels.Count - 1));
-            state.Begin(allLevels[levelIndex], catalogPieces);
+            PlayerPrefs.SetInt(PrefLastLevel, levelIndex);
+            PlayerPrefs.Save();
+            var next = allLevels[levelIndex];
+            bool tutorial = next != null && next.source == "tutorial";
+            state.Begin(next, catalogPieces, tutorial);
             var trayIds = state.TrayIds();
             for (int i = 0; i < slots.Count; i++)
             {
@@ -1223,53 +2205,65 @@ namespace Aura
                 }
             }
             levelWord.text = "Level";
-            levelNumber.text = (levelIndex + 1).ToString();
-            messageText.text = "";
+            int shown = next != null && next.global > 0 ? next.global : levelIndex + 1;
+            levelNumber.text = shown.ToString();
+            levelNumber.color = TagColor(next != null ? next.tag : null);
+            messageText.text = LevelHintLine();
             fingerDragStopped = false;
             fingerTapStopped = false;
             celebrating = false;
+            rotating = false;
+            pendingEndDrag = false;
             boardIntroActive = true;
             motionBusy = true;
+            StopTransientFx();
             HideOverlayNow();
             RestoreCoach();
+            hudLanded = !state.HasMoveLimit;
+            briefingSkip = false;
+            briefingDocked = true;
+            if (briefing != null)
+            {
+                briefing.gameObject.SetActive(false);
+                briefing.localScale = Vector3.one;
+            }
+            if (hudLanded)
+                ShowTagBanner();
             Refresh();
+            if (rotateRoutine != null)
+            {
+                StopCoroutine(rotateRoutine);
+                rotateRoutine = null;
+            }
+            if (hintRoutine != null)
+            {
+                StopCoroutine(hintRoutine);
+                hintRoutine = null;
+            }
+            ClearHintBurst();
             if (introRoutine != null)
                 StopCoroutine(introRoutine);
             introRoutine = StartCoroutine(LevelIntro());
+            UpdateHintButton();
         }
 
         void Refresh()
         {
+            SyncTraySlots();
             Layout();
             hintText.text = "∞";
-            foreach (var slot in slots)
-            {
-                bool placed = slot.id != null && state.IsPlaced(slot.id);
-                bool inTray = slot.id != null && !placed;
-                slot.slab.gameObject.SetActive(inTray);
-                slot.hit.gameObject.SetActive(inTray);
-                var slabGroup = slot.slabRect.GetComponent<CanvasGroup>();
-                if (slabGroup != null)
-                {
-                    slabGroup.alpha = 1f;
-                    slabGroup.blocksRaycasts = true;
-                }
-                slot.control.pieceId = slot.id;
-                slot.control.onBoard = false;
-                slot.label.color = placed ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
-                if (inTray)
-                {
-                    state.Oriented(slot.id, state.trayTurns[slot.id], out int h, out int w);
-                    FitTraySlab(slot, h, w);
-                }
-            }
             for (int i = placedLayer.childCount - 1; i >= 0; i--)
-                Destroy(placedLayer.GetChild(i).gameObject);
+            {
+                var child = placedLayer.GetChild(i);
+                child.gameObject.SetActive(false);
+                Destroy(child.gameObject);
+            }
             for (int i = grid.childCount - 1; i >= 0; i--)
             {
                 var child = grid.GetChild(i);
                 if (child == placedLayer || child == ghost)
                     continue;
+                child.gameObject.SetActive(false);
                 Destroy(child.gameObject);
             }
             for (int r = 0; r < GameState.Size; r++)
@@ -1315,9 +2309,12 @@ namespace Aura
             else
             {
                 celebrating = false;
-                if (hintPanel == null || !hintPanel.gameObject.activeSelf)
+                bool keepHint = hintPanel != null && hintPanel.gameObject.activeSelf;
+                bool keepMoves = movesPanel != null && movesPanel.gameObject.activeSelf;
+                if (!keepHint && !keepMoves)
                     HideOverlayNow();
             }
+            UpdateMovesHud();
         }
 
         void UpdateUndoVisual()
@@ -1333,10 +2330,8 @@ namespace Aura
         {
             var hit = MakeRect("Hit", cell);
             Stretch(hit);
-            float extraX = piece.w == 1 ? pitch * 0.4f : pitch * 0.12f;
-            float extraY = piece.h == 1 ? pitch * 0.4f : pitch * 0.12f;
-            hit.offsetMin = new Vector2(-extraX, -extraY);
-            hit.offsetMax = new Vector2(extraX, extraY);
+            hit.offsetMin = Vector2.zero;
+            hit.offsetMax = Vector2.zero;
             var image = hit.gameObject.AddComponent<Image>();
             image.color = Color.clear;
             image.raycastTarget = true;
@@ -1344,6 +2339,21 @@ namespace Aura
             control.screen = this;
             control.pieceId = piece.id;
             control.onBoard = true;
+        }
+
+        IEnumerator RejectBoardRotate(string id)
+        {
+            var cell = placedLayer.Find(id) as RectTransform;
+            if (cell == null)
+                yield break;
+            motionBusy = true;
+            Haptics.Miss();
+            if (messageText != null)
+                messageText.text = "Rotate is not possible";
+            yield return Motion.ShakeX(cell, 22f, 0.22f);
+            if (cell != null)
+                yield return Motion.Punch(cell, 1.05f, 0.1f);
+            motionBusy = false;
         }
 
         TraySlot SlotOf(PieceControl control)
@@ -1378,15 +2388,24 @@ namespace Aura
             return control.transform as RectTransform;
         }
 
+        Vector2 TraySlabSize(TraySlot slot, int h, int w)
+        {
+            float maxW = Mathf.Max(8f, slot.root.rect.width * 0.84f);
+            float maxH = Mathf.Max(8f, slot.root.rect.height * 0.54f);
+            float unit = Mathf.Min(maxW / Mathf.Max(1, w), maxH / Mathf.Max(1, h));
+            if (unit < 4f)
+                unit = 4f;
+            return new Vector2(Mathf.Min(maxW, unit * w), Mathf.Min(maxH, unit * h));
+        }
+
         void FitTraySlab(TraySlot slot, int h, int w)
         {
-            float unit = Mathf.Min((slot.root.rect.width * 0.9f) / Mathf.Max(1, w), (slot.root.rect.height * 0.62f) / Mathf.Max(1, h));
-            if (unit <= 1f)
-                unit = 48f;
             slot.slabRect.anchorMin = slot.slabRect.anchorMax = new Vector2(0.5f, 0.62f);
             slot.slabRect.pivot = new Vector2(0.5f, 0.5f);
             slot.slabRect.anchoredPosition = Vector2.zero;
-            slot.slabRect.sizeDelta = new Vector2(unit * w, unit * h);
+            slot.slabRect.sizeDelta = TraySlabSize(slot, h, w);
+            slot.slabRect.localRotation = Quaternion.identity;
+            slot.slabRect.localScale = Vector3.one;
             SetPiece(slot.slab, ColorOf(slot.id));
             slot.label.rectTransform.anchorMin = new Vector2(0f, 0f);
             slot.label.rectTransform.anchorMax = new Vector2(1f, 0.24f);
@@ -1396,11 +2415,12 @@ namespace Aura
 
         void Layout()
         {
+            Canvas.ForceUpdateCanvases();
             if (root == null || root.rect.width < 10f)
                 return;
             Rect safe = Screen.safeArea;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, safe.min, null, out var min);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, new Vector2(safe.xMax, safe.yMax), null, out var max);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, safe.min, UiCamera(), out var min);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, new Vector2(safe.xMax, safe.yMax), UiCamera(), out var max);
             float pad = 40f;
             float width = Mathf.Min(max.x - min.x - pad * 2f, 1000f);
             float left = (min.x + max.x) * 0.5f - width * 0.5f;
@@ -1414,18 +2434,18 @@ namespace Aura
             float topH = pillH;
             float buttonH = 128f;
             float numberH = 40f;
-            int trayCount = 0;
-            foreach (var slot in slots)
-            {
-                if (slot.root.gameObject.activeSelf)
-                    trayCount++;
-            }
+            int trayCount = TrayVisibleCount();
             bool oneRow = trayCount <= 4;
             float trayH = oneRow ? Mathf.Clamp(width * 0.28f, 240f, 320f) : Mathf.Clamp(width * 0.42f, 360f, 480f);
             bool showCoach = coach != null && coach.gameObject.activeSelf;
             float coachH = showCoach ? 110f : 0f;
+            bool showInfo = state != null && (state.HasMoveLimit || (state.level != null && !state.IsTutorial));
+            float infoH = showInfo ? 48f : 0f;
             float spacing = 20f;
-            float used = topH + coachH + numberH + trayH + buttonH + spacing * (showCoach ? 5f : 4f);
+            int gaps = 4;
+            if (showCoach) gaps++;
+            if (showInfo) gaps++;
+            float used = topH + coachH + infoH + numberH + trayH + buttonH + spacing * gaps;
             float boardBudget = top - bottom - used;
             float boardSize = Mathf.Min(width - numberH, boardBudget);
             boardSize = Mathf.Max(160f, boardSize);
@@ -1444,15 +2464,30 @@ namespace Aura
             LayoutLevelTitle(pillW, pillH, headerScale);
 
             float afterHeader = top - topH - spacing;
+            if (showInfo && movesPill != null)
+            {
+                Place(movesPill, left + width * 0.18f, afterHeader - infoH, width * 0.64f, infoH);
+                if (levelSprite != null)
+                    FitSlice(movesPillImage, 68f, infoH * 0.5f);
+                movesPill.gameObject.SetActive(hudLanded);
+                LayoutMovesHud(width * 0.64f, infoH);
+                afterHeader -= infoH + spacing;
+            }
+            else if (movesPill != null)
+                movesPill.gameObject.SetActive(false);
             if (showCoach)
             {
                 Place(coach, left, afterHeader - coachH, width, coachH);
                 afterHeader -= coachH + spacing;
             }
+            if (banner != null && banner.gameObject.activeSelf)
+                Place(banner, left, afterHeader + 8f, width, 64f);
             float frameLeft = left + numberH;
             float boardTop = afterHeader - numberH;
             float boardBottom = boardTop - boardSize;
             Place(boardFrame, frameLeft, boardBottom, boardSize, boardSize);
+            if (frameImage != null)
+                frameImage.color = FrameTint();
             float rim = Mathf.Clamp(boardSize * 0.045f, 22f, 40f);
             if (frameImage.sprite != null)
             {
@@ -1479,12 +2514,16 @@ namespace Aura
             LayoutCandyButton(Find("Undo"), buttonH);
             LayoutCandyButton(Find("Reset"), buttonH);
             Place(messageText.rectTransform, left, buttonTop - buttonH - 48f, width, 44f);
-            Place(rotateButton, left + width * 0.28f, trayTop - 88f, width * 0.44f, 80f);
 
             if (overlay != null)
             {
                 Stretch(overlay);
                 overlay.SetAsLastSibling();
+            }
+            if (briefing != null && briefing.gameObject.activeSelf && briefingDocked)
+            {
+                LayoutBriefingCard(left, width, boardBottom, boardSize);
+                briefing.SetAsLastSibling();
             }
             float cardW = Mathf.Min(860f, width * 0.9f);
             float cardH = Mathf.Min(1040f, cardW * 1.22f);
@@ -1492,6 +2531,10 @@ namespace Aura
             SizeCentered(hintPanel, cardW, cardH);
             confirmPanel.anchorMin = confirmPanel.anchorMax = new Vector2(0.5f, 0.5f);
             confirmPanel.sizeDelta = new Vector2(Mathf.Min(820f, width), 420f);
+            if (movesPanel != null)
+                SizeCentered(movesPanel, Mathf.Min(820f, width), 420f);
+            if (debugPanel != null)
+                SizeCentered(debugPanel, Mathf.Min(820f, width), 520f);
             FitSlice(winPanel.GetComponent<Image>(), 48f, 36f);
             FitSlice(hintPanel.GetComponent<Image>(), 48f, 36f);
             LayoutCompleteTitle();
@@ -1502,6 +2545,8 @@ namespace Aura
             LayoutPill(winPanel.Find("Replay") as RectTransform, 110f);
             LayoutPill(hintPanel.Find("UseHint") as RectTransform, 110f);
             LayoutPill(hintPanel.Find("MoreHints") as RectTransform, 110f);
+            if (debugPanel != null)
+                LayoutPill(debugPanel.Find("Jump") as RectTransform, 110f);
 
             DrawNumbers(frameLeft, boardTop, rim, numberH);
             foreach (var slot in slots)
@@ -1512,6 +2557,8 @@ namespace Aura
                     FitTraySlab(slot, h, w);
                 }
             }
+            UpdateHintButton();
+            LayoutMenus();
         }
 
         void DrawNumbers(float frameLeft, float frameTop, float rim, float numberH)
@@ -1538,14 +2585,53 @@ namespace Aura
             }
         }
 
-        void LayoutTray(RectTransform tray)
+        int TrayVisibleCount()
         {
-            int count = 0;
+            int n = 0;
             foreach (var slot in slots)
             {
-                if (slot.root.gameObject.activeSelf)
-                    count++;
+                if (slot.id != null && !state.IsPlaced(slot.id))
+                    n++;
             }
+            return n;
+        }
+
+        void SyncTraySlots()
+        {
+            foreach (var slot in slots)
+            {
+                bool placed = slot.id != null && state.IsPlaced(slot.id);
+                bool inTray = slot.id != null && !placed;
+                bool spare = state.IsDecoy && slot.id != null && state.level != null && slot.id == state.level.unused && state.IsComplete();
+                slot.root.gameObject.SetActive(inTray);
+                slot.slab.gameObject.SetActive(inTray);
+                slot.hit.gameObject.SetActive(inTray);
+                var slabGroup = slot.slabRect.GetComponent<CanvasGroup>();
+                if (slabGroup != null)
+                {
+                    slabGroup.alpha = spare ? 0.35f : 1f;
+                    slabGroup.blocksRaycasts = true;
+                }
+                slot.control.pieceId = slot.id;
+                slot.control.onBoard = false;
+                slot.label.color = spare ? new Color(1f, 1f, 1f, 0.55f) : Color.white;
+                if (spare)
+                    slot.label.text = "spare";
+                else if (inTray)
+                {
+                    var def = state.Find(slot.id);
+                    if (def != null)
+                    {
+                        state.Oriented(slot.id, state.trayTurns[slot.id], out int h, out int w);
+                        slot.label.text = h + " × " + w;
+                    }
+                }
+            }
+        }
+
+        void LayoutTray(RectTransform tray)
+        {
+            int count = TrayVisibleCount();
             if (count == 0)
                 return;
             int rows = count <= 4 ? 1 : 2;
@@ -1558,8 +2644,10 @@ namespace Aura
             int index = 0;
             foreach (var slot in slots)
             {
-                if (!slot.root.gameObject.activeSelf)
+                if (slot.id == null || state.IsPlaced(slot.id))
                     continue;
+                if (!slot.root.gameObject.activeSelf)
+                    slot.root.gameObject.SetActive(true);
                 int row = count <= 4 ? 0 : index / 4;
                 int col = count <= 4 ? index : index % 4;
                 int inRow = count <= 4 ? count : (row == rows - 1 ? count - row * 4 : 4);
@@ -1589,7 +2677,7 @@ namespace Aura
 
         Vector2 BoardLocal(Vector2 screen)
         {
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(grid, screen, null, out var local);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(grid, screen, UiCamera(), out var local);
             return local;
         }
 
@@ -1618,7 +2706,7 @@ namespace Aura
                 return;
             image.sprite = SpriteFor(color);
             image.type = Image.Type.Sliced;
-            image.color = PieceTint(color);
+            image.color = ThemePiece(color, PieceTint(color));
             FitSlice(image, color == "violet" || color == "white" ? 16f : 18f);
         }
 
@@ -1627,6 +2715,39 @@ namespace Aura
             if (color == "violet" || color == "white")
                 return Hex("8B5CFF");
             return Color.white;
+        }
+
+        Color EmptyTint()
+        {
+            switch (equippedTheme)
+            {
+                case 1: return Hex("F8DFC0");
+                case 3: return Hex("FFF6D8");
+                case 4: return Hex("E7F0D8");
+                case 6: return Hex("FFE9A8");
+                case 7: return Hex("4A5160");
+                default: return Color.white;
+            }
+        }
+
+        Color FrameTint()
+        {
+            switch (equippedTheme)
+            {
+                case 1: return Hex("FFD9A8");
+                case 4: return Hex("8FBF7A");
+                case 7: return Hex("2A3140");
+                default: return Color.white;
+            }
+        }
+
+        Color ThemePiece(string color, Color baseColor)
+        {
+            if (equippedTheme == 2)
+                return Color.Lerp(baseColor, Hex("3EC4D6"), 0.28f);
+            if (equippedTheme == 5)
+                return Color.Lerp(baseColor, Color.white, 0.12f);
+            return baseColor;
         }
 
         void FitSlice(Image image, float borderPixels, float target = -1f)
@@ -1644,21 +2765,146 @@ namespace Aura
         void LoadCatalogs()
         {
             allLevels.Clear();
+            tutorialCount = 0;
             var tutorialAsset = Resources.Load<TextAsset>("Data/tutorial_levels");
             var mainAsset = Resources.Load<TextAsset>("Data/levels");
+            var specialAsset = Resources.Load<TextAsset>("Data/special_levels");
+            var campaignAsset = Resources.Load<TextAsset>("Data/campaign");
             LevelCatalog tutorial = null;
             if (tutorialAsset != null)
                 tutorial = JsonUtility.FromJson<LevelCatalog>(tutorialAsset.text);
             if (mainAsset != null)
                 mainLevels = JsonUtility.FromJson<LevelCatalog>(mainAsset.text);
-            if (tutorial != null && tutorial.levels != null)
-                allLevels.AddRange(tutorial.levels);
-            if (mainLevels != null && mainLevels.levels != null)
-                allLevels.AddRange(mainLevels.levels);
+            SpecialCatalog specials = specialAsset != null ? JsonUtility.FromJson<SpecialCatalog>(specialAsset.text) : null;
             if (tutorial != null && tutorial.pieces != null)
                 catalogPieces = tutorial.pieces;
             else if (mainLevels != null)
                 catalogPieces = mainLevels.pieces;
+
+            var tutorialMap = new Dictionary<int, LevelDef>();
+            if (tutorial != null && tutorial.levels != null)
+            {
+                foreach (var lvl in tutorial.levels)
+                {
+                    if (lvl != null)
+                        tutorialMap[lvl.id] = lvl;
+                }
+            }
+            var mainMap = new Dictionary<int, LevelDef>();
+            if (mainLevels != null && mainLevels.levels != null)
+            {
+                foreach (var lvl in mainLevels.levels)
+                {
+                    if (lvl != null)
+                        mainMap[lvl.id] = lvl;
+                }
+            }
+            var specialMap = new Dictionary<string, SpecialLevelDef>();
+            if (specials != null && specials.levels != null)
+            {
+                foreach (var lvl in specials.levels)
+                {
+                    if (lvl != null && !string.IsNullOrEmpty(lvl.id))
+                        specialMap[lvl.id] = lvl;
+                }
+            }
+
+            var campaign = campaignAsset != null ? JsonUtility.FromJson<CampaignFile>(campaignAsset.text) : null;
+            if (campaign != null && campaign.levels != null && campaign.levels.Length > 0)
+            {
+                foreach (var entry in campaign.levels)
+                {
+                    var resolved = ResolveCampaign(entry, tutorialMap, mainMap, specialMap);
+                    if (resolved == null)
+                        continue;
+                    allLevels.Add(resolved);
+                    if (resolved.source == "tutorial")
+                        tutorialCount++;
+                }
+            }
+            if (allLevels.Count == 0)
+            {
+                if (tutorial != null && tutorial.levels != null)
+                {
+                    tutorialCount = tutorial.levels.Length;
+                    allLevels.AddRange(tutorial.levels);
+                }
+                if (mainLevels != null && mainLevels.levels != null)
+                    allLevels.AddRange(mainLevels.levels);
+            }
+
+            firstRotateId = 7;
+            for (int i = 0; i < tutorialCount && i < allLevels.Count; i++)
+            {
+                var lvl = allLevels[i];
+                if (lvl != null && lvl.tutorial != null && lvl.tutorial.rotationEnabled)
+                {
+                    firstRotateId = lvl.id;
+                    break;
+                }
+            }
+        }
+
+        static LevelDef CloneLevel(LevelDef src)
+        {
+            return src == null ? new LevelDef() : JsonUtility.FromJson<LevelDef>(JsonUtility.ToJson(src));
+        }
+
+        static LevelDef FromSpecial(SpecialLevelDef spec)
+        {
+            if (spec == null)
+                return new LevelDef();
+            return new LevelDef
+            {
+                id = 0,
+                key = spec.id,
+                type = spec.type,
+                difficulty = spec.type,
+                unused = spec.unused,
+                rules = spec.rules,
+                wrongPieces = spec.wrongPieces,
+                black = spec.black,
+                toPlace = spec.toPlace,
+                solution = spec.solution,
+                initial = spec.initial
+            };
+        }
+
+        static LevelDef ResolveCampaign(
+            CampaignEntry entry,
+            Dictionary<int, LevelDef> tutorialMap,
+            Dictionary<int, LevelDef> mainMap,
+            Dictionary<string, SpecialLevelDef> specialMap)
+        {
+            if (entry == null)
+                return null;
+            LevelDef clone = null;
+            int numericId;
+            if (entry.source == "tutorial" && int.TryParse(entry.id, out numericId) && tutorialMap.ContainsKey(numericId))
+                clone = CloneLevel(tutorialMap[numericId]);
+            else if (entry.source == "main" && int.TryParse(entry.id, out numericId) && mainMap.ContainsKey(numericId))
+                clone = CloneLevel(mainMap[numericId]);
+            else if (!string.IsNullOrEmpty(entry.id) && specialMap.ContainsKey(entry.id))
+                clone = FromSpecial(specialMap[entry.id]);
+            if (clone == null)
+                return null;
+            clone.source = entry.source;
+            clone.key = entry.source + ":" + entry.id;
+            clone.tag = entry.tag;
+            clone.global = entry.global;
+            clone.world = entry.world;
+            clone.worldName = entry.worldName;
+            clone.posInWorld = entry.posInWorld;
+            clone.par = entry.par;
+            clone.moveLimit = entry.moveLimit;
+            clone.intro = entry.intro;
+            if (!string.IsNullOrEmpty(entry.coachText))
+                clone.coachText = entry.coachText;
+            if (entry.source == "color" || entry.source == "decoy" || entry.source == "rescue")
+                clone.type = entry.source;
+            else if (string.IsNullOrEmpty(clone.type))
+                clone.type = "classic";
+            return clone;
         }
 
         void RestoreCoach()
@@ -1666,9 +2912,10 @@ namespace Aura
             coachHidden = false;
             if (coach == null)
                 return;
-            if (state.level != null && state.level.tutorial != null && !string.IsNullOrEmpty(state.level.tutorial.coachText))
+            string text = CoachText();
+            if (!string.IsNullOrEmpty(text))
             {
-                coachLabel.text = state.level.tutorial.coachText;
+                coachLabel.text = text;
                 coach.gameObject.SetActive(true);
                 if (coachGroup != null)
                     coachGroup.alpha = 0f;
@@ -1676,6 +2923,349 @@ namespace Aura
             else
             {
                 coach.gameObject.SetActive(false);
+            }
+        }
+
+        string CoachText()
+        {
+            var lvl = state.level;
+            if (lvl == null)
+                return null;
+            if (lvl.tutorial != null && !string.IsNullOrEmpty(lvl.tutorial.coachText))
+                return lvl.tutorial.coachText;
+            if (!string.IsNullOrEmpty(lvl.coachText))
+                return lvl.coachText;
+            if (lvl.world > 0 && lvl.posInWorld == 1)
+            {
+                string key = "GridAura.WorldSeen." + lvl.world;
+                if (PlayerPrefs.GetInt(key, 0) == 0)
+                {
+                    PlayerPrefs.SetInt(key, 1);
+                    PlayerPrefs.Save();
+                    return string.IsNullOrEmpty(lvl.worldName) ? "World " + lvl.world : lvl.worldName;
+                }
+            }
+            return null;
+        }
+
+        string LevelHintLine()
+        {
+            if (state.IsColor)
+                return "Same colors can't touch";
+            if (state.IsDecoy)
+                return "Use 7 of 8 pieces";
+            if (state.IsRescue)
+                return "Fix the misplaced pieces";
+            return "";
+        }
+
+        static Color TagColor(string tag)
+        {
+            switch (tag)
+            {
+                case "easy": return Hex("2E9B57");
+                case "medium": return Hex("C9A227");
+                case "hard": return Hex("E65100");
+                case "boss": return Hex("D32F2F");
+                default: return Hex("1E7BFF");
+            }
+        }
+
+        void LayoutMovesHud(float w, float h)
+        {
+            UpdateMovesHud();
+            if (headerStars != null)
+            {
+                headerStars.alignment = TextAlignmentOptions.MidlineRight;
+                headerStars.ForceMeshUpdate();
+            }
+            if (movesLabel != null)
+            {
+                var rect = movesLabel.rectTransform;
+                rect.anchorMin = rect.anchorMax = new Vector2(0f, 0.5f);
+                rect.pivot = new Vector2(0f, 0.5f);
+                rect.anchoredPosition = new Vector2(28f, 0f);
+                rect.sizeDelta = new Vector2(w * 0.52f, h);
+                movesLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            }
+            float star = Mathf.Min(h * 0.62f, 40f);
+            float starsW = headerStars != null ? Mathf.Max(36f, headerStars.preferredWidth + 6f) : 36f;
+            if (headerStars != null)
+            {
+                var rect = headerStars.rectTransform;
+                rect.anchorMin = rect.anchorMax = new Vector2(1f, 0.5f);
+                rect.pivot = new Vector2(1f, 0.5f);
+                rect.anchoredPosition = new Vector2(-22f, 0f);
+                rect.sizeDelta = new Vector2(starsW, h);
+            }
+            if (headerStarIcon != null)
+            {
+                var rect = headerStarIcon.rectTransform;
+                rect.anchorMin = rect.anchorMax = new Vector2(1f, 0.5f);
+                rect.pivot = new Vector2(1f, 0.5f);
+                rect.sizeDelta = new Vector2(star, star);
+                rect.anchoredPosition = new Vector2(-22f - starsW - 6f, 0f);
+            }
+        }
+
+        void UpdateMovesHud()
+        {
+            if (headerStars != null)
+                headerStars.text = TotalStars().ToString();
+            if (movesLabel == null)
+                return;
+            if (!state.HasMoveLimit)
+            {
+                movesLabel.text = "";
+                return;
+            }
+            movesLabel.text = "Moves " + state.movesLeft;
+            if (movesPillImage != null)
+                movesPillImage.color = Color.white;
+            if (state.movesLeft <= 1)
+                movesLabel.color = Hex("D32F2F");
+            else if (state.movesLeft <= 3)
+                movesLabel.color = Hex("E65100");
+            else
+                movesLabel.color = Hex("2B2B2B");
+        }
+
+        string LevelTypeTitle()
+        {
+            var tag = state.level != null ? state.level.tag : "";
+            string kind = "Classic";
+            if (state.IsColor)
+                kind = "Color Clash";
+            else if (state.IsDecoy)
+                kind = "Odd One Out";
+            else if (state.IsRescue)
+                kind = "Rescue";
+            if (tag == "boss")
+                return "Boss " + kind;
+            if (tag == "hard")
+                return "Hard " + kind;
+            return kind;
+        }
+
+        void FillBriefing()
+        {
+            if (briefingType != null)
+                briefingType.text = LevelTypeTitle();
+            if (briefingBody != null)
+            {
+                string body = LevelHintLine();
+                briefingBody.text = string.IsNullOrEmpty(body) ? "Fill every empty cell" : body;
+            }
+            if (briefingMoves != null)
+                briefingMoves.text = state.HasMoveLimit ? "Moves " + state.movesLeft : "";
+            if (briefingStars != null)
+                briefingStars.text = TotalStars().ToString();
+        }
+
+        void LayoutBriefingCard(float left, float width, float boardBottom, float boardSize)
+        {
+            if (briefing == null)
+                return;
+            float cardW = Mathf.Min(760f, width * 0.92f);
+            float cardH = 480f;
+            float x = left + (width - cardW) * 0.5f;
+            float y = boardBottom + (boardSize - cardH) * 0.5f;
+            Place(briefing, x, y, cardW, cardH);
+            var cardImage = briefing.GetComponent<Image>();
+            if (cardImage != null && popupCardSprite != null)
+                FitSlice(cardImage, 48f, 36f);
+            briefing.SetAsLastSibling();
+            if (briefingType != null)
+            {
+                var r = briefingType.rectTransform;
+                r.anchorMin = new Vector2(0.08f, 0.68f);
+                r.anchorMax = new Vector2(0.92f, 0.92f);
+                r.offsetMin = r.offsetMax = Vector2.zero;
+            }
+            if (briefingBody != null)
+            {
+                var r = briefingBody.rectTransform;
+                r.anchorMin = new Vector2(0.08f, 0.48f);
+                r.anchorMax = new Vector2(0.92f, 0.68f);
+                r.offsetMin = r.offsetMax = Vector2.zero;
+            }
+            var chip = briefing.Find("MovesChip") as RectTransform;
+            if (chip != null)
+            {
+                chip.anchorMin = new Vector2(0.18f, 0.18f);
+                chip.anchorMax = new Vector2(0.82f, 0.42f);
+                chip.offsetMin = chip.offsetMax = Vector2.zero;
+                var chipImage = chip.GetComponent<Image>();
+                if (chipImage != null && yellowButtonSprite != null)
+                    FitSlice(chipImage, 42f, 36f);
+            }
+            var star = briefing.Find("Star") as RectTransform;
+            if (star != null)
+            {
+                star.anchorMin = star.anchorMax = new Vector2(0.5f, 0.1f);
+                star.pivot = new Vector2(1f, 0.5f);
+                star.sizeDelta = new Vector2(40f, 40f);
+                star.anchoredPosition = new Vector2(-8f, 0f);
+            }
+            if (briefingStars != null)
+            {
+                var r = briefingStars.rectTransform;
+                r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.1f);
+                r.pivot = new Vector2(0f, 0.5f);
+                r.sizeDelta = new Vector2(80f, 40f);
+                r.anchoredPosition = new Vector2(8f, 0f);
+            }
+        }
+
+        IEnumerator PlayLevelBriefing()
+        {
+            if (briefing == null)
+            {
+                hudLanded = true;
+                yield break;
+            }
+            briefingSkip = false;
+            briefingDocked = true;
+            hudLanded = false;
+            FillBriefing();
+            briefing.gameObject.SetActive(true);
+            if (briefingGroup != null)
+                briefingGroup.alpha = 1f;
+            briefing.localScale = Vector3.one * 0.82f;
+            Layout();
+            briefing.SetAsLastSibling();
+            yield return Motion.PopIn(briefing, 0.3f);
+            float wait = 0f;
+            while (wait < 2.1f && !briefingSkip)
+            {
+                wait += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            briefingDocked = false;
+            hudLanded = true;
+            Layout();
+            if (movesPill != null)
+            {
+                Vector2 from = briefing.anchoredPosition;
+                Vector2 fromSize = briefing.sizeDelta;
+                Vector2 to = movesPill.anchoredPosition;
+                Vector2 toSize = movesPill.sizeDelta;
+                briefing.pivot = movesPill.pivot;
+                briefing.anchorMin = movesPill.anchorMin;
+                briefing.anchorMax = movesPill.anchorMax;
+                briefing.anchoredPosition = from;
+                briefing.sizeDelta = fromSize;
+                float t = 0f;
+                while (t < 1f)
+                {
+                    t += Time.unscaledDeltaTime / 0.48f;
+                    float u = Motion.OutCubic(Mathf.Clamp01(t));
+                    briefing.anchoredPosition = Vector2.LerpUnclamped(from, to, u);
+                    briefing.sizeDelta = Vector2.LerpUnclamped(fromSize, toSize, u);
+                    briefing.localScale = Vector3.LerpUnclamped(Vector3.one, Vector3.one * 0.9f, u);
+                    if (briefingGroup != null)
+                        briefingGroup.alpha = 1f - 0.6f * u;
+                    yield return null;
+                }
+            }
+            briefing.gameObject.SetActive(false);
+            briefing.localScale = Vector3.one;
+            if (briefingGroup != null)
+                briefingGroup.alpha = 1f;
+            briefingDocked = true;
+            hudLanded = true;
+            if (movesPill != null)
+            {
+                movesPill.gameObject.SetActive(true);
+                StartCoroutine(Motion.Punch(movesPill, 1.1f, 0.18f));
+            }
+            Layout();
+        }
+
+        void ShowTagBanner()
+        {
+            if (bannerRoutine != null)
+            {
+                StopCoroutine(bannerRoutine);
+                bannerRoutine = null;
+            }
+            var lvl = state.level;
+            bool hard = lvl != null && lvl.tag == "hard";
+            bool boss = lvl != null && lvl.tag == "boss";
+            if (banner == null || (!hard && !boss))
+            {
+                if (banner != null)
+                    banner.gameObject.SetActive(false);
+                return;
+            }
+            bannerLabel.text = boss ? "Boss Level!" : "Hard Level!";
+            bannerImage.color = boss ? Hex("C62828") : Hex("E65100");
+            banner.gameObject.SetActive(true);
+            if (bannerGroup != null)
+                bannerGroup.alpha = 1f;
+            bannerRoutine = StartCoroutine(HideBanner());
+        }
+
+        IEnumerator HideBanner()
+        {
+            yield return Motion.Wait(1.6f);
+            if (bannerGroup != null)
+                yield return Motion.Alpha(bannerGroup, 0f, 0.24f);
+            if (banner != null)
+                banner.gameObject.SetActive(false);
+            bannerRoutine = null;
+        }
+
+        void ShowOutOfMoves()
+        {
+            if (movesPanel == null || celebrating)
+                return;
+            Haptics.Miss();
+            messageText.text = "Out of moves!";
+            ShowOverlay(movesPanel);
+        }
+
+        int TotalStars()
+        {
+            int total = 0;
+            for (int i = 0; i < allLevels.Count; i++)
+            {
+                int global = allLevels[i] != null && allLevels[i].global > 0 ? allLevels[i].global : i + 1;
+                total += PlayerPrefs.GetInt("GridAura.BestStars." + global, 0);
+            }
+            return total;
+        }
+
+        string RecordStars(int earned)
+        {
+            int global = state.level != null && state.level.global > 0 ? state.level.global : levelIndex + 1;
+            string key = "GridAura.BestStars." + global;
+            int prev = PlayerPrefs.GetInt(key, 0);
+            if (earned > prev)
+                PlayerPrefs.SetInt(key, earned);
+            int claimed = PlayerPrefs.GetInt("GridAura.ChestsClaimed", 0);
+            int total = TotalStars();
+            string unlocked = null;
+            while (claimed < ChestAt.Length && total >= ChestAt[claimed])
+            {
+                unlocked = ChestRewards[claimed];
+                claimed++;
+            }
+            PlayerPrefs.SetInt("GridAura.ChestsClaimed", claimed);
+            PlayerPrefs.Save();
+            return unlocked;
+        }
+
+        IEnumerator WiggleWrongPieces()
+        {
+            if (state.level == null || state.level.wrongPieces == null)
+                yield break;
+            yield return Motion.Wait(0.12f);
+            foreach (var id in state.level.wrongPieces)
+            {
+                var cell = placedLayer.Find(id) as RectTransform;
+                if (cell != null)
+                    StartCoroutine(Motion.Punch(cell, 1.1f, 0.28f));
             }
         }
 
@@ -1706,22 +3296,54 @@ namespace Aura
                     Destroy(aidLayer.GetChild(i).gameObject);
             }
             ClearSlotDecorations();
-            if (boardIntroActive || !state.IsTutorial || state.IsComplete())
+            if (boardIntroActive || !state.IsTutorial || state.IsComplete() || dragging)
                 return;
             aidLayer.SetAsLastSibling();
             bool guided = state.GuidedDrag;
             if (guided && !dragging)
                 fingerDragStopped = false;
-            if (guided || state.HasAid("regionGlow") || state.HasAid("targetOutline") || state.HasAid("fingerDrag"))
-                DrawTargetOutlines(guided || state.HasAid("fingerDrag"));
             if (guided)
+            {
+                DrawTargetOutlines(true);
                 HighlightGuidePiece();
-            if (state.HasAid("rotateArrow") && !fingerTapStopped)
+            }
+            bool teachRotate = InRotateTeachWindow();
+            if (teachRotate)
                 DrawRotateArrows();
             if ((guided || state.HasAid("fingerDrag")) && !fingerDragStopped && !dragging)
                 aidRoutine = StartCoroutine(FingerDragLoop());
-            else if (!guided && state.HasAid("fingerTap") && !fingerTapStopped)
+            else if (teachRotate && state.level != null && state.level.id == firstRotateId && !fingerTapStopped)
                 aidRoutine = StartCoroutine(FingerTapLoop());
+        }
+
+        bool InRotateTeachWindow()
+        {
+            if (!state.IsTutorial || state.level == null || dragging)
+                return false;
+            return state.level.id >= firstRotateId && state.level.id <= firstRotateId + 3;
+        }
+
+        void MarkRotateTaught()
+        {
+            fingerTapStopped = true;
+        }
+
+        void PlaceRotateNearDrag()
+        {
+            if (!dragging || rotateButton == null || !rotateButton.gameObject.activeSelf)
+                return;
+            float w = 280f;
+            float h = 92f;
+            if (boardFrame != null)
+            {
+                rotateButton.anchorMin = rotateButton.anchorMax = new Vector2(0f, 1f);
+                rotateButton.pivot = new Vector2(0.5f, 1f);
+                rotateButton.sizeDelta = new Vector2(w, h);
+                rotateButton.anchoredPosition = new Vector2(
+                    boardFrame.anchoredPosition.x + boardFrame.sizeDelta.x * 0.5f,
+                    boardFrame.anchoredPosition.y - 10f);
+            }
+            rotateButton.SetAsLastSibling();
         }
 
         void ClearSlotDecorations()
@@ -1804,6 +3426,22 @@ namespace Aura
             var image = edge.gameObject.AddComponent<Image>();
             image.color = Hex("FFD21F");
             image.raycastTarget = false;
+        }
+
+        void UpdateDragRotateButton(bool overBoard)
+        {
+            if (rotateButton == null)
+                return;
+            bool show = dragging && active != null && overBoard && state.CanRotate(active.pieceId);
+            rotateButton.gameObject.SetActive(show);
+            if (show)
+                PlaceRotateNearDrag();
+        }
+
+        bool PointerOverTray()
+        {
+            var tray = Find("Tray");
+            return tray != null && RectTransformUtility.RectangleContainsScreenPoint(tray, lastPointer, UiCamera());
         }
 
         void DrawRotateArrows()
@@ -1910,7 +3548,7 @@ namespace Aura
             TraySlot slot = null;
             foreach (var item in slots)
             {
-                if (item.id != null && state.NeedsRotation(item.id) && !state.IsPlaced(item.id))
+                if (item.id != null && state.CanRotate(item.id) && !state.IsPlaced(item.id))
                 {
                     slot = item;
                     break;
@@ -1980,7 +3618,7 @@ namespace Aura
         {
             Vector3 world = rect.TransformPoint(rect.rect.center);
             var space = aidLayer != null ? aidLayer : root;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(space, RectTransformUtility.WorldToScreenPoint(null, world), null, out var local);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(space, RectTransformUtility.WorldToScreenPoint(UiCamera(), world), UiCamera(), out var local);
             return local;
         }
 
@@ -1989,7 +3627,7 @@ namespace Aura
             var local = new Vector2((col + w * 0.5f) * pitch, -((row + h * 0.5f) * pitch));
             Vector3 world = grid.TransformPoint(local);
             var space = aidLayer != null ? aidLayer : root;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(space, RectTransformUtility.WorldToScreenPoint(null, world), null, out var point);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(space, RectTransformUtility.WorldToScreenPoint(UiCamera(), world), UiCamera(), out var point);
             return point;
         }
 
@@ -1998,7 +3636,7 @@ namespace Aura
             if (rect == null)
                 return Vector2.zero;
             Vector3 world = rect.TransformPoint(rect.rect.center);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, RectTransformUtility.WorldToScreenPoint(null, world), null, out var local);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, RectTransformUtility.WorldToScreenPoint(UiCamera(), world), UiCamera(), out var local);
             return local;
         }
 
@@ -2006,7 +3644,7 @@ namespace Aura
         {
             var local = new Vector2((col + w * 0.5f) * pitch, -((row + h * 0.5f) * pitch));
             Vector3 world = grid.TransformPoint(local);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, RectTransformUtility.WorldToScreenPoint(null, world), null, out var point);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(root, RectTransformUtility.WorldToScreenPoint(UiCamera(), world), UiCamera(), out var point);
             return point;
         }
 
@@ -2095,108 +3733,302 @@ namespace Aura
 
         IEnumerator PopStars()
         {
+            int[] order = { 1, 0, 2 };
             for (int i = 0; i < winStarRoots.Length; i++)
             {
                 if (winStarRoots[i] == null)
                     continue;
+                winStarRoots[i].gameObject.SetActive(false);
                 winStarRoots[i].localScale = Vector3.zero;
                 winStarRoots[i].localRotation = Quaternion.identity;
+                if (winStars[i] != null)
+                    winStars[i].color = Color.white;
+                if (winStarGlows[i] != null)
+                    winStarGlows[i].color = Color.white;
             }
             yield return Motion.Wait(0.2f);
-            int[] order = { 1, 0, 2 };
-            for (int n = 0; n < order.Length; n++)
+            int count = Mathf.Clamp(winEarnedStars, 0, order.Length);
+            for (int n = 0; n < count; n++)
             {
                 int i = order[n];
                 var star = winStarRoots[i];
                 if (star == null)
                     continue;
-                bool earned = i < winEarnedStars;
+                star.gameObject.SetActive(true);
                 yield return Motion.FallFromCamera(star, 0.38f, 620f, i == 1 ? 3.6f : 3.1f);
-                Haptics.Impact(earned);
+                Haptics.Impact();
+                PlayToonFx(starBurstFx, star, 0.42f, true, 1.4f, false, 0.38f, 0.62f);
+                PlayToonFx(starPoofFx, star, 0.32f, true, 1.2f, false, 0.28f, 0.45f);
                 if (winPanel != null)
                     StartCoroutine(Motion.Punch(winPanel, 1.03f, 0.14f));
                 yield return Motion.ImpactSquash(star);
                 yield return Motion.Wait(0.1f);
             }
+            starRoutine = null;
         }
 
-        IEnumerator PlayLandImpact(RectTransform landed)
+        IEnumerator PlayLandImpact(RectTransform landed, string cheer = null)
         {
             if (landed == null)
                 yield break;
-            Haptics.Impact();
-            var image = landed.GetComponent<Image>();
-            Color flash = image != null ? Color.Lerp(image.color, Color.white, 0.55f) : Color.white;
-            float size = Mathf.Max(landed.sizeDelta.x, landed.sizeDelta.y);
-            StartCoroutine(BurstImpact(landed, flash, size));
+            Haptics.Place();
+            PlayToonFx(sparkImpactFx, landed, ToonScale(landed, 1.35f));
+            if (!string.IsNullOrEmpty(cheer))
+                StartCoroutine(FitTextRoutine(landed, cheer));
             if (boardFrame != null)
                 StartCoroutine(Motion.Punch(boardFrame, 1.03f, 0.14f));
             yield return Motion.ImpactSquash(landed);
         }
 
-        IEnumerator BurstImpact(RectTransform target, Color color, float size)
+        float ToonScale(RectTransform target, float boost)
         {
             if (target == null)
-                yield break;
-            var space = target.parent as RectTransform ?? target;
-            var ring = MakeRect("Impact", space);
-            ring.SetAsLastSibling();
-            ring.pivot = new Vector2(0.5f, 0.5f);
-            ring.anchorMin = ring.anchorMax = new Vector2(0.5f, 0.5f);
+                return boost;
             Vector3[] corners = new Vector3[4];
             target.GetWorldCorners(corners);
-            Vector3 world = (corners[0] + corners[2]) * 0.5f;
-            ring.anchoredPosition = space.InverseTransformPoint(world);
-            ring.sizeDelta = new Vector2(size * 0.45f, size * 0.45f);
-            var image = ring.gameObject.AddComponent<Image>();
-            image.sprite = RingSprite();
-            image.preserveAspect = true;
-            image.raycastTarget = false;
-            image.color = color;
-            var group = ring.gameObject.AddComponent<CanvasGroup>();
-            group.blocksRaycasts = false;
-            group.alpha = 0.9f;
-            float t = 0f;
-            while (t < 1f && ring != null)
-            {
-                t += Time.unscaledDeltaTime / 0.28f;
-                float u = Mathf.Clamp01(t);
-                float span = Mathf.Lerp(size * 0.4f, size * 2.15f, Motion.OutCubic(u));
-                ring.sizeDelta = new Vector2(span, span);
-                group.alpha = 0.95f * (1f - u);
-                yield return null;
-            }
-            if (ring != null)
-                Destroy(ring.gameObject);
+            float span = Mathf.Max(Vector3.Distance(corners[0], corners[3]), Vector3.Distance(corners[0], corners[1]));
+            return Mathf.Clamp(span * boost, 0.7f, 2.6f);
         }
 
-        Sprite RingSprite()
+        void PlayToonFx(GameObject prefab, RectTransform target, float scale, bool useGameStar = false, float life = 2.5f, bool fromTop = false, float sizeMul = 1f, float alphaMul = 1f)
         {
-            if (impactRingSprite != null)
-                return impactRingSprite;
-            const int s = 96;
-            var tex = new Texture2D(s, s, TextureFormat.RGBA32, false);
-            tex.wrapMode = TextureWrapMode.Clamp;
-            tex.filterMode = FilterMode.Bilinear;
-            float mid = (s - 1) * 0.5f;
-            for (int y = 0; y < s; y++)
+            if (prefab == null || target == null)
+                return;
+            Vector3[] corners = new Vector3[4];
+            target.GetWorldCorners(corners);
+            Vector3 pos = fromTop ? (corners[1] + corners[2]) * 0.5f : (corners[0] + corners[2]) * 0.5f;
+            var cam = canvas != null && canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
+            if (fromTop)
+                pos += Vector3.up * 0.55f;
+            else if (cam != null)
+                pos -= cam.transform.forward * 0.25f;
+            var rotation = fromTop ? Quaternion.identity : prefab.transform.rotation;
+            if (fxRoot == null)
+                fxRoot = new GameObject("LiveFx").transform;
+            var fx = Instantiate(prefab, pos, rotation, fxRoot);
+            fx.transform.localScale = Vector3.one * Mathf.Max(0.2f, scale);
+            var systems = fx.GetComponentsInChildren<ParticleSystem>(true);
+            Texture starTex = useGameStar && starSprite != null ? starSprite.texture : null;
+            for (int i = 0; i < systems.Length; i++)
             {
-                for (int x = 0; x < s; x++)
+                var main = systems[i].main;
+                main.useUnscaledTime = true;
+                if (sizeMul != 1f)
+                    main.startSizeMultiplier *= sizeMul;
+                if (alphaMul < 0.99f)
                 {
-                    float nx = (x - mid) / mid;
-                    float ny = (y - mid) / mid;
-                    float d = Mathf.Sqrt(nx * nx + ny * ny);
-                    float ring = 1f - Mathf.Abs(d - 0.76f) / 0.18f;
-                    float core = 1f - Mathf.Clamp01(d / 0.42f);
-                    float a = Mathf.Clamp01(Mathf.Max(ring, core * 0.4f));
-                    if (d > 1f)
-                        a = 0f;
-                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                    var start = main.startColor;
+                    var color = start.color;
+                    color.a *= alphaMul;
+                    start.color = color;
+                    main.startColor = start;
+                }
+                var renderer = systems[i].GetComponent<ParticleSystemRenderer>();
+                if (renderer == null)
+                    continue;
+                renderer.sortingOrder = fromTop ? 40 : 20;
+                if (starTex == null)
+                    continue;
+                var mats = renderer.materials;
+                for (int m = 0; m < mats.Length; m++)
+                {
+                    if (mats[m] == null)
+                        continue;
+                    mats[m].mainTexture = starTex;
+                    if (mats[m].HasProperty("_BaseMap"))
+                        mats[m].SetTexture("_BaseMap", starTex);
+                    if (mats[m].HasProperty("_MainTex"))
+                        mats[m].SetTexture("_MainTex", starTex);
+                }
+                renderer.materials = mats;
+            }
+            Destroy(fx, life);
+        }
+
+        void StopTransientFx()
+        {
+            Haptics.Stop();
+            StopConfetti();
+            if (starRoutine != null)
+            {
+                StopCoroutine(starRoutine);
+                starRoutine = null;
+            }
+            if (fxRoot != null)
+            {
+                Destroy(fxRoot.gameObject);
+                fxRoot = null;
+            }
+            if (cheerRoot != null)
+            {
+                for (int i = cheerRoot.childCount - 1; i >= 0; i--)
+                    Destroy(cheerRoot.GetChild(i).gameObject);
+            }
+        }
+
+        void StopConfetti()
+        {
+            Haptics.Stop();
+            if (confettiRoutine != null)
+            {
+                StopCoroutine(confettiRoutine);
+                confettiRoutine = null;
+            }
+            if (confettiLive != null)
+            {
+                Destroy(confettiLive);
+                confettiLive = null;
+            }
+        }
+
+        IEnumerator PlayScreenConfetti()
+        {
+            if (confettiLive != null)
+            {
+                Destroy(confettiLive);
+                confettiLive = null;
+            }
+            var cam = canvas != null && canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
+            if (cam == null || confettiShowerFx == null)
+                yield break;
+            float worldH = cam.orthographicSize * 2f;
+            float worldW = worldH * cam.aspect;
+            Vector3 pos = new Vector3(cam.transform.position.x, cam.transform.position.y + cam.orthographicSize * 1.08f, -0.35f);
+            confettiLive = new GameObject("Confetti");
+            var shower = Instantiate(confettiShowerFx, pos, Quaternion.identity, confettiLive.transform);
+            shower.transform.localScale = Vector3.one;
+            var systems = shower.GetComponentsInChildren<ParticleSystem>(true);
+            for (int i = 0; i < systems.Length; i++)
+            {
+                var main = systems[i].main;
+                main.loop = true;
+                main.useUnscaledTime = true;
+                main.simulationSpace = ParticleSystemSimulationSpace.World;
+                main.cullingMode = ParticleSystemCullingMode.AlwaysSimulate;
+                main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+                main.startLifetime = new ParticleSystem.MinMaxCurve(3.4f, 5.8f);
+                main.startSpeed = new ParticleSystem.MinMaxCurve(1.2f, 2.6f);
+                main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.16f);
+                main.gravityModifier = 1.55f;
+                main.maxParticles = 1200;
+                var shape = systems[i].shape;
+                shape.enabled = true;
+                shape.shapeType = ParticleSystemShapeType.Box;
+                shape.scale = new Vector3(worldW * 1.35f, 0.35f, 0.35f);
+                var emission = systems[i].emission;
+                emission.rateOverTimeMultiplier *= Mathf.Max(1.2f, worldW * 0.45f);
+                var renderer = systems[i].GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                    renderer.sortingOrder = 60;
+                systems[i].Play(true);
+            }
+            float fall = 7.5f;
+            float t = 0f;
+            while (t < fall && confettiLive != null)
+            {
+                t += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            if (confettiLive == null)
+                yield break;
+            systems = confettiLive.GetComponentsInChildren<ParticleSystem>(true);
+            for (int i = 0; i < systems.Length; i++)
+                systems[i].Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            var renderers = confettiLive.GetComponentsInChildren<ParticleSystemRenderer>(true);
+            var mats = new List<Material>();
+            var bases = new List<Color>();
+            for (int r = 0; r < renderers.Length; r++)
+            {
+                var used = renderers[r].materials;
+                for (int m = 0; m < used.Length; m++)
+                {
+                    if (used[m] == null)
+                        continue;
+                    mats.Add(used[m]);
+                    if (used[m].HasProperty("_BaseColor"))
+                        bases.Add(used[m].GetColor("_BaseColor"));
+                    else if (used[m].HasProperty("_Color"))
+                        bases.Add(used[m].GetColor("_Color"));
+                    else
+                        bases.Add(used[m].color);
                 }
             }
-            tex.Apply(false, true);
-            impactRingSprite = Sprite.Create(tex, new Rect(0f, 0f, s, s), new Vector2(0.5f, 0.5f), 96f);
-            return impactRingSprite;
+            t = 0f;
+            float fade = 2f;
+            while (t < fade && confettiLive != null)
+            {
+                t += Time.unscaledDeltaTime;
+                float a = 1f - Motion.OutCubic(t / fade);
+                for (int i = 0; i < mats.Count; i++)
+                {
+                    if (mats[i] == null)
+                        continue;
+                    var c = bases[i];
+                    c.a *= a;
+                    if (mats[i].HasProperty("_BaseColor"))
+                        mats[i].SetColor("_BaseColor", c);
+                    if (mats[i].HasProperty("_Color"))
+                        mats[i].SetColor("_Color", c);
+                    mats[i].color = c;
+                }
+                yield return null;
+            }
+            Haptics.Stop();
+            if (confettiLive != null)
+            {
+                Destroy(confettiLive);
+                confettiLive = null;
+            }
+            confettiRoutine = null;
+        }
+
+        IEnumerator FitTextRoutine(RectTransform at, string phrase)
+        {
+            if (at == null || string.IsNullOrEmpty(phrase) || cheerRoot == null)
+                yield break;
+            var label = MakeText(cheerRoot, phrase, 88, Hex("FFD21F"), fontBlack);
+            var rect = label.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(780f, 150f);
+            rect.anchoredPosition = CheerPoint(at);
+            rect.localScale = Vector3.one * 0.4f;
+            label.outlineWidth = 0.32f;
+            label.outlineColor = new Color(0.16f, 0.07f, 0f, 1f);
+            var group = label.gameObject.AddComponent<CanvasGroup>();
+            group.blocksRaycasts = false;
+            Vector2 from = rect.anchoredPosition;
+            Vector2 to = from + new Vector2(0f, 56f);
+            float t = 0f;
+            while (t < 1f && rect != null)
+            {
+                t += Time.unscaledDeltaTime / 0.7f;
+                float u = Mathf.Clamp01(t);
+                float pop = u < 0.28f ? Motion.OutBack(u / 0.28f) : 1f;
+                rect.localScale = Vector3.one * Mathf.LerpUnclamped(0.4f, 1f, pop);
+                rect.anchoredPosition = Vector2.LerpUnclamped(from, to, Motion.OutCubic(u));
+                group.alpha = u < 0.7f ? 1f : 1f - (u - 0.7f) / 0.3f;
+                yield return null;
+            }
+            if (label != null)
+                Destroy(label.gameObject);
+        }
+
+        Vector2 CheerPoint(RectTransform at)
+        {
+            Vector3[] corners = new Vector3[4];
+            at.GetWorldCorners(corners);
+            Vector3 piece = (corners[0] + corners[2]) * 0.5f;
+            Vector3 anchor = piece;
+            if (boardFrame != null)
+            {
+                boardFrame.GetWorldCorners(corners);
+                Vector3 top = (corners[1] + corners[2]) * 0.5f;
+                anchor = new Vector3(piece.x, top.y, piece.z);
+            }
+            Vector2 screen = RectTransformUtility.WorldToScreenPoint(UiCamera(), anchor);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(cheerRoot, screen, null, out var local);
+            return local + new Vector2(0f, 70f);
         }
 
         IEnumerator DealTraySlots()
@@ -2234,6 +4066,19 @@ namespace Aura
 
         IEnumerator LevelIntro()
         {
+            if (!state.IsTutorial)
+            {
+                if (state.HasMoveLimit)
+                    yield return PlayLevelBriefing();
+                boardIntroActive = false;
+                motionBusy = false;
+                introRoutine = null;
+                UpdateHintButton();
+                DrawTutorialAids();
+                if (state.IsRescue && state.level != null && state.level.intro)
+                    StartCoroutine(WiggleWrongPieces());
+                yield break;
+            }
             for (int r = 0; r < GameState.Size; r++)
             {
                 for (int c = 0; c < GameState.Size; c++)
@@ -2247,6 +4092,7 @@ namespace Aura
 
             for (int diagonal = 0; diagonal <= GameState.Size * 2 - 2; diagonal++)
             {
+                bool sat = false;
                 for (int r = 0; r < GameState.Size; r++)
                 {
                     int c = diagonal - r;
@@ -2254,15 +4100,23 @@ namespace Aura
                         continue;
                     var empty = grid.Find("Empty_" + c + "_" + r) as RectTransform;
                     if (empty != null)
+                    {
                         StartCoroutine(Motion.Sit(empty, 0.32f, 16f, 5f));
+                        sat = true;
+                    }
                 }
+                if (sat)
+                    Haptics.Tick();
                 yield return Motion.Wait(0.028f);
             }
             yield return Motion.Wait(0.08f);
             foreach (Transform child in placedLayer)
             {
                 if (child is RectTransform piece)
+                {
                     StartCoroutine(Motion.Sit(piece, 0.3f, 14f, 4f));
+                    Haptics.Tick();
+                }
                 yield return Motion.Wait(0.03f);
             }
             yield return Motion.Wait(0.12f);
@@ -2278,6 +4132,7 @@ namespace Aura
             boardIntroActive = false;
             motionBusy = false;
             introRoutine = null;
+            UpdateHintButton();
             DrawTutorialAids();
             PulseGuideButtons();
         }
@@ -2343,10 +4198,16 @@ namespace Aura
                 StopCoroutine(pulseRoutine);
             if (!state.IsTutorial)
                 return;
-            if (state.level.id == 4)
-                pulseRoutine = StartCoroutine(PulseOnce(Find("Undo")));
-            else if (state.level.id == 5)
-                pulseRoutine = StartCoroutine(PulseOnce(Find("Hint")));
+            pulseRoutine = StartCoroutine(PulseGuideRoutine());
+        }
+
+        IEnumerator PulseGuideRoutine()
+        {
+            if (state.level != null && state.level.id == 4)
+                yield return PulseOnce(Find("Undo"));
+            if (HintUnlocked && state.level != null && (state.level.id == 4 || state.level.id == 5))
+                yield return PulseOnce(Find("Hint"));
+            pulseRoutine = null;
         }
 
         IEnumerator PulseOnce(RectTransform rect)
@@ -2366,7 +4227,6 @@ namespace Aura
                 }
             }
             rect.localScale = baseScale;
-            pulseRoutine = null;
         }
 
         void StyleSlab(SlabGraphic slab, string color, bool black)
@@ -2415,6 +4275,10 @@ namespace Aura
             overlayGroup = overlay.gameObject.AddComponent<CanvasGroup>();
             overlayGroup.alpha = 0f;
             overlayGroup.blocksRaycasts = false;
+            var overlayCanvas = overlay.gameObject.AddComponent<Canvas>();
+            overlayCanvas.overrideSorting = true;
+            overlayCanvas.sortingOrder = 200;
+            overlay.gameObject.AddComponent<GraphicRaycaster>();
             var dim = overlay.gameObject.AddComponent<Image>();
             dim.color = new Color(0f, 0f, 0f, 0.62f);
             dim.raycastTarget = true;
@@ -2429,7 +4293,6 @@ namespace Aura
             titleImage.sprite = levelCompleteSprite;
             titleImage.preserveAspect = true;
             titleImage.raycastTarget = false;
-            AddConfetti(winPanel);
             var stars = MakeRect("Stars", winPanel);
             Pin(stars, 0.08f, 0.42f, 0.92f, 0.68f);
             for (int i = 0; i < 3; i++)
@@ -2453,8 +4316,10 @@ namespace Aura
                 faceImage.raycastTarget = false;
                 winStars[i] = faceImage;
             }
-            hintsUsedText = MakeText(winPanel, "Hints used: 0", 50, new Color(1f, 1f, 1f, 0.85f), fontBold);
-            Pin(hintsUsedText.rectTransform, 0.1f, 0.36f, 0.9f, 0.44f);
+            hintsUsedText = MakeText(winPanel, "Hints used: 0", 42, new Color(1f, 1f, 1f, 0.85f), fontBold);
+            Pin(hintsUsedText.rectTransform, 0.1f, 0.37f, 0.9f, 0.44f);
+            starsTotalText = MakeText(winPanel, "Stars 0", 36, Hex("FFD21F"), fontBold);
+            Pin(starsTotalText.rectTransform, 0.1f, 0.30f, 0.9f, 0.37f);
             var next = MakePill(winPanel, "Next", yellowButtonSprite, "Next Level", Hex("1A1A1A"), out nextLabel);
             nextLabel.font = tmpBlack;
             Pin(next, 0.1f, 0.21f, 0.9f, 0.35f);
@@ -2488,7 +4353,405 @@ namespace Aura
             Pin(more, 0.1f, 0.06f, 0.9f, 0.18f);
             BindButton(more.gameObject, () => messageText.text = "Shop coming soon");
 
+            BuildDebugPanel();
             HideOverlayNow();
+        }
+
+        void BuildDebugPanel()
+        {
+            debugPanel = MakeCard("Debug");
+            var title = MakeText(debugPanel, "Debug", 52, Color.white, fontBlack);
+            Pin(title.rectTransform, 0.08f, 0.82f, 0.92f, 0.96f);
+            var close = MakeRect("Close", debugPanel);
+            close.anchorMin = close.anchorMax = new Vector2(1f, 1f);
+            close.pivot = new Vector2(1f, 1f);
+            close.anchoredPosition = new Vector2(-18f, -18f);
+            close.sizeDelta = new Vector2(64f, 64f);
+            var closeImage = close.gameObject.AddComponent<Image>();
+            closeImage.sprite = closeSprite;
+            closeImage.preserveAspect = true;
+            BindButton(close.gameObject, HideOverlay);
+
+            var label = MakeText(debugPanel, "Jump to level", 36, new Color(1f, 1f, 1f, 0.9f), fontBold);
+            Pin(label.rectTransform, 0.1f, 0.66f, 0.9f, 0.78f);
+
+            var field = MakeRect("LevelField", debugPanel);
+            Pin(field, 0.18f, 0.48f, 0.82f, 0.64f);
+            var fieldBg = field.gameObject.AddComponent<Image>();
+            fieldBg.color = Hex("2A2F38");
+            fieldBg.raycastTarget = true;
+            var textArea = MakeRect("Text Area", field);
+            Stretch(textArea, 12f);
+            textArea.gameObject.AddComponent<RectMask2D>();
+            var inputText = MakeText(textArea, "", 48, Color.white, fontBlack);
+            inputText.raycastTarget = true;
+            inputText.alignment = TextAlignmentOptions.Center;
+            var placeholder = MakeText(textArea, "e.g. 23", 40, new Color(1f, 1f, 1f, 0.35f), fontBold);
+            placeholder.alignment = TextAlignmentOptions.Center;
+            debugLevelInput = field.gameObject.AddComponent<TMP_InputField>();
+            debugLevelInput.textViewport = textArea;
+            debugLevelInput.textComponent = inputText;
+            debugLevelInput.placeholder = placeholder;
+            debugLevelInput.contentType = TMP_InputField.ContentType.IntegerNumber;
+            debugLevelInput.characterLimit = 3;
+            debugLevelInput.caretColor = Color.white;
+            debugLevelInput.selectionColor = new Color(0.2f, 0.5f, 1f, 0.35f);
+            debugLevelInput.lineType = TMP_InputField.LineType.SingleLine;
+
+            debugStatus = MakeText(debugPanel, "", 30, new Color(1f, 1f, 1f, 0.7f), fontSemiBold);
+            Pin(debugStatus.rectTransform, 0.1f, 0.36f, 0.9f, 0.46f);
+
+            var jump = MakePill(debugPanel, "Jump", yellowButtonSprite, "Jump", Hex("1A1A1A"), out var jumpLabel);
+            jumpLabel.font = tmpBlack;
+            Pin(jump, 0.1f, 0.12f, 0.9f, 0.32f);
+            BindButton(jump.gameObject, JumpDebugLevel);
+
+            debugPanel.gameObject.SetActive(false);
+        }
+
+        void BuildMenus()
+        {
+            menuRoot = MakeRect("Menu", root);
+            Stretch(menuRoot);
+            var bg = menuRoot.gameObject.AddComponent<Image>();
+            bg.color = Hex("0E1016");
+            bg.raycastTarget = true;
+            var menuCanvas = menuRoot.gameObject.AddComponent<Canvas>();
+            menuCanvas.overrideSorting = true;
+            menuCanvas.sortingOrder = 120;
+            menuRoot.gameObject.AddComponent<GraphicRaycaster>();
+
+            splashPanel = MakeRect("Splash", menuRoot);
+            Stretch(splashPanel);
+            var splashTitle = MakeText(splashPanel, "GridAura", 86, Color.white, fontBlack);
+            Pin(splashTitle.rectTransform, 0.08f, 0.48f, 0.92f, 0.64f);
+            var splashSub = MakeText(splashPanel, "Fill every empty cell", 34, Hex("FFD21F"), fontBold);
+            Pin(splashSub.rectTransform, 0.1f, 0.38f, 0.9f, 0.48f);
+
+            homePanel = MakeRect("Home", menuRoot);
+            Stretch(homePanel);
+            var starChip = MakeRect("StarChip", homePanel);
+            var starChipBg = starChip.gameObject.AddComponent<Image>();
+            starChipBg.sprite = settingsButtonSprite != null ? settingsButtonSprite : yellowButtonSprite;
+            starChipBg.type = Image.Type.Sliced;
+            starChipBg.color = Hex("FFD21F");
+            var starChipIcon = MakeRect("Icon", starChip);
+            Pin(starChipIcon, 0.12f, 0.18f, 0.48f, 0.82f);
+            var starChipImage = starChipIcon.gameObject.AddComponent<Image>();
+            starChipImage.sprite = starSprite;
+            starChipImage.preserveAspect = true;
+            starChipImage.raycastTarget = false;
+            homeStarLabel = MakeText(starChip, "0", 28, Hex("1A1A1A"), fontBlack);
+            homeStarLabel.alignment = TextAlignmentOptions.Center;
+            Pin(homeStarLabel.rectTransform, 0.42f, 0.08f, 0.92f, 0.92f);
+            BindButton(starChip.gameObject, OpenThemes);
+
+            var logo = MakeRect("Logo", homePanel);
+            BuildHomeLogo(logo);
+            var homeTitle = MakeText(homePanel, "GridAura", 82, Color.white, fontBlack);
+            homeTitle.outlineWidth = 0.28f;
+            homeTitle.outlineColor = Hex("1A1A1A");
+            Pin(homeTitle.rectTransform, 0.08f, 0.50f, 0.92f, 0.64f);
+            var homeSub = MakeText(homePanel, "Fill the grid", 30, Hex("FFD21F"), fontExtraBold);
+            Pin(homeSub.rectTransform, 0.1f, 0.45f, 0.9f, 0.51f);
+
+            var play = MakePill(homePanel, "Play", yellowButtonSprite, "Level 1", Hex("1A1A1A"), out homePlayLabel);
+            Pin(play, 0.12f, 0.30f, 0.88f, 0.43f);
+            BindButton(play.gameObject, PlayContinue);
+            var levels = MakePill(homePanel, "Levels", blueButtonSprite, "Levels", Color.white, out _);
+            Pin(levels, 0.12f, 0.17f, 0.88f, 0.29f);
+            BindButton(levels.gameObject, OpenLevels);
+            homeStatus = MakeText(homePanel, "", 26, Hex("FFD21F"), fontBold);
+            Pin(homeStatus.rectTransform, 0.1f, 0.12f, 0.9f, 0.17f);
+
+            MakeHomeRound(homePanel, "SettingsBtn", settingsButtonSprite, settingsGearSprite, OpenSettingsFromHome);
+            MakeHomeRound(homePanel, "ShopBtn", yellowButtonSprite, starSprite, OpenThemes);
+            var soundBtn = MakeHomeRound(homePanel, "SoundBtn", yellowButtonSprite, hintBulbSprite, ToggleHaptics);
+            var soundIconRect = soundBtn.Find("Icon");
+            if (soundIconRect != null)
+                soundIcon = soundIconRect.GetComponent<Image>();
+
+            levelsPanel = MakeRect("Levels", menuRoot);
+            Stretch(levelsPanel);
+            var levelsTitle = MakeText(levelsPanel, "Select Level", 48, Color.white, fontBlack);
+            Pin(levelsTitle.rectTransform, 0.18f, 0.90f, 0.82f, 0.98f);
+            var levelsBack = MakePill(levelsPanel, "Back", blueButtonSprite, "Back", Color.white, out _);
+            Pin(levelsBack, 0.04f, 0.90f, 0.22f, 0.98f);
+            BindButton(levelsBack.gameObject, BackFromMenu);
+            var viewport = MakeRect("Viewport", levelsPanel);
+            Pin(viewport, 0.04f, 0.02f, 0.96f, 0.88f);
+            viewport.gameObject.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.02f);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            levelsContent = MakeRect("Content", viewport);
+            levelsContent.anchorMin = new Vector2(0f, 1f);
+            levelsContent.anchorMax = new Vector2(1f, 1f);
+            levelsContent.pivot = new Vector2(0.5f, 1f);
+            levelsContent.anchoredPosition = Vector2.zero;
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.content = levelsContent;
+            scroll.viewport = viewport;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.scrollSensitivity = 48f;
+            BuildLevelTiles();
+
+            settingsPanel = MakeRect("Settings", menuRoot);
+            Stretch(settingsPanel);
+            var setTitle = MakeText(settingsPanel, "Settings", 56, Color.white, fontBlack);
+            Pin(setTitle.rectTransform, 0.1f, 0.84f, 0.9f, 0.96f);
+            var setBack = MakePill(settingsPanel, "Back", blueButtonSprite, "Back", Color.white, out _);
+            Pin(setBack, 0.08f, 0.72f, 0.92f, 0.82f);
+            BindButton(setBack.gameObject, BackFromMenu);
+            var hap = MakePill(settingsPanel, "Haptics", yellowButtonSprite, "Haptics On", Hex("1A1A1A"), out hapticsLabel);
+            Pin(hap, 0.08f, 0.58f, 0.92f, 0.70f);
+            BindButton(hap.gameObject, ToggleHaptics);
+            var jump = MakePill(settingsPanel, "Jump", greenButtonSprite, "Jump Level", Color.white, out _);
+            Pin(jump, 0.08f, 0.44f, 0.92f, 0.56f);
+            BindButton(jump.gameObject, ShowDebugPanel);
+            var shop = MakePill(settingsPanel, "Shop", blueButtonSprite, "Hint Shop", Color.white, out _);
+            Pin(shop, 0.08f, 0.30f, 0.92f, 0.42f);
+            BindButton(shop.gameObject, ShopSoon);
+
+            themesPanel = MakeRect("Themes", menuRoot);
+            Stretch(themesPanel);
+            var themeTitle = MakeText(themesPanel, "Themes", 56, Color.white, fontBlack);
+            Pin(themeTitle.rectTransform, 0.18f, 0.90f, 0.82f, 0.98f);
+            var themeBack = MakePill(themesPanel, "Back", blueButtonSprite, "Back", Color.white, out _);
+            Pin(themeBack, 0.04f, 0.90f, 0.22f, 0.98f);
+            BindButton(themeBack.gameObject, BackFromMenu);
+            var themeNote = MakeText(themesPanel, "Unlock chests with stars.", 28, new Color(1f, 1f, 1f, 0.7f), fontBold);
+            Pin(themeNote.rectTransform, 0.08f, 0.84f, 0.92f, 0.90f);
+            themeLabels.Clear();
+            string[] names = new string[ChestRewards.Length + 1];
+            names[0] = "Classic Board";
+            for (int i = 0; i < ChestRewards.Length; i++)
+                names[i + 1] = ChestRewards[i];
+            for (int i = 0; i < names.Length; i++)
+            {
+                int theme = i;
+                var row = MakePill(themesPanel, "Theme" + i, i == 0 ? yellowButtonSprite : blueButtonSprite, names[i], i == 0 ? Hex("1A1A1A") : Color.white, out var label);
+                float yMax = 0.82f - i * 0.09f;
+                float yMin = yMax - 0.08f;
+                Pin(row, 0.08f, yMin, 0.92f, yMax);
+                themeLabels.Add(label);
+                BindButton(row.gameObject, () => EquipTheme(theme));
+            }
+
+            menuRoot.gameObject.SetActive(false);
+        }
+
+        void BuildHomeLogo(RectTransform logo)
+        {
+            string[] cells =
+            {
+                "yellow", "blue", "empty", "red",
+                "blue", "black", "yellow", "blue",
+                "red", "empty", "black", "yellow",
+                "blue", "red", "yellow", "black"
+            };
+            for (int i = 0; i < 16; i++)
+            {
+                int col = i % 4;
+                int row = i / 4;
+                var cell = MakeRect("C" + i, logo);
+                cell.anchorMin = new Vector2(col / 4f, 1f - (row + 1) / 4f);
+                cell.anchorMax = new Vector2((col + 1) / 4f, 1f - row / 4f);
+                cell.offsetMin = new Vector2(6f, 6f);
+                cell.offsetMax = new Vector2(-6f, -6f);
+                var image = cell.gameObject.AddComponent<Image>();
+                image.raycastTarget = false;
+                string color = cells[i];
+                if (color == "empty")
+                {
+                    image.sprite = emptySprite;
+                    image.color = Color.white;
+                }
+                else if (color == "black")
+                {
+                    image.sprite = blackSprite;
+                    image.color = Color.white;
+                }
+                else
+                {
+                    image.sprite = SpriteFor(color);
+                    image.color = PieceTint(color);
+                }
+                image.type = Image.Type.Sliced;
+                if (image.sprite != null)
+                    FitSlice(image, 16f, 22f);
+            }
+        }
+
+        RectTransform MakeHomeRound(Transform parent, string name, Sprite background, Sprite icon, UnityEngine.Events.UnityAction action)
+        {
+            var rect = MakeRect(name, parent);
+            var image = rect.gameObject.AddComponent<Image>();
+            image.raycastTarget = true;
+            if (background != null)
+            {
+                image.sprite = background;
+                image.type = Image.Type.Sliced;
+                image.color = Color.white;
+            }
+            else
+                image.color = Hex("FFD21F");
+            var iconRect = MakeRect("Icon", rect);
+            Pin(iconRect, 0.22f, 0.22f, 0.78f, 0.78f);
+            var iconImage = iconRect.gameObject.AddComponent<Image>();
+            iconImage.sprite = icon;
+            iconImage.preserveAspect = true;
+            iconImage.raycastTarget = false;
+            BindButton(rect.gameObject, action);
+            return rect;
+        }
+
+        void LayoutHome()
+        {
+            if (homePanel == null)
+                return;
+            var starChip = homePanel.Find("StarChip") as RectTransform;
+            if (starChip != null)
+            {
+                starChip.anchorMin = starChip.anchorMax = new Vector2(1f, 1f);
+                starChip.pivot = new Vector2(1f, 1f);
+                starChip.anchoredPosition = new Vector2(-36f, -36f);
+                starChip.sizeDelta = new Vector2(132f, 72f);
+                FitSlice(starChip.GetComponent<Image>(), 36f, 32f);
+            }
+            var logo = homePanel.Find("Logo") as RectTransform;
+            if (logo != null)
+                Pin(logo, 0.18f, 0.50f, 0.82f, 0.88f);
+            float round = 108f;
+            float gap = 48f;
+            float total = round * 3f + gap * 2f;
+            var settings = homePanel.Find("SettingsBtn") as RectTransform;
+            var shop = homePanel.Find("ShopBtn") as RectTransform;
+            var sound = homePanel.Find("SoundBtn") as RectTransform;
+            LayoutHomeRound(settings, -total * 0.5f + round * 0.5f, round);
+            LayoutHomeRound(shop, 0f, round);
+            LayoutHomeRound(sound, total * 0.5f - round * 0.5f, round);
+        }
+
+        void LayoutHomeRound(RectTransform button, float x, float size)
+        {
+            if (button == null)
+                return;
+            button.anchorMin = button.anchorMax = new Vector2(0.5f, 0f);
+            button.pivot = new Vector2(0.5f, 0f);
+            button.anchoredPosition = new Vector2(x, 48f);
+            button.sizeDelta = new Vector2(size, size);
+            FitSlice(button.GetComponent<Image>(), 36f, size * 0.42f);
+        }
+
+        void BuildLevelTiles()
+        {
+            levelTiles.Clear();
+            int count = Mathf.Max(1, allLevels.Count);
+            int cols = 4;
+            float rowH = 110f;
+            float pad = 10f;
+            int rows = Mathf.CeilToInt(count / (float)cols);
+            levelsContent.sizeDelta = new Vector2(0f, rows * (rowH + pad) + pad);
+            for (int i = 0; i < count; i++)
+            {
+                int index = i;
+                var tile = MakeRect("L" + i, levelsContent);
+                var image = tile.gameObject.AddComponent<Image>();
+                image.sprite = levelSprite;
+                image.type = Image.Type.Sliced;
+                image.color = Color.white;
+                var num = MakeText(tile, (i + 1).ToString(), 36, Hex("1A1A1A"), fontBlack);
+                num.gameObject.name = "Num";
+                Pin(num.rectTransform, 0.06f, 0.42f, 0.94f, 0.92f);
+                var star = MakeText(tile, "", 22, Hex("C9A227"), fontBold);
+                star.gameObject.name = "Stars";
+                Pin(star.rectTransform, 0.06f, 0.06f, 0.94f, 0.42f);
+                BindButton(tile.gameObject, () => PlayLevelFromSelect(index));
+                levelTiles.Add(tile);
+            }
+        }
+
+        void RefreshLevelSelect()
+        {
+            int cols = 4;
+            float rowH = 110f;
+            float pad = 10f;
+            float width = levelsContent != null ? Mathf.Max(200f, levelsContent.rect.width) : 800f;
+            float tileW = (width - pad * (cols + 1)) / cols;
+            int rows = Mathf.CeilToInt(Mathf.Max(1, levelTiles.Count) / (float)cols);
+            if (levelsContent != null)
+                levelsContent.sizeDelta = new Vector2(0f, rows * (rowH + pad) + pad);
+            for (int i = 0; i < levelTiles.Count; i++)
+            {
+                var tile = levelTiles[i];
+                int col = i % cols;
+                int row = i / cols;
+                tile.anchorMin = tile.anchorMax = new Vector2(0f, 1f);
+                tile.pivot = new Vector2(0f, 1f);
+                tile.sizeDelta = new Vector2(tileW, rowH);
+                tile.anchoredPosition = new Vector2(pad + col * (tileW + pad), -(pad + row * (rowH + pad)));
+                bool open = LevelUnlocked(i);
+                int stars = StarsAt(i);
+                var image = tile.GetComponent<Image>();
+                if (image != null)
+                    image.color = open ? Color.white : new Color(1f, 1f, 1f, 0.45f);
+                var num = tile.Find("Num");
+                if (num != null)
+                {
+                    var text = num.GetComponent<TextMeshProUGUI>();
+                    if (text != null)
+                        text.text = GlobalOf(i).ToString();
+                }
+                var star = tile.Find("Stars");
+                if (star != null)
+                {
+                    var text = star.GetComponent<TextMeshProUGUI>();
+                    if (text != null)
+                        text.text = !open ? "Locked" : (stars > 0 ? stars + " star" : "Play");
+                }
+                var press = tile.GetComponent<TapPress>();
+                if (press != null)
+                    press.enabled = open;
+            }
+        }
+
+        void RefreshThemes()
+        {
+            string[] names = new string[ChestRewards.Length + 1];
+            names[0] = "Classic Board";
+            for (int i = 0; i < ChestRewards.Length; i++)
+                names[i + 1] = ChestRewards[i];
+            for (int i = 0; i < themeLabels.Count && i < names.Length; i++)
+            {
+                bool open = ThemeUnlocked(i);
+                bool on = equippedTheme == i;
+                string mark = on ? " (On)" : (open ? "" : " (Locked)");
+                themeLabels[i].text = names[i] + mark;
+            }
+        }
+
+        void LayoutMenus()
+        {
+            if (menuRoot == null || !menuOpen)
+                return;
+            Stretch(menuRoot);
+            if (homePanel != null && homePanel.gameObject.activeSelf)
+                LayoutHome();
+            LayoutPill(homePanel != null ? homePanel.Find("Play") as RectTransform : null, 128f);
+            LayoutPill(homePanel != null ? homePanel.Find("Levels") as RectTransform : null, 118f);
+            LayoutPill(levelsPanel != null ? levelsPanel.Find("Back") as RectTransform : null, 72f);
+            LayoutPill(settingsPanel != null ? settingsPanel.Find("Back") as RectTransform : null, 100f);
+            LayoutPill(settingsPanel != null ? settingsPanel.Find("Haptics") as RectTransform : null, 100f);
+            LayoutPill(settingsPanel != null ? settingsPanel.Find("Jump") as RectTransform : null, 100f);
+            LayoutPill(settingsPanel != null ? settingsPanel.Find("Shop") as RectTransform : null, 100f);
+            LayoutPill(themesPanel != null ? themesPanel.Find("Back") as RectTransform : null, 72f);
+            if (themesPanel != null)
+            {
+                for (int i = 0; i <= ChestRewards.Length; i++)
+                    LayoutPill(themesPanel.Find("Theme" + i) as RectTransform, 88f);
+            }
+            if (levelsPanel != null && levelsPanel.gameObject.activeSelf)
+                RefreshLevelSelect();
         }
 
         RectTransform MakeCard(string name)
@@ -2565,13 +4828,17 @@ namespace Aura
             nextLabel.text = last ? "Home" : "Next Level";
             hintsUsedText.text = "Hints used: " + state.hintsUsed;
             winEarnedStars = state.hintsUsed <= 0 ? 3 : (state.hintsUsed == 1 ? 2 : 1);
-            for (int i = 0; i < winStars.Length; i++)
+            string chest = RecordStars(winEarnedStars);
+            if (starsTotalText != null)
             {
-                bool earned = i < winEarnedStars;
-                if (winStars[i] != null)
-                    winStars[i].color = earned ? Color.white : new Color(1f, 1f, 1f, 0.28f);
-                if (winStarGlows[i] != null)
-                    winStarGlows[i].color = earned ? Color.white : new Color(1f, 1f, 1f, 0.12f);
+                int total = TotalStars();
+                int claimed = PlayerPrefs.GetInt("GridAura.ChestsClaimed", 0);
+                if (!string.IsNullOrEmpty(chest))
+                    starsTotalText.text = "Chest unlocked: " + chest;
+                else if (claimed >= ChestAt.Length)
+                    starsTotalText.text = "Stars " + total;
+                else
+                    starsTotalText.text = "Stars " + total + "  ·  " + (ChestAt[claimed] - total) + " to chest";
             }
             LayoutWinStars();
             bool first = !celebrating;
@@ -2581,10 +4848,35 @@ namespace Aura
                 foreach (Transform child in placedLayer)
                     StartCoroutine(Motion.Punch(child, 1.04f, 0.16f));
                 ShowOverlay(winPanel);
-                StartCoroutine(PopStars());
+                if (confettiRoutine != null)
+                    StopCoroutine(confettiRoutine);
+                confettiRoutine = StartCoroutine(PlayScreenConfetti());
+                starRoutine = StartCoroutine(PopStars());
             }
-            else if (overlay != null && !overlay.gameObject.activeSelf)
-                ShowOverlay(winPanel);
+            else
+            {
+                int[] order = { 1, 0, 2 };
+                int count = Mathf.Clamp(winEarnedStars, 0, order.Length);
+                for (int i = 0; i < winStarRoots.Length; i++)
+                {
+                    if (winStarRoots[i] == null)
+                        continue;
+                    bool earned = false;
+                    for (int n = 0; n < count; n++)
+                    {
+                        if (order[n] == i)
+                            earned = true;
+                    }
+                    winStarRoots[i].gameObject.SetActive(earned);
+                    winStarRoots[i].localScale = earned ? Vector3.one : Vector3.zero;
+                    if (winStars[i] != null)
+                        winStars[i].color = Color.white;
+                    if (winStarGlows[i] != null)
+                        winStarGlows[i].color = Color.white;
+                }
+                if (overlay != null && !overlay.gameObject.activeSelf)
+                    ShowOverlay(winPanel);
+            }
         }
 
         void LayoutWinStars()
@@ -2639,11 +4931,15 @@ namespace Aura
             if (winPanel != null && winPanel.gameObject.activeInHierarchy)
             {
                 for (int i = 0; i < winStarGlows.Length; i++)
-                    PulseGlow(winStarGlows[i], t + i * 0.55f, i < winEarnedStars);
+                {
+                    bool on = winStarRoots[i] != null && winStarRoots[i].gameObject.activeInHierarchy;
+                    PulseGlow(winStarGlows[i], t + i * 0.55f, on);
+                }
             }
             bool hintOpen = hintPanel != null && hintPanel.gameObject.activeInHierarchy;
             PulseGlow(hintPopupGlow, t, hintOpen);
-            PulseGlow(headerBulbGlow, t, true);
+            bool hintLive = HintUnlocked && !boardIntroActive && hintGroup != null && hintGroup.blocksRaycasts;
+            PulseGlow(headerBulbGlow, t, hintLive);
         }
 
         static void PulseGlow(Image glow, float time, bool strong)
@@ -2690,24 +4986,6 @@ namespace Aura
             glow.pivot = new Vector2(0.5f, 0.5f);
             glow.anchoredPosition = Vector2.zero;
             glow.sizeDelta = new Vector2(root.rect.width * (1f + extra), root.rect.height * (1f + extra));
-        }
-
-        void AddConfetti(RectTransform parent)
-        {
-            Color[] colors = { Hex("F03030"), Hex("1E7BFF"), Hex("FFD21F"), Hex("2EC84F") };
-            float[] xs = { 0.10f, 0.22f, 0.78f, 0.90f, 0.14f, 0.86f, 0.30f, 0.70f };
-            float[] ys = { 0.88f, 0.94f, 0.93f, 0.86f, 0.74f, 0.76f, 0.97f, 0.72f };
-            for (int i = 0; i < xs.Length; i++)
-            {
-                var bit = MakeRect("Confetti", parent);
-                bit.anchorMin = bit.anchorMax = new Vector2(xs[i], ys[i]);
-                bit.pivot = new Vector2(0.5f, 0.5f);
-                bit.sizeDelta = new Vector2(i % 2 == 0 ? 16f : 12f, i % 3 == 0 ? 22f : 12f);
-                bit.localRotation = Quaternion.Euler(0f, 0f, i * 28f);
-                var image = bit.gameObject.AddComponent<Image>();
-                image.color = colors[i % colors.Length];
-                image.raycastTarget = false;
-            }
         }
 
         static void Pin(RectTransform rect, float xMin, float yMin, float xMax, float yMax)
@@ -2925,20 +5203,23 @@ namespace Aura
         }
     }
 
-    public class PieceControl : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+    public class PieceControl : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerUpHandler
     {
         public GameScreen screen;
         public string pieceId;
         public bool onBoard;
 
         public void OnPointerDown(PointerEventData eventData) { screen.PointerDown(this, eventData); }
+        public void OnBeginDrag(PointerEventData eventData) { screen.PointerBeginDrag(this, eventData); }
         public void OnDrag(PointerEventData eventData) { screen.PointerDrag(this, eventData); }
+        public void OnEndDrag(PointerEventData eventData) { screen.PointerEndDrag(this, eventData); }
         public void OnPointerUp(PointerEventData eventData) { screen.PointerUp(this, eventData); }
     }
 
     public class TapPress : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
         public UnityEngine.Events.UnityAction click;
+        public bool fireOnDown;
         Coroutine anim;
         bool pressed;
         Rect pressRect;
@@ -2948,6 +5229,10 @@ namespace Aura
             pressed = true;
             pressRect = ScreenRect();
             Animate(0.96f);
+            if (!fireOnDown)
+                return;
+            pressed = false;
+            click?.Invoke();
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -2971,8 +5256,12 @@ namespace Aura
             var rect = transform as RectTransform;
             Vector3[] corners = new Vector3[4];
             rect.GetWorldCorners(corners);
-            Vector2 min = RectTransformUtility.WorldToScreenPoint(null, corners[0]);
-            Vector2 max = RectTransformUtility.WorldToScreenPoint(null, corners[2]);
+            var canvas = GetComponentInParent<Canvas>();
+            Camera cam = null;
+            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+                cam = canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
+            Vector2 min = RectTransformUtility.WorldToScreenPoint(cam, corners[0]);
+            Vector2 max = RectTransformUtility.WorldToScreenPoint(cam, corners[2]);
             return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
         }
 
