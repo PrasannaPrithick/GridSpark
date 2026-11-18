@@ -37,30 +37,40 @@ Each level JSON defines:
 - `rotationNeeded` — tray pieces whose solution orientation is rotated
 - `tutorial` — optional coach text and on-screen aids
 
-**Playable pack today:** 92 campaign levels from `campaign.json` (12 tutorial + 50 classic + 10 color + 10 decoy + 10 rescue). Daily levels exist as data (25) but are not in the live play loop yet.
+**Playable pack today:** **250** campaign levels from `campaign.json` (12 tutorial + 238 unique packs in `campaign_levels.json`). Daily levels exist as data (25) but are not in the live play loop yet.
 
-Campaign worlds 1–8 (levels 13–92) follow a Candy Crush wave: **easy, medium, easy, medium, hard, easy, medium, easy, hard, boss**. Each world is a little harder than the one before. Hard and boss levels flash a banner. The level after a boss is always easy.
+Tutorial **1–12 is frozen**. No new rules, no move limit, no briefing card.
 
-After two classic openers (13–14), new rules start **early**: color at 15, decoy at 23, rescue at 33. Classic packing returns as Deep Pack and Grand Finale.
+From 13, worlds of 10 follow a Candy Crush wave: **easy, medium, easy, medium, hard, easy, medium, easy, hard, boss**. After a boss the next level is easy. Each world is only a little harder than the one before — slack stays generous (easy +8 down to +6 late; boss +4 down to +3). Hard and boss flash a banner. The 8-level finale (243–250) uses easy/medium/easy/medium/hard/easy/hard/boss.
 
-| World | Name | Mix |
+**Every 3 campaign levels** (13, 16, 19, …) shows something new: a new rule intro, or a new layout family, or a light extra challenge. New-rule intros get a coach trial. Never stack two harsh modifiers. No timers.
+
+| Band | Levels | Worlds |
 | --- | --- | --- |
-| 1 (13–22) | Color Clash | 13–14 classic, then color from 15 |
-| 2 (23–32) | Odd One Out | Decoy + classic |
-| 3 (33–42) | Rescue Mission | Rescue + classic |
-| 4–6 (43–72) | Mix It Up / II / Mastery | Color, decoy, rescue, classic mixed |
-| 7 (73–82) | Deep Pack | Classic packing |
-| 8 (83–92) | Grand Finale | Hardest classic pack |
+| Tutorial | 1–12 | Learn |
+| Open | 13–42 | Color Clash, Odd One Out, Rescue Mission |
+| New tricks | 43–122 | Touch & Lock through Borderlands |
+| Mix | 123–242 | Stone, islands, commit, big-first, turn limit, harmony |
+| Finale | 243–250 | Grand Finale |
 
 ### Special types
 
-- **Color** — same-color partners may not share an edge (A–G, B–E, C–F, D–H). Corners are fine. Illegal drop toasts “Same colors can't touch”.
-- **Decoy** — 8 pieces in the tray, only 7 fit. Leave the spare. Board complete with one piece left. Label: “Use 7 of 8 pieces”.
-- **Rescue** — some pieces start on the board unlocked, a few in the wrong place. Reset restores that start, not an empty board.
+- **Color** — same-color partners may not share an edge (A–G, B–E, C–F, D–H). Corners are fine.
+- **Decoy** — 8 in the tray, only 7 fit. **Double Spare** — leave two.
+- **Rescue** — some pieces start on the board unlocked, a few in the wrong place.
+- **Must Touch** — matching colors **must** share an edge.
+- **Keystone** — one piece is already locked on the board.
+- **Commit** — after you drop a piece, it stays (undo still works unless No Undo).
+- **Turn limit** — only N rotates.
+- **Big First** — place the biggest leftover piece next.
+- **Border Seat** — every piece must touch the frame.
+- **Stone Hug** — every piece must touch a black block.
+- **Islands** — rooms split by stone; stay inside a room.
+- **No Undo** — undo is off for that level. Reset still works.
 
 ### Moves
 
-From level 13, each level has a move limit (`par` + slack: easy +6, medium +4, hard +3, boss +2). A move is a finished drop onto the board. Rotate, return to tray, hint, and undo-refund cost nothing. At 0 moves with a gap still open: **Out of moves** with Retry / Home. Tutorial levels have no limit.
+From level 13, each drop onto the board costs **1 move**. `moveLimit = par + slack` with Candy Crush slack (not tight). Rotate, return to tray, hint, and undo-refund cost nothing. Tutorial levels have no limit.
 
 ---
 
@@ -83,7 +93,7 @@ No Rotate chip on placed pieces. Tap a piece on the board to turn it if the new 
 Popups sit on a dim overlay:
 
 - **Hint** — only when you have no hints left (“Need a Hint?” + Get More Hints)  
-- **Level Complete** — title art, 3 stars, hints used, lifetime star total / next chest, Next Level, Replay  
+- **Level Complete** — title art, 3 stars, hints used, Next Level, Replay  
 - **Out of moves** — Retry / Home (from level 13)  
 - **Reset confirm** — Reset / Cancel  
 
@@ -152,7 +162,7 @@ On Level Complete:
 | 1 | 2 |
 | 2+ | 1 |
 
-Moves left do not change stars. Best stars per level are saved. The win card also shows the lifetime total and how many stars remain until the next **star chest** (25, 50, 75, 100, 150, 200, 250). Chests unlock named cosmetics (board / piece / tile packs); applying those skins is not in the live loop yet.
+Moves left do not change stars. Best stars per level are saved. There are no theme chests or extra skins — the live candy look is the only look.
 
 Title art is a fixed **545×196** graphic, inset from the top of the card on every resolution. Next Level / Replay use Nunito Black via TextMeshPro, size 80. Hints-used copy is size 50.
 
@@ -278,11 +288,11 @@ iOS uses Core Haptics + UIKit generators. Android uses the Vibrator / VibratorMa
 
 ## 11. App shell (current candy UI, polish later)
 
-- **Splash** then **Home**: Play / Continue, Levels, Daily (soon), Themes, Settings
-- **Levels**: scroll of 92 tiles, sequential unlock, star counts
+- **Splash** then **Home**: Play / Continue, Levels, Daily (soon), Settings
+- **Levels**: scroll of campaign tiles, sequential unlock, star counts
 - **Settings**: haptics on/off, jump debug, hint shop stub
-- **Themes**: Classic plus chest cosmetics (Sunset Board … Midnight Board). Unlocked names can be equipped; they tint board, tiles, or pieces. Art packs later.
+- **Look**: one default candy skin. No extra themes or chests.
 - **Home** from out-of-moves / last-level Next returns to Home, not level 1
 - Gear on the play screen opens Settings (Back resumes the level)
 
-Still later: daily playlist, hint shop, world map art, full theme packs.
+Still later: daily playlist, hint shop, world map art.

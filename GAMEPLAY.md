@@ -1,6 +1,6 @@
 # GridAura — Full Gameplay Document
 
-This is the complete picture of the game as it exists now: what it is, how the grid works, every rule, the campaign, the UI, and how those pieces were added from the first packing puzzle through the live 92-level loop.
+This is the complete picture of the game as it exists now: what it is, how the grid works, every rule, the campaign, the UI, and how those pieces were added from the first packing puzzle through the live 250-level loop.
 
 Project folder: **GridSpark**. Unity project: **GridAura**. Player-facing name: **GridAura**.
 
@@ -19,7 +19,7 @@ There are always the same eight piece shapes (A–H). What changes per level is:
 - where the black blocks sit
 - which pieces start in the tray vs already on the board
 - whether a piece must be rotated
-- extra rules (color clash, decoy, rescue)
+- extra rules (color, decoy, rescue, must-touch, keystone, commit, turn cap, big-first, border, stone hug, islands, double spare, no undo)
 - a move limit (from level 13)
 
 It is not a match-3, not a sliding puzzle, and not Tetris. Pieces do not fall, lock by gravity, or clear lines. You place them by hand until the picture is full.
@@ -126,7 +126,8 @@ A level is a JSON object. Campaign entries in `campaign.json` pick a source file
 
 | File | What it holds |
 | --- | --- |
-| `Resources/Data/campaign.json` | Live 92-level playlist |
+| `Resources/Data/campaign.json` | Live 250-level playlist |
+| `Resources/Data/campaign_levels.json` | Unique packs for levels 13–250 |
 | `Resources/Data/tutorial_levels.json` | 12 teaching levels |
 | `Resources/Data/levels.json` | 50 classic main packs |
 | `Resources/Data/special_levels.json` | 10 color + 10 decoy + 10 rescue |
@@ -256,51 +257,52 @@ Coach banner can be tapped away. It comes back when the level is shown again.
 
 ---
 
-## 8. Campaign (levels 13–92)
+## 8. Campaign (levels 13–250)
 
-After the tutorial, `campaign.json` plays **80 more levels** in 8 worlds of 10. Wave inside each world:
+Tutorial **1–12 stays frozen**. After that, `campaign.json` plays **238 unique packs** (23 worlds of 10, then an 8-level finale). Wave inside each 10-level world:
 
 **easy, medium, easy, medium, hard, easy, medium, easy, hard, boss**  
 (short: **EMEMHEMEHB**)
 
 The level after a boss is always easy. Hard and boss tint the level number and can flash a banner. Campaign levels skip the tutorial sit-in; instead a **briefing card** (see UI) names the type and move count.
 
-New rules start **early**, not at the end of the pack:
+**Every 3 levels** from 13 (13, 16, 19, …) shows a new rule, layout, or challenge. New-rule intros (coach trial):
 
 | First time | Global | Type |
 | --- | --- | --- |
-| Color Clash rule | 15 | Color (`C1`) |
-| Odd One Out rule | 23 | Decoy (`D1`) |
-| Rescue rule | 33 | Rescue (`R1`) |
+| Full pack | 13 | Classic |
+| Color Clash | 16 | Color |
+| Odd One Out | 19 | Decoy |
+| Rescue | 25 | Rescue |
+| Must Touch | 28 | Partners must share an edge |
+| Keystone | 31 | One locked piece already on the board |
+| Commit | 34 | Dropped pieces stay |
+| Turn limit | 37 | Only a few rotates |
+| Big First | 40 | Largest leftover piece next |
+| Border Seat | 43 | Every piece touches the frame |
+| Stone Hug | 46 | Every piece touches black |
+| Islands | 49 | Stay inside a room |
+| Double Spare | 55 | Leave two pieces |
+| No Undo | 58 | Undo is off |
 
 ### Worlds
 
-| World | Levels | Name | Mix |
-| --- | --- | --- | --- |
-| 0 | 1–12 | Tutorial | Learn to place, undo, hint, rotate |
-| 1 | 13–22 | Color Clash | 13–14 classic, then color from 15 |
-| 2 | 23–32 | Odd One Out | Decoy + classic |
-| 3 | 33–42 | Rescue Mission | Rescue + classic |
-| 4 | 43–52 | Mix It Up | Color, decoy, rescue, classic |
-| 5 | 53–62 | Mix It Up II | Mixed |
-| 6 | 63–72 | Mastery | Mixed |
-| 7 | 73–82 | Deep Pack | Classic leftovers |
-| 8 | 83–92 | Grand Finale | Hardest classic pack |
+23 worlds of 10 (13–242) then Grand Finale 243–250. Names include Color Clash, Odd One Out, Rescue Mission, Touch & Lock, New Tricks, Mix It Up, Borderlands, Island Hop, Commit Path, Harmony, Star Road, High Farm, Grand Finale.
 
-Counts in the live playlist: **12 tutorial + 50 classic + 10 color + 10 decoy + 10 rescue = 92**.
+Counts: **12 tutorial + 238 unique packs = 250**.
 
 ### Move limit
 
 From level 13, each drop onto the board costs **1 move**.
 
-`moveLimit = par + slack`
+`moveLimit = par + slack` — Candy Crush slack, not tight:
 
-| Tag | Typical par | Slack | Typical limit |
-| --- | --- | --- | --- |
-| easy | 8 | +6 | 14 |
-| medium | 8 | +4 | 12 |
-| hard | 8 | +3 | 11 |
-| boss | 8 | +2 | 10 |
+| Tag | Early slack | Late slack |
+| --- | --- | --- |
+| easy | +8 | +6 |
+| medium | +6 | +5 |
+| hard | +5 | +4 |
+| boss | +4 | +3 |
 
 Decoy par is 7 (seven placements). Rescue par is lower (4–6) because several pieces already sit on the board.
 
@@ -310,97 +312,17 @@ At 0 moves with a gap still open: **Out of moves** popup — Retry / Home.
 
 ### Full playlist
 
-`src` is the JSON pool. `id` is the level inside that pool.
+Levels 1–12 stay in `tutorial_levels.json`. Levels 13–250 are unique packs in `campaign_levels.json`, queued by `campaign.json`. Do not reuse the old 92-level main/special ids for the live loop.
 
 | # | World | Tag | Type | Src | Id | Moves |
 | --- | ---: | --- | --- | --- | --- | ---: |
 | 1–12 | Tutorial | learn | classic | tutorial | 1–12 | none |
-| 13 | Color Clash | easy | classic | main | 1 | 14 |
-| 14 | Color Clash | medium | classic | main | 7 | 12 |
-| 15 | Color Clash | easy | **color** intro | color | C1 | 14 |
-| 16 | Color Clash | medium | classic | main | 11 | 12 |
-| 17 | Color Clash | hard | classic | main | 25 | 11 |
-| 18 | Color Clash | easy | color | color | C2 | 14 |
-| 19 | Color Clash | medium | classic | main | 12 | 12 |
-| 20 | Color Clash | easy | color | color | C3 | 14 |
-| 21 | Color Clash | hard | color | color | C7 | 11 |
-| 22 | Color Clash | boss | classic | main | 37 | 10 |
-| 23 | Odd One Out | easy | **decoy** intro | decoy | D1 | 13 |
-| 24 | Odd One Out | medium | classic | main | 15 | 12 |
-| 25 | Odd One Out | easy | decoy | decoy | D2 | 13 |
-| 26 | Odd One Out | medium | classic | main | 16 | 12 |
-| 27 | Odd One Out | hard | classic | main | 32 | 11 |
-| 28 | Odd One Out | easy | decoy | decoy | D3 | 13 |
-| 29 | Odd One Out | medium | classic | main | 17 | 12 |
-| 30 | Odd One Out | easy | classic | main | 6 | 14 |
-| 31 | Odd One Out | hard | decoy | decoy | D7 | 10 |
-| 32 | Odd One Out | boss | classic | main | 41 | 10 |
-| 33 | Rescue Mission | easy | **rescue** intro | rescue | R1 | 10 |
-| 34 | Rescue Mission | medium | classic | main | 21 | 12 |
-| 35 | Rescue Mission | easy | rescue | rescue | R2 | 10 |
-| 36 | Rescue Mission | medium | classic | main | 22 | 12 |
-| 37 | Rescue Mission | hard | classic | main | 36 | 11 |
-| 38 | Rescue Mission | easy | rescue | rescue | R3 | 10 |
-| 39 | Rescue Mission | medium | classic | main | 23 | 12 |
-| 40 | Rescue Mission | easy | classic | main | 10 | 14 |
-| 41 | Rescue Mission | hard | rescue | rescue | R7 | 8 |
-| 42 | Rescue Mission | boss | classic | main | 46 | 10 |
-| 43 | Mix It Up | easy | color | color | C4 | 14 |
-| 44 | Mix It Up | medium | classic | main | 26 | 12 |
-| 45 | Mix It Up | easy | decoy | decoy | D4 | 13 |
-| 46 | Mix It Up | medium | classic | main | 27 | 12 |
-| 47 | Mix It Up | hard | rescue | rescue | R9 | 8 |
-| 48 | Mix It Up | easy | classic | main | 14 | 14 |
-| 49 | Mix It Up | medium | color | color | C8 | 12 |
-| 50 | Mix It Up | easy | decoy | decoy | D5 | 13 |
-| 51 | Mix It Up | hard | classic | main | 40 | 11 |
-| 52 | Mix It Up | boss | rescue | rescue | R10 | 8 |
-| 53 | Mix It Up II | easy | decoy | decoy | D6 | 13 |
-| 54 | Mix It Up II | medium | classic | main | 34 | 12 |
-| 55 | Mix It Up II | easy | rescue | rescue | R4 | 10 |
-| 56 | Mix It Up II | medium | classic | main | 35 | 12 |
-| 57 | Mix It Up II | hard | color | color | C9 | 11 |
-| 58 | Mix It Up II | easy | classic | main | 18 | 14 |
-| 59 | Mix It Up II | medium | decoy | decoy | D8 | 11 |
-| 60 | Mix It Up II | easy | rescue | rescue | R5 | 10 |
-| 61 | Mix It Up II | hard | classic | main | 45 | 11 |
-| 62 | Mix It Up II | boss | color | color | C10 | 10 |
-| 63 | Mastery | easy | rescue | rescue | R6 | 11 |
-| 64 | Mastery | medium | classic | main | 38 | 12 |
-| 65 | Mastery | easy | color | color | C5 | 14 |
-| 66 | Mastery | medium | classic | main | 39 | 12 |
-| 67 | Mastery | hard | decoy | decoy | D9 | 10 |
-| 68 | Mastery | easy | classic | main | 24 | 14 |
-| 69 | Mastery | medium | rescue | rescue | R8 | 9 |
-| 70 | Mastery | easy | color | color | C6 | 14 |
-| 71 | Mastery | hard | classic | main | 47 | 11 |
-| 72 | Mastery | boss | decoy | decoy | D10 | 9 |
-| 73 | Deep Pack | easy | classic | main | 2 | 14 |
-| 74 | Deep Pack | medium | classic | main | 8 | 12 |
-| 75 | Deep Pack | easy | classic | main | 3 | 14 |
-| 76 | Deep Pack | medium | classic | main | 9 | 12 |
-| 77 | Deep Pack | hard | classic | main | 19 | 11 |
-| 78 | Deep Pack | easy | classic | main | 4 | 14 |
-| 79 | Deep Pack | medium | classic | main | 13 | 12 |
-| 80 | Deep Pack | easy | classic | main | 5 | 14 |
-| 81 | Deep Pack | hard | classic | main | 20 | 11 |
-| 82 | Deep Pack | boss | classic | main | 33 | 10 |
-| 83 | Grand Finale | easy | classic | main | 28 | 14 |
-| 84 | Grand Finale | medium | classic | main | 42 | 12 |
-| 85 | Grand Finale | easy | classic | main | 29 | 14 |
-| 86 | Grand Finale | medium | classic | main | 43 | 12 |
-| 87 | Grand Finale | hard | classic | main | 48 | 11 |
-| 88 | Grand Finale | easy | classic | main | 30 | 14 |
-| 89 | Grand Finale | medium | classic | main | 44 | 12 |
-| 90 | Grand Finale | easy | classic | main | 31 | 14 |
-| 91 | Grand Finale | hard | classic | main | 49 | 11 |
-| 92 | Grand Finale | boss | classic | main | 50 | 10 |
-
+| 13–250 | Worlds 1–24 | Candy Crush wave | mixed unique | pack | P013–P250 | par + slack |
 ---
 
 ## 9. Game types
 
-Every level is one of four types. The briefing card names it at the start of campaign levels.
+Campaign levels mix the types below. The briefing card names the type at the start of levels 13+.
 
 ### Classic
 
@@ -417,44 +339,31 @@ Same-color **partners may not share an edge**. Corners are allowed.
 | C and F | Yellow |
 | D and H | Violet |
 
-Illegal drop: ghost turns coral, toast **Same colors can't touch**. First seen at **level 15 (C1)** with coach: *New rule! Pieces of the same color can't touch edge to edge.*
-
-All 10 color levels (`C1`–`C10`) put A–H in the tray with 3 black regions, same as a classic pack, but the unique solution depends on the touch rule.
+Illegal drop: ghost turns coral, toast **Same colors can't touch**. First seen at **level 16**.
 
 ### Odd One Out (`type: decoy`)
 
-All **8 pieces** are in the tray. Only **7 fit**. Extra black (typically 4 regions) so area does not allow the eighth. Leave the spare. The board is complete with one piece left in the tray.
+All **8 pieces** are in the tray. Only **7 fit**. Leave the spare. First seen at **level 19**.
 
-Label: **Use 7 of 8 pieces.** First seen at **level 23 (D1)** with coach: *One piece doesn't belong. Leave it in the tray.*
+### Double Spare (`type: doublespare`)
 
-Spares by level: D1 H, D2 H, D3 G, D4 D, D5 F, D6 D, D7 A, D8 C, D9 G, D10 C.
+Two pieces do not fit. Leave both. First seen at **level 55**.
 
 ### Rescue (`type: rescue`)
 
-Some pieces start **on the board, unlocked**. A listed subset (`wrongPieces`) is in the **wrong place**. The rest of `initial` is already correct but still movable. A few pieces start in the tray (`toPlace`). Reset restores that starting arrangement, not an empty board.
+Some pieces start **on the board, unlocked**. A listed subset is in the **wrong place**. Reset restores that start. First seen at **level 25**. Wrong pieces wiggle on the intro.
 
-First seen at **level 33 (R1)** with coach: *These pieces are in the wrong place. Move them to finish.* Wrong pieces wiggle once on that intro.
+### Must Touch (`type: musttouch`)
 
-| Id | Wrong | Already on board | In tray |
-| --- | --- | --- | --- |
-| R1 | B | 5 | A, E, F |
-| R2 | B | 5 | A, F, H |
-| R3 | A | 5 | E, F, H |
-| R4 | C, E | 6 | D, F |
-| R5 | E, H | 6 | D, G |
-| R6 | B, C | 5 | A, E, H |
-| R7 | E, F | 5 | D, G, H |
-| R8 | A, C, E | 6 | D, H |
-| R9 | B, E, H | 6 | C, D |
-| R10 | A, B, D | 5 | C, E, H |
+Matching colors **must** share an edge. First seen at **level 28**.
 
-### Types discussed, not built
+### Keystone, Commit, Turn limit, Big First, Border, Stone Hug, Islands, No Undo
 
-Must-touch, big-first, cornered, frozen pieces, rotate budget, timed levels. Not in the live loop.
+See the intro table in section 8. These are live. Timed levels are still not in the loop.
 
 ---
 
-## 10. Stars, chests, save data
+## 10. Stars and save data
 
 On **Level Complete**, stars come only from **hints used** (on that attempt). Moves left do not change stars.
 
@@ -464,21 +373,9 @@ On **Level Complete**, stars come only from **hints used** (on that attempt). Mo
 | 1 | 2 |
 | 2+ | 1 |
 
-Best stars per **global** level id are stored in PlayerPrefs (`GridAura.BestStars.{n}`). The win card shows the lifetime total and how many stars remain until the next chest.
+Best stars per **global** level id are stored in PlayerPrefs (`GridAura.BestStars.{n}`). There are **no theme chests**. One look for the whole game: the current candy tiles and frame.
 
-| Stars | Chest name |
-| ---: | --- |
-| 25 | Sunset Board |
-| 50 | Ocean Pieces |
-| 75 | Chime Tiles |
-| 100 | Forest Board |
-| 150 | Candy Pieces |
-| 200 | Pop Tiles |
-| 250 | Midnight Board |
-
-Home → **Themes** equips an unlocked chest. That tints the board, empty tiles, or pieces (Sunset warm, Ocean cooler pieces, Forest green frame, Midnight dark tiles, and so on). Full art packs can replace these tints later.
-
-Other prefs: `GridAura.ChestsClaimed`, `GridAura.WorldSeen.{world}`, `GridAura.LastLevel`, `GridAura.Theme`, `GridAura.Haptics`.
+Other prefs: `GridAura.WorldSeen.{world}`, `GridAura.LastLevel`, `GridAura.Haptics`.
 
 ---
 
@@ -510,7 +407,7 @@ Tap to skip, or wait ~2 seconds. The card then **flies up and shrinks** into the
 ### Popups (dim overlay)
 
 - **Hint** — only when hints would be exhausted (“Need a Hint?” + Get More Hints). Shop not live.
-- **Level Complete** — title art 545×196, earned stars only (no faded ghosts), hints used, star total / next chest, Next Level, Replay. Rainbow confetti on open.
+- **Level Complete** — title art 545×196, earned stars only (no faded ghosts), hints used, Next Level, Replay. Rainbow confetti on open.
 - **Out of moves** — Retry / Home.
 - **Reset confirm** — Reset / Cancel.
 
@@ -602,7 +499,7 @@ Unscaled tweens, no snaps, haptics, Epic Toon FX sparks/stars/confetti, level-co
 
 ### 5. Campaign instead of “tutorial then dump 50 classics”
 
-`campaign.json` became the playlist. Candy Crush wave (EMEMHEMEHB). Eight named worlds. Hard/boss banners. Move limits from 13. Out-of-moves fail state. Stars from hints. Star chests (names only).
+`campaign.json` became the playlist. Candy Crush wave (EMEMHEMEHB). Named worlds. Hard/boss banners. Move limits from 13. Out-of-moves fail state. Stars from hints. One default skin.
 
 ### 6. Three extra types, introduced early
 
@@ -614,7 +511,7 @@ Moves + stars used to live only as a thin bar at the top (and a ★ glyph that d
 
 ### 8. App shell now, polish later
 
-Splash → Home (Play/Continue, Levels, Daily soon, Themes, Settings). Sequential level select. Settings: haptics, jump, shop stub. Themes apply chest tints. Out-of-moves Home and last-level Next return to Home.
+Splash → Home (Play/Continue, Levels, Daily soon, Settings). Sequential level select. Settings: haptics, jump, shop stub. One default skin. Out-of-moves Home and last-level Next return to Home.
 
 Still later: daily playlist, hint shop, world-map art, full theme packs, extra types.
 

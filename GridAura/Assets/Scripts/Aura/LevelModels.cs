@@ -38,6 +38,8 @@ namespace Aura
         public bool intro;
         public string coachText;
         public string unused;
+        public string[] unusedPieces;
+        public int rotateCap;
         public string[] rules;
         public string[] wrongPieces;
         public BlockPlacement[] black;
@@ -47,6 +49,18 @@ namespace Aura
         public string[] toPlace;
         public string[] rotationNeeded;
         public TutorialInfo tutorial;
+        public SpotCell[] spots;
+        public string[] frozen;
+        public string modifier;
+        public int timeLimitSec;
+    }
+
+    [Serializable]
+    public class SpotCell
+    {
+        public int row;
+        public int col;
+        public string color;
     }
 
     [Serializable]
@@ -98,6 +112,8 @@ namespace Aura
         public int posInWorld;
         public bool intro;
         public string coachText;
+        public string modifier;
+        public int timeLimitSec;
     }
 
     [Serializable]
@@ -112,11 +128,19 @@ namespace Aura
         public string id;
         public string type;
         public string[] rules;
+        public int rotateCap;
         public BlockPlacement[] black;
         public string[] toPlace;
         public SolutionPlacement[] solution;
         public SolutionPlacement[] initial;
+        public SolutionPlacement[] preplaced;
         public string unused;
+        public string[] unusedPieces;
         public string[] wrongPieces;
+        public string[] rotationNeeded;
+        public string coachText;
+        public bool intro;
+        public SpotCell[] spots;
+        public string[] frozen;
     }
 }

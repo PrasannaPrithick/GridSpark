@@ -25,13 +25,6 @@ namespace Aura
         int levelIndex;
         int tutorialCount;
         int firstRotateId = 7;
-        static readonly int[] ChestAt = { 25, 50, 75, 100, 150, 200, 250 };
-        static readonly string[] ChestRewards =
-        {
-            "Sunset Board", "Ocean Pieces", "Chime Tiles",
-            "Forest Board", "Candy Pieces", "Pop Tiles",
-            "Midnight Board"
-        };
         Font font;
         Font fontBlack;
         Font fontExtraBold;
@@ -81,6 +74,23 @@ namespace Aura
         Sprite starSprite;
         Sprite starGlowSprite;
         Sprite hintGlowSprite;
+        Sprite iconSoundSprite;
+        Sprite iconMusicSprite;
+        Sprite iconHapticsSprite;
+        Sprite iconThemeSprite;
+        Sprite iconCartSprite;
+        Sprite iconShieldSprite;
+        Sprite iconStarSprite;
+        Sprite iconBackSprite;
+        Sprite iconChevronSprite;
+        Sprite toggleTrackSprite;
+        Sprite toggleKnobSprite;
+        Sprite settingsBgSprite;
+        Sprite settingsBackSprite;
+        Sprite settingsRowSprite;
+        Sprite settingsTitleSprite;
+        Sprite settingsToggleOnSprite;
+        Sprite settingsToggleKnobSprite;
         GameObject starBurstFx;
         GameObject starPoofFx;
         GameObject sparkImpactFx;
@@ -108,26 +118,56 @@ namespace Aura
         bool briefingDocked;
         bool hudLanded;
         const float DragSlop = 56f;
+        const float BoardTapSlop = 22f;
         const string PrefLastLevel = "GridAura.LastLevel";
-        const string PrefTheme = "GridAura.Theme";
         const string PrefHaptics = "GridAura.Haptics";
+        const string PrefSound = "GridAura.Sound";
+        const string PrefMusic = "GridAura.Music";
+        const string PrefHints = "GridAura.Hints";
+        const string PrefUnlimited = "GridAura.UnlimitedHints";
+        const string PrefNeon = "GridAura.Neon";
+        const string PrefTheme = "GridAura.Theme";
+        const string PrefHowTo = "GridAura.HowToSeen";
+        const string PrefRelaxed = "GridAura.RelaxedTimers";
+        static readonly string[] LevelTabs = { "Easy", "Medium", "Hard", "Expert" };
+        static readonly Color[] LevelCandy =
+        {
+            Hex("2F6BFF"), Hex("E23B3B"), Hex("F5C400"), Hex("2F6BFF"), Hex("F5C400")
+        };
         RectTransform menuRoot;
         RectTransform splashPanel;
         RectTransform homePanel;
         RectTransform levelsPanel;
         RectTransform settingsPanel;
-        RectTransform themesPanel;
+        RectTransform shopPanel;
+        RectTransform howToPanel;
+        RectTransform themePanel;
+        RectTransform privacyPanel;
         RectTransform levelsContent;
+        RectTransform menuBackTo;
         TextMeshProUGUI homePlayLabel;
         TextMeshProUGUI homeStatus;
         TextMeshProUGUI homeStarLabel;
-        TextMeshProUGUI hapticsLabel;
+        TextMeshProUGUI shopStatus;
+        TextMeshProUGUI themeStatus;
         Image soundIcon;
+        RectTransform soundToggle;
+        RectTransform musicToggle;
+        RectTransform hapticsToggle;
+        RectTransform relaxedToggle;
+        RectTransform keepGoingButton;
+        TextMeshProUGUI movesTitle;
+        TextMeshProUGUI movesBodyLabel;
+        float timeLeft;
+        bool timeFailed;
         readonly List<RectTransform> levelTiles = new List<RectTransform>();
-        readonly List<TextMeshProUGUI> themeLabels = new List<TextMeshProUGUI>();
+        readonly List<RectTransform> levelTabButtons = new List<RectTransform>();
+        int levelTab;
+        int versionTaps;
+        bool soundOn = true;
+        bool musicOn = true;
         bool menuOpen;
         bool settingsFromPlay;
-        int equippedTheme;
         RectTransform movesPill;
         RectTransform banner;
         RectTransform movesPanel;
@@ -204,6 +244,7 @@ namespace Aura
         Vector2 pointerStart;
         int grabCol;
         int grabRow;
+        bool colorClashHover;
 
         class TraySlot
         {
@@ -264,6 +305,27 @@ namespace Aura
             levelCompleteSprite = Resources.Load<Sprite>("Art/LevelComplete");
             starSprite = Resources.Load<Sprite>("Art/StarClear");
             starGlowSprite = Resources.Load<Sprite>("Art/StarGlow");
+            iconSoundSprite = Resources.Load<Sprite>("Art/IconSound");
+            iconMusicSprite = Resources.Load<Sprite>("Art/IconMusic");
+            iconHapticsSprite = Resources.Load<Sprite>("Art/IconHaptics");
+            iconThemeSprite = Resources.Load<Sprite>("Art/IconTheme");
+            iconCartSprite = Resources.Load<Sprite>("Art/IconCart");
+            iconShieldSprite = Resources.Load<Sprite>("Art/IconShield");
+            iconStarSprite = Resources.Load<Sprite>("Art/IconStar");
+            iconBackSprite = Resources.Load<Sprite>("Art/IconBack");
+            iconChevronSprite = Resources.Load<Sprite>("Art/IconChevron");
+            settingsBgSprite = Resources.Load<Sprite>("Art/SettingsBg");
+            settingsBackSprite = Resources.Load<Sprite>("Art/SettingsBack");
+            settingsRowSprite = Resources.Load<Sprite>("Art/SettingsRow");
+            settingsTitleSprite = Resources.Load<Sprite>("Art/SettingsTitle");
+            settingsToggleOnSprite = Resources.Load<Sprite>("Art/SettingsToggleOn");
+            settingsToggleKnobSprite = Resources.Load<Sprite>("Art/SettingsToggleKnob");
+            toggleTrackSprite = Resources.Load<Sprite>("Art/IconToggleTrack");
+            toggleKnobSprite = Resources.Load<Sprite>("Art/IconToggleKnob");
+            if (toggleTrackSprite == null)
+                toggleTrackSprite = settingsToggleOnSprite;
+            if (toggleKnobSprite == null)
+                toggleKnobSprite = settingsToggleKnobSprite;
             hintGlowSprite = Resources.Load<Sprite>("Art/HintGlow");
             starBurstFx = Resources.Load<GameObject>("Vfx/StarBurst2D");
             starPoofFx = Resources.Load<GameObject>("Vfx/StarPoof");
@@ -276,8 +338,10 @@ namespace Aura
             yellowSprite = Resources.Load<Sprite>("Art/TileYellow");
             blackSprite = Resources.Load<Sprite>("Art/TileBlack");
             LoadCatalogs();
-            equippedTheme = PlayerPrefs.GetInt(PrefTheme, 0);
             Haptics.Enabled = PlayerPrefs.GetInt(PrefHaptics, 1) == 1;
+            soundOn = PlayerPrefs.GetInt(PrefSound, 1) == 1;
+            musicOn = PlayerPrefs.GetInt(PrefMusic, 1) == 1;
+            AudioListener.volume = soundOn ? 1f : 0f;
             var camera = Camera.main;
             if (camera != null)
             {
@@ -344,6 +408,7 @@ namespace Aura
             AnimateGlows();
             BreatheHint();
             UpdateHintButton();
+            TickSpeedClock();
         }
 
         void Build()
@@ -355,7 +420,7 @@ namespace Aura
                 events.AddComponent<StandaloneInputModule>();
             }
             if (EventSystem.current != null)
-                EventSystem.current.pixelDragThreshold = 12;
+                EventSystem.current.pixelDragThreshold = 1;
 
             var canvasGo = new GameObject("GameCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvas = canvasGo.GetComponent<Canvas>();
@@ -559,13 +624,9 @@ namespace Aura
             messageText = MakeText(root, "", 36, Color.white, fontBold);
             BuildPopups();
             confirmPanel = MakePopup(root, "Reset this level?", out _);
-            var yes = MakeButton(confirmPanel, "Yes", "red", out var yesText);
-            yesText.text = "Reset";
-            yesText.color = Color.white;
+            var yes = MakePill(confirmPanel, "Yes", resetButtonSprite != null ? resetButtonSprite : yellowButtonSprite, "Reset", Color.white, out _);
             BindButton(yes.gameObject, ConfirmReset);
-            var no = MakeButton(confirmPanel, "No", "blue", out var noText);
-            noText.text = "Cancel";
-            noText.color = Color.white;
+            var no = MakePill(confirmPanel, "No", blueButtonSprite, "Cancel", Color.white, out _);
             BindButton(no.gameObject, CancelReset);
             confirmPanel.gameObject.SetActive(false);
             movesPill = MakeRect("Moves", root);
@@ -641,6 +702,18 @@ namespace Aura
 
             movesPanel = MakePopup(overlay, "Out of moves!", out var movesBody);
             movesBody.text = "Retry this level, or go back to the start.";
+            movesBodyLabel = movesBody;
+            var headings = movesPanel.GetComponentsInChildren<TextMeshProUGUI>(true);
+            if (headings != null && headings.Length > 0)
+                movesTitle = headings[0];
+            keepGoingButton = MakeButton(movesPanel, "KeepGoing", "green", out var keepText);
+            keepText.text = "Keep going";
+            keepText.color = Color.white;
+            BindButton(keepGoingButton.gameObject, OnKeepGoing);
+            keepGoingButton.anchorMin = new Vector2(0.08f, 0.34f);
+            keepGoingButton.anchorMax = new Vector2(0.92f, 0.50f);
+            keepGoingButton.offsetMin = keepGoingButton.offsetMax = Vector2.zero;
+            keepGoingButton.gameObject.SetActive(false);
             var retry = MakeButton(movesPanel, "Retry", "yellow", out var retryText);
             retryText.text = "Retry";
             retryText.color = Hex("1A1A1A");
@@ -722,36 +795,50 @@ namespace Aura
         {
             ShowMenu(splashPanel);
             yield return Motion.Wait(1.1f);
-            ShowMenu(homePanel);
+            if (PlayerPrefs.GetInt(PrefHowTo, 0) == 0)
+                ShowMenu(howToPanel, homePanel);
+            else
+                ShowMenu(homePanel);
         }
 
-        void ShowMenu(RectTransform panel)
+        void ShowMenu(RectTransform panel, RectTransform backTo = null)
         {
             menuOpen = true;
+            if (backTo != null)
+                menuBackTo = backTo;
             HideOverlayNow();
             if (menuRoot == null)
                 return;
             menuRoot.gameObject.SetActive(true);
             menuRoot.SetAsLastSibling();
-            if (splashPanel != null)
-                splashPanel.gameObject.SetActive(panel == splashPanel);
-            if (homePanel != null)
-                homePanel.gameObject.SetActive(panel == homePanel);
-            if (levelsPanel != null)
-                levelsPanel.gameObject.SetActive(panel == levelsPanel);
-            if (settingsPanel != null)
-                settingsPanel.gameObject.SetActive(panel == settingsPanel);
-            if (themesPanel != null)
-                themesPanel.gameObject.SetActive(panel == themesPanel);
+            SetMenuPanel(splashPanel, panel);
+            SetMenuPanel(homePanel, panel);
+            SetMenuPanel(levelsPanel, panel);
+            SetMenuPanel(settingsPanel, panel);
+            SetMenuPanel(shopPanel, panel);
+            SetMenuPanel(howToPanel, panel);
+            SetMenuPanel(themePanel, panel);
+            SetMenuPanel(privacyPanel, panel);
             if (panel == homePanel)
+            {
+                menuBackTo = null;
                 FillHome();
+            }
             if (panel == levelsPanel)
                 RefreshLevelSelect();
-            if (panel == themesPanel)
-                RefreshThemes();
             if (panel == settingsPanel)
-                FillHapticsLabel();
+                FillSettings();
+            if (panel == shopPanel)
+                FillShop();
+            if (panel == themePanel)
+                FillTheme();
             LayoutMenus();
+        }
+
+        static void SetMenuPanel(RectTransform panel, RectTransform active)
+        {
+            if (panel != null)
+                panel.gameObject.SetActive(panel == active);
         }
 
         void HideMenu()
@@ -771,23 +858,62 @@ namespace Aura
         void OpenLevels()
         {
             settingsFromPlay = false;
-            ShowMenu(levelsPanel);
-        }
-
-        void OpenThemes()
-        {
-            settingsFromPlay = false;
-            ShowMenu(themesPanel);
+            int next = ContinueIndex();
+            levelTab = 0;
+            for (int i = 3; i >= 0; i--)
+            {
+                if (next >= TabStart(i))
+                {
+                    levelTab = i;
+                    break;
+                }
+            }
+            ShowMenu(levelsPanel, homePanel);
         }
 
         void OpenSettingsFromHome()
         {
             settingsFromPlay = false;
-            ShowMenu(settingsPanel);
+            ShowMenu(settingsPanel, homePanel);
+        }
+
+        void OpenShop()
+        {
+            RectTransform back = homePanel;
+            if (themePanel != null && themePanel.gameObject.activeSelf)
+                back = themePanel;
+            else if (settingsPanel != null && settingsPanel.gameObject.activeSelf)
+                back = settingsPanel;
+            else if (settingsFromPlay)
+                back = null;
+            ShowMenu(shopPanel, back);
+        }
+
+        void OpenHowTo()
+        {
+            settingsFromPlay = false;
+            ShowMenu(howToPanel, homePanel);
+        }
+
+        void OpenTheme()
+        {
+            ShowMenu(themePanel, settingsPanel);
+        }
+
+        void OpenPrivacy()
+        {
+            ShowMenu(privacyPanel, settingsPanel);
         }
 
         void BackFromMenu()
         {
+            var to = menuBackTo;
+            menuBackTo = null;
+            if (to != null && to != homePanel && to != splashPanel)
+            {
+                ShowMenu(to, settingsFromPlay ? null : homePanel);
+                return;
+            }
             if (settingsFromPlay)
             {
                 HideMenu();
@@ -806,9 +932,9 @@ namespace Aura
 
         void ShopSoon()
         {
-            if (homeStatus != null)
-                homeStatus.text = "Shop coming soon";
+            OpenShop();
         }
+
 
         int GlobalOf(int index)
         {
@@ -852,15 +978,63 @@ namespace Aura
             if (homeStarLabel != null)
                 homeStarLabel.text = TotalStars().ToString();
             if (homeStatus != null)
-                homeStatus.text = "";
+                homeStatus.text = "How to Play";
             if (soundIcon != null)
-                soundIcon.color = Haptics.Enabled ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+                soundIcon.color = soundOn ? Color.white : new Color(1f, 1f, 1f, 0.35f);
         }
 
-        void FillHapticsLabel()
+        void FillSettings()
         {
-            if (hapticsLabel != null)
-                hapticsLabel.text = Haptics.Enabled ? "Haptics On" : "Haptics Off";
+            SetToggle(soundToggle, soundOn);
+            SetToggle(musicToggle, musicOn);
+            SetToggle(hapticsToggle, Haptics.Enabled);
+            SetToggle(relaxedToggle, RelaxedTimersOn());
+        }
+
+        bool RelaxedTimersOn()
+        {
+            return PlayerPrefs.GetInt(PrefRelaxed, 0) == 1;
+        }
+
+        bool SpeedClockActive()
+        {
+            return state != null && state.HasSpeed && !RelaxedTimersOn();
+        }
+
+        void ToggleRelaxedTimers()
+        {
+            PlayerPrefs.SetInt(PrefRelaxed, RelaxedTimersOn() ? 0 : 1);
+            PlayerPrefs.Save();
+            FillSettings();
+            if (state != null && state.HasSpeed)
+            {
+                if (RelaxedTimersOn())
+                {
+                    timeLeft = 0f;
+                    timeFailed = false;
+                }
+                else if (timeLeft <= 0f && !timeFailed)
+                    timeLeft = state.level != null ? state.level.timeLimitSec : 0f;
+            }
+            UpdateMovesHud();
+        }
+
+        void ToggleSound()
+        {
+            soundOn = !soundOn;
+            AudioListener.volume = soundOn ? 1f : 0f;
+            PlayerPrefs.SetInt(PrefSound, soundOn ? 1 : 0);
+            PlayerPrefs.Save();
+            FillSettings();
+            FillHome();
+        }
+
+        void ToggleMusic()
+        {
+            musicOn = !musicOn;
+            PlayerPrefs.SetInt(PrefMusic, musicOn ? 1 : 0);
+            PlayerPrefs.Save();
+            FillSettings();
         }
 
         void ToggleHaptics()
@@ -868,32 +1042,9 @@ namespace Aura
             Haptics.Enabled = !Haptics.Enabled;
             PlayerPrefs.SetInt(PrefHaptics, Haptics.Enabled ? 1 : 0);
             PlayerPrefs.Save();
-            FillHapticsLabel();
-            FillHome();
+            FillSettings();
             if (Haptics.Enabled)
                 Haptics.Tick();
-        }
-
-        int ChestsUnlockedCount()
-        {
-            return Mathf.Clamp(PlayerPrefs.GetInt("GridAura.ChestsClaimed", 0), 0, ChestRewards.Length);
-        }
-
-        bool ThemeUnlocked(int theme)
-        {
-            return theme <= 0 || theme <= ChestsUnlockedCount();
-        }
-
-        void EquipTheme(int theme)
-        {
-            if (!ThemeUnlocked(theme))
-                return;
-            equippedTheme = theme;
-            PlayerPrefs.SetInt(PrefTheme, theme);
-            PlayerPrefs.Save();
-            RefreshThemes();
-            if (state != null && state.level != null && !menuOpen)
-                Refresh();
         }
 
         void PlayLevelFromSelect(int index)
@@ -1163,7 +1314,10 @@ namespace Aura
             if (!state.CommitHint(step))
                 messageText.text = "Almost there!";
             else
+            {
+                SpendHint();
                 messageText.text = "";
+            }
             Refresh();
             var landed = placedLayer.Find(step.piece) as RectTransform;
             if (landed != null)
@@ -1249,6 +1403,8 @@ namespace Aura
             lastPointer = eventData.position;
             moved = false;
             dragging = false;
+            if (control.onBoard && !(state.placed.ContainsKey(control.pieceId) && state.placed[control.pieceId].locked))
+                BeginDrag(control, eventData);
         }
 
         public void PointerBeginDrag(PieceControl control, PointerEventData eventData)
@@ -1257,7 +1413,7 @@ namespace Aura
                 return;
             if (active != control)
                 PointerDown(control, eventData);
-            if (dragging || rotating || !control.onBoard)
+            if (dragging || rotating)
                 return;
             moved = true;
             BeginDrag(control, eventData);
@@ -1272,8 +1428,8 @@ namespace Aura
                 lastPointer = eventData.position;
                 return;
             }
-            float slop = control.onBoard ? 16f : DragSlop;
-            if (!moved && Vector2.Distance(eventData.position, pointerStart) > slop)
+            float slop = control.onBoard ? 0f : DragSlop;
+            if (!dragging && !moved && Vector2.Distance(eventData.position, pointerStart) > slop)
             {
                 moved = true;
                 BeginDrag(control, eventData);
@@ -1284,12 +1440,12 @@ namespace Aura
 
         public void PointerEndDrag(PieceControl control, PointerEventData eventData)
         {
-            FinishBoardDrag(control);
+            FinishBoardDrag(control, eventData);
         }
 
         public void PointerUp(PieceControl control, PointerEventData eventData)
         {
-            if (FinishBoardDrag(control))
+            if (FinishBoardDrag(control, eventData))
                 return;
             if (active != control)
                 return;
@@ -1304,32 +1460,27 @@ namespace Aura
                 return;
             }
             if (control.onBoard)
-            {
-                if (state.IsPlaced(control.pieceId) && state.placed[control.pieceId].locked)
-                {
-                    if (messageText != null)
-                        messageText.text = "This piece is locked";
-                    Haptics.Miss();
-                }
-                else if (state.CanRotate(control.pieceId) && state.IsPlaced(control.pieceId))
-                {
-                    if (state.CanRotateBoard(control.pieceId))
-                        rotateRoutine = StartCoroutine(RotateBoardRoutine(control.pieceId));
-                    else
-                        StartCoroutine(RejectBoardRotate(control.pieceId));
-                }
-                else
-                    StartCoroutine(TapReturnToTray(control));
-            }
+                HandleBoardTap(control.pieceId);
+            else if (state.IsFrozenPiece(control.pieceId) && !state.IsPlaced(control.pieceId))
+                StartCoroutine(RejectFrozen(control.pieceId, false));
             else if (state.CanRotate(control.pieceId) && !state.IsPlaced(control.pieceId))
                 rotateRoutine = StartCoroutine(RotateTraySlotRoutine(control.pieceId));
             active = null;
         }
 
-        bool FinishBoardDrag(PieceControl control)
+        bool FinishBoardDrag(PieceControl control, PointerEventData eventData = null)
         {
             if (active != control || !dragging)
                 return false;
+            Vector2 pos = eventData != null ? eventData.position : lastPointer;
+            if (control.onBoard && Vector2.Distance(pos, pointerStart) < BoardTapSlop)
+            {
+                string id = control.pieceId;
+                AbortDrag();
+                HandleBoardTap(id);
+                active = null;
+                return true;
+            }
             if (rotating)
                 pendingEndDrag = true;
             else if (!motionBusy)
@@ -1338,10 +1489,38 @@ namespace Aura
             return true;
         }
 
+        void HandleBoardTap(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !state.IsPlaced(id))
+                return;
+            if (state.placed[id].locked)
+            {
+                if (messageText != null)
+                    messageText.text = "This piece is locked";
+                Haptics.Miss();
+                return;
+            }
+            if (state.IsFrozenPiece(id))
+            {
+                StartCoroutine(RejectFrozen(id, true));
+                return;
+            }
+            if (state.CanRotate(id))
+            {
+                if (state.CanRotateBoard(id))
+                    rotateRoutine = StartCoroutine(RotateBoardRoutine(id));
+                else
+                    StartCoroutine(RejectBoardRotate(id));
+            }
+            else
+                StartCoroutine(TapReturnToTray(id));
+        }
+
         void AbortDrag()
         {
             dragging = false;
             moved = false;
+            colorClashHover = false;
             pendingEndDrag = false;
             ghost.gameObject.SetActive(false);
             if (rotateButton != null)
@@ -1403,9 +1582,6 @@ namespace Aura
                 lifted = new PlacedPiece { id = placed.id, row = placed.row, col = placed.col, h = placed.h, w = placed.w };
                 state.SyncTrayTurns(placed);
                 state.placed.Remove(control.pieceId);
-                var boardCell = placedLayer.Find(control.pieceId) as RectTransform;
-                if (boardCell != null)
-                    boardCell.gameObject.SetActive(false);
                 RevealCells(lifted.col, lifted.row, lifted.w, lifted.h);
             }
             else
@@ -1445,7 +1621,7 @@ namespace Aura
             if (group == null)
                 group = hide.gameObject.AddComponent<CanvasGroup>();
             group.alpha = slot != null ? 0.28f : 0f;
-            group.blocksRaycasts = false;
+            group.blocksRaycasts = slot == null;
             hiddenGroup = group;
             ClearSlotDecorations();
             rotateButton.gameObject.SetActive(false);
@@ -1469,7 +1645,23 @@ namespace Aura
             bool overBoard = row < GameState.Size && col < GameState.Size && row + dragH > 0 && col + dragW > 0;
             UpdateDragRotateButton(overBoard);
             ghost.gameObject.SetActive(overBoard);
+            bool clash = overBoard && state.IsColor && state.BlockedOnlyByColor(active.pieceId, row, col, dragH, dragW);
             PulseColorPartner(active.pieceId, overBoard && state.IsColor);
+            string why = overBoard ? state.DropHint(active.pieceId, row, col, dragH, dragW) : null;
+            if (!string.IsNullOrEmpty(why))
+            {
+                if (!colorClashHover)
+                {
+                    colorClashHover = true;
+                    if (messageText != null)
+                        messageText.text = why;
+                    Haptics.Miss();
+                    if (clash)
+                        StartCoroutine(PulseClashPartner(active.pieceId));
+                }
+            }
+            else
+                colorClashHover = false;
             if (!overBoard)
                 return;
             SetPiece(ghostImage, ColorOf(active.pieceId));
@@ -1496,16 +1688,35 @@ namespace Aura
         void PulseColorPartner(string id, bool on)
         {
             string partner = on ? state.ColorPartner(id) : null;
+            bool clash = colorClashHover;
             foreach (Transform child in placedLayer)
             {
                 var group = child.GetComponent<CanvasGroup>();
-                if (group == null)
+                if (group == null || group == hiddenGroup)
                     continue;
                 if (partner != null && child.name == partner)
-                    group.alpha = 0.55f + 0.45f * (Mathf.Sin(Time.unscaledTime * 6f) * 0.5f + 0.5f);
+                    group.alpha = clash
+                        ? 0.45f + 0.55f * (Mathf.Sin(Time.unscaledTime * 10f) * 0.5f + 0.5f)
+                        : 0.55f + 0.45f * (Mathf.Sin(Time.unscaledTime * 6f) * 0.5f + 0.5f);
                 else
                     group.alpha = 1f;
             }
+        }
+
+        IEnumerator PulseClashPartner(string id)
+        {
+            string partner = state != null ? state.ColorPartner(id) : null;
+            var cell = !string.IsNullOrEmpty(partner) ? placedLayer.Find(partner) as RectTransform : null;
+            if (cell == null)
+                yield break;
+            var image = cell.GetComponent<Image>();
+            Color rest = image != null ? image.color : Color.white;
+            if (image != null)
+                StartCoroutine(Motion.ColorTo(image, new Color(1f, 0.38f, 0.42f, 1f), 0.08f));
+            yield return Motion.ShakeX(cell, 16f, 0.16f);
+            yield return Motion.Punch(cell, 1.08f, 0.1f);
+            if (image != null)
+                yield return Motion.ColorTo(image, rest, 0.12f);
         }
 
         Vector2 GhostAnchor(int col, int row, int w, int h)
@@ -1545,6 +1756,7 @@ namespace Aura
                 row = Mathf.RoundToInt(-topLeft.y / pitch);
             }
             dragging = false;
+            colorClashHover = false;
             ghost.gameObject.SetActive(false);
             rotateButton.gameObject.SetActive(false);
             PulseColorPartner(null, false);
@@ -1581,9 +1793,16 @@ namespace Aura
             drag.pivot = new Vector2(0.5f, 0.5f);
             drag.anchoredPosition = start;
             drag.localScale = Vector3.one;
+            string clashWhy = piece != null ? state.DropHint(piece.pieceId, row, col, dragH, dragW) : null;
             if (!canPlace && !onTray)
             {
                 Haptics.Miss();
+                if (clashWhy == "Same colors can't touch")
+                {
+                    if (messageText != null)
+                        messageText.text = clashWhy;
+                    StartCoroutine(PulseClashPartner(piece.pieceId));
+                }
                 yield return Motion.ShakeX(drag, 10f, 0.1f);
                 yield return Motion.ColorTo(dragImage, new Color(1f, 0.4f, 0.42f, 1f), 0.06f);
             }
@@ -1627,11 +1846,16 @@ namespace Aura
             else if (origin != null)
             {
                 state.RestorePlaced(origin);
-                if (piece != null && state.BlockedOnlyByColor(piece.pieceId, row, col, dragH, dragW))
-                    messageText.text = "Same colors can't touch";
+                string why = piece != null ? state.DropHint(piece.pieceId, row, col, dragH, dragW) : null;
+                if (!string.IsNullOrEmpty(why) && messageText != null)
+                    messageText.text = why;
             }
-            else if (piece != null && state.BlockedOnlyByColor(piece.pieceId, row, col, dragH, dragW))
-                messageText.text = "Same colors can't touch";
+            else if (piece != null)
+            {
+                string why = state.DropHint(piece.pieceId, row, col, dragH, dragW);
+                if (!string.IsNullOrEmpty(why) && messageText != null)
+                    messageText.text = why;
+            }
             Refresh();
             if (canPlace && !onTray && piece != null)
             {
@@ -1684,6 +1908,9 @@ namespace Aura
             image.type = Image.Type.Sliced;
             image.color = EmptyTint();
             FitSlice(image, 18f);
+            string spot = state.SpotColorAt(row, col);
+            if (!string.IsNullOrEmpty(spot))
+                AddSpotDot(cell, spot, false);
         }
 
         void RotateDragged()
@@ -1709,6 +1936,8 @@ namespace Aura
             motionBusy = true;
             if (!state.RotateTray(id))
             {
+                if (state.HasRotateCap && state.RotatesLeft <= 0 && messageText != null)
+                    messageText.text = "No turns left";
                 rotating = false;
                 motionBusy = false;
                 rotateRoutine = null;
@@ -1906,20 +2135,20 @@ namespace Aura
             motionBusy = false;
         }
 
-        IEnumerator TapReturnToTray(PieceControl control)
+        IEnumerator TapReturnToTray(string id)
         {
-            if (control == null || !state.IsPlaced(control.pieceId) || (state.placed.ContainsKey(control.pieceId) && state.placed[control.pieceId].locked))
+            if (string.IsNullOrEmpty(id) || !state.IsPlaced(id) || (state.placed.ContainsKey(id) && state.placed[id].locked))
                 yield break;
             motionBusy = true;
-            var board = placedLayer.Find(control.pieceId) as RectTransform;
-            var slot = SlotById(control.pieceId);
+            var board = placedLayer.Find(id) as RectTransform;
+            var slot = SlotById(id);
             if (board != null && slot != null)
             {
-                var flyer = MakeFlyer(control.pieceId, PointInRoot(board), board.sizeDelta);
+                var flyer = MakeFlyer(id, PointInRoot(board), board.sizeDelta);
                 yield return Motion.Arc(flyer, PointInRoot(board), PointInRoot(slot.slabRect), board.sizeDelta, slot.slabRect.sizeDelta, 22f, 0.18f);
                 Destroy(flyer.gameObject);
             }
-            state.ReturnToTray(control.pieceId, true);
+            state.ReturnToTray(id, true);
             Refresh();
             motionBusy = false;
         }
@@ -2185,7 +2414,9 @@ namespace Aura
             PlayerPrefs.Save();
             var next = allLevels[levelIndex];
             bool tutorial = next != null && next.source == "tutorial";
-            state.Begin(next, catalogPieces, tutorial);
+            state.Begin(next, catalogPieces, tutorial, HintBank(), UnlimitedHints());
+            timeFailed = false;
+            timeLeft = SpeedClockActive() ? next.timeLimitSec : 0f;
             var trayIds = state.TrayIds();
             for (int i = 0; i < slots.Count; i++)
             {
@@ -2298,6 +2529,9 @@ namespace Aura
                     AddBoardHit(cell, piece);
                 else if (!state.IsPreplaced(piece.id))
                     AddHintBadge(cell);
+                if (state.IsFrozenPiece(piece.id))
+                    AddFrozenBadge(cell);
+                AddCoveredSpotRings(cell, piece);
             }
             DrawTutorialAids();
             UpdateUndoVisual();
@@ -2356,6 +2590,20 @@ namespace Aura
             motionBusy = false;
         }
 
+        IEnumerator RejectFrozen(string id, bool onBoard)
+        {
+            RectTransform cell = onBoard
+                ? placedLayer.Find(id) as RectTransform
+                : (SlotById(id) != null ? SlotById(id).slabRect : null);
+            motionBusy = true;
+            Haptics.Miss();
+            if (messageText != null)
+                messageText.text = "Frozen";
+            if (cell != null)
+                yield return Motion.ShakeX(cell, 18f, 0.2f);
+            motionBusy = false;
+        }
+
         TraySlot SlotOf(PieceControl control)
         {
             foreach (var slot in slots)
@@ -2407,6 +2655,11 @@ namespace Aura
             slot.slabRect.localRotation = Quaternion.identity;
             slot.slabRect.localScale = Vector3.one;
             SetPiece(slot.slab, ColorOf(slot.id));
+            var frozenMark = slot.slabRect.Find("Frozen");
+            if (state.IsFrozenPiece(slot.id))
+                AddFrozenBadge(slot.slabRect);
+            else if (frozenMark != null)
+                Destroy(frozenMark.gameObject);
             slot.label.rectTransform.anchorMin = new Vector2(0f, 0f);
             slot.label.rectTransform.anchorMax = new Vector2(1f, 0.24f);
             slot.label.rectTransform.offsetMin = Vector2.zero;
@@ -2532,7 +2785,10 @@ namespace Aura
             confirmPanel.anchorMin = confirmPanel.anchorMax = new Vector2(0.5f, 0.5f);
             confirmPanel.sizeDelta = new Vector2(Mathf.Min(820f, width), 420f);
             if (movesPanel != null)
-                SizeCentered(movesPanel, Mathf.Min(820f, width), 420f);
+            {
+                bool mercy = keepGoingButton != null && keepGoingButton.gameObject.activeSelf;
+                SizeCentered(movesPanel, Mathf.Min(820f, width), mercy ? 540f : 420f);
+            }
             if (debugPanel != null)
                 SizeCentered(debugPanel, Mathf.Min(820f, width), 520f);
             FitSlice(winPanel.GetComponent<Image>(), 48f, 36f);
@@ -2563,25 +2819,25 @@ namespace Aura
 
         void DrawNumbers(float frameLeft, float frameTop, float rim, float numberH)
         {
-            var old = root.Find("Numbers");
-            if (old != null)
-                Destroy(old.gameObject);
-            var numbers = MakeRect("Numbers", root);
-            Stretch(numbers);
-            float originX = -root.rect.xMin;
-            float originY = -root.rect.yMax;
+            for (int i = root.childCount - 1; i >= 0; i--)
+            {
+                var child = root.GetChild(i);
+                if (child.name.StartsWith("GridNum"))
+                    Destroy(child.gameObject);
+            }
+            int boardIndex = boardFrame != null ? boardFrame.GetSiblingIndex() : 0;
             for (int i = 0; i < 8; i++)
             {
-                var col = MakeText(numbers, (i + 1).ToString(), 32, new Color(1f, 1f, 1f, 0.9f), fontSemiBold);
-                col.rectTransform.anchorMin = col.rectTransform.anchorMax = new Vector2(0f, 1f);
-                col.rectTransform.pivot = new Vector2(0f, 1f);
-                col.rectTransform.anchoredPosition = new Vector2(frameLeft + originX + rim + i * pitch, frameTop + originY + numberH);
-                col.rectTransform.sizeDelta = new Vector2(pitch, numberH);
-                var row = MakeText(numbers, (i + 1).ToString(), 32, new Color(1f, 1f, 1f, 0.9f), fontSemiBold);
-                row.rectTransform.anchorMin = row.rectTransform.anchorMax = new Vector2(0f, 1f);
-                row.rectTransform.pivot = new Vector2(0f, 1f);
-                row.rectTransform.anchoredPosition = new Vector2(frameLeft + originX - numberH, frameTop + originY - rim - i * pitch);
-                row.rectTransform.sizeDelta = new Vector2(numberH, pitch);
+                var col = MakeText(root, (i + 1).ToString(), 28, new Color(1f, 1f, 1f, 0.7f), fontSemiBold);
+                col.gameObject.name = "GridNumC" + i;
+                col.raycastTarget = false;
+                Place(col.rectTransform, frameLeft + rim + i * pitch, frameTop, pitch, numberH);
+                col.rectTransform.SetSiblingIndex(boardIndex);
+                var row = MakeText(root, (i + 1).ToString(), 28, new Color(1f, 1f, 1f, 0.7f), fontSemiBold);
+                row.gameObject.name = "GridNumR" + i;
+                row.raycastTarget = false;
+                Place(row.rectTransform, frameLeft - numberH, frameTop - rim - (i + 1) * pitch, numberH, pitch);
+                row.rectTransform.SetSiblingIndex(boardIndex);
             }
         }
 
@@ -2706,7 +2962,7 @@ namespace Aura
                 return;
             image.sprite = SpriteFor(color);
             image.type = Image.Type.Sliced;
-            image.color = ThemePiece(color, PieceTint(color));
+            image.color = PieceTint(color);
             FitSlice(image, color == "violet" || color == "white" ? 16f : 18f);
         }
 
@@ -2719,35 +2975,12 @@ namespace Aura
 
         Color EmptyTint()
         {
-            switch (equippedTheme)
-            {
-                case 1: return Hex("F8DFC0");
-                case 3: return Hex("FFF6D8");
-                case 4: return Hex("E7F0D8");
-                case 6: return Hex("FFE9A8");
-                case 7: return Hex("4A5160");
-                default: return Color.white;
-            }
+            return NeonOn() ? Hex("C8F4FF") : Color.white;
         }
 
         Color FrameTint()
         {
-            switch (equippedTheme)
-            {
-                case 1: return Hex("FFD9A8");
-                case 4: return Hex("8FBF7A");
-                case 7: return Hex("2A3140");
-                default: return Color.white;
-            }
-        }
-
-        Color ThemePiece(string color, Color baseColor)
-        {
-            if (equippedTheme == 2)
-                return Color.Lerp(baseColor, Hex("3EC4D6"), 0.28f);
-            if (equippedTheme == 5)
-                return Color.Lerp(baseColor, Color.white, 0.12f);
-            return baseColor;
+            return NeonOn() ? Hex("5C7CFF") : Color.white;
         }
 
         void FitSlice(Image image, float borderPixels, float target = -1f)
@@ -2769,6 +3002,7 @@ namespace Aura
             var tutorialAsset = Resources.Load<TextAsset>("Data/tutorial_levels");
             var mainAsset = Resources.Load<TextAsset>("Data/levels");
             var specialAsset = Resources.Load<TextAsset>("Data/special_levels");
+            var packAsset = Resources.Load<TextAsset>("Data/campaign_levels");
             var campaignAsset = Resources.Load<TextAsset>("Data/campaign");
             LevelCatalog tutorial = null;
             if (tutorialAsset != null)
@@ -2803,6 +3037,15 @@ namespace Aura
             if (specials != null && specials.levels != null)
             {
                 foreach (var lvl in specials.levels)
+                {
+                    if (lvl != null && !string.IsNullOrEmpty(lvl.id))
+                        specialMap[lvl.id] = lvl;
+                }
+            }
+            SpecialCatalog pack = packAsset != null ? JsonUtility.FromJson<SpecialCatalog>(packAsset.text) : null;
+            if (pack != null && pack.levels != null)
+            {
+                foreach (var lvl in pack.levels)
                 {
                     if (lvl != null && !string.IsNullOrEmpty(lvl.id))
                         specialMap[lvl.id] = lvl;
@@ -2861,12 +3104,20 @@ namespace Aura
                 type = spec.type,
                 difficulty = spec.type,
                 unused = spec.unused,
+                unusedPieces = spec.unusedPieces,
+                rotateCap = spec.rotateCap,
                 rules = spec.rules,
                 wrongPieces = spec.wrongPieces,
                 black = spec.black,
                 toPlace = spec.toPlace,
                 solution = spec.solution,
-                initial = spec.initial
+                initial = spec.initial,
+                preplaced = spec.preplaced,
+                rotationNeeded = spec.rotationNeeded,
+                coachText = spec.coachText,
+                intro = spec.intro,
+                spots = spec.spots,
+                frozen = spec.frozen
             };
         }
 
@@ -2898,6 +3149,8 @@ namespace Aura
             clone.par = entry.par;
             clone.moveLimit = entry.moveLimit;
             clone.intro = entry.intro;
+            clone.modifier = entry.modifier;
+            clone.timeLimitSec = entry.timeLimitSec;
             if (!string.IsNullOrEmpty(entry.coachText))
                 clone.coachText = entry.coachText;
             if (entry.source == "color" || entry.source == "decoy" || entry.source == "rescue")
@@ -2950,13 +3203,40 @@ namespace Aura
 
         string LevelHintLine()
         {
+            var parts = new System.Collections.Generic.List<string>();
+            if (state.IsSpots)
+                parts.Add("Match the dot colors");
+            if (state.IsFrozen)
+                parts.Add("Frozen pieces can't turn");
+            if (SpeedClockActive())
+                parts.Add("Beat the clock");
+            if (state.HasRule("doublespare"))
+                parts.Add("Leave two pieces in the tray");
+            else if (state.IsDecoy)
+                parts.Add("Use 7 of 8 pieces");
             if (state.IsColor)
-                return "Same colors can't touch";
-            if (state.IsDecoy)
-                return "Use 7 of 8 pieces";
+                parts.Add("Same colors can't touch");
             if (state.IsRescue)
-                return "Fix the misplaced pieces";
-            return "";
+                parts.Add("Fix the misplaced pieces");
+            if (state.IsMustTouch)
+                parts.Add("Matching colors must touch");
+            if (state.HasRule("keystone"))
+                parts.Add("A locked piece is already set");
+            if (state.HasRule("islands"))
+                parts.Add("Stay inside a room");
+            if (state.IsBorder)
+                parts.Add("Every piece must touch the edge");
+            if (state.IsStoneHug)
+                parts.Add("Every piece must touch black");
+            if (state.IsBigFirst)
+                parts.Add("Biggest leftover piece first");
+            if (state.HasRotateCap)
+                parts.Add("Only " + state.level.rotateCap + " turns");
+            if (state.IsNoUndo)
+                parts.Add("Undo is off this level");
+            if (parts.Count == 0)
+                return "";
+            return string.Join(", ", parts);
         }
 
         static Color TagColor(string tag)
@@ -3014,6 +3294,22 @@ namespace Aura
                 headerStars.text = TotalStars().ToString();
             if (movesLabel == null)
                 return;
+            if (SpeedClockActive())
+            {
+                int secs = Mathf.Max(0, Mathf.CeilToInt(timeLeft));
+                int mm = secs / 60;
+                int ss = secs % 60;
+                movesLabel.text = "Time " + mm + ":" + ss.ToString("00");
+                if (movesPillImage != null)
+                    movesPillImage.color = Color.white;
+                if (secs <= 10)
+                    movesLabel.color = Hex("D32F2F");
+                else if (secs <= 30)
+                    movesLabel.color = Hex("E65100");
+                else
+                    movesLabel.color = Hex("2B2B2B");
+                return;
+            }
             if (!state.HasMoveLimit)
             {
                 movesLabel.text = "";
@@ -3030,16 +3326,57 @@ namespace Aura
                 movesLabel.color = Hex("2B2B2B");
         }
 
+        void TickSpeedClock()
+        {
+            if (!SpeedClockActive() || timeFailed || celebrating || state.IsComplete())
+                return;
+            if (!hudLanded || boardIntroActive || OverlayBusy() || motionBusy || hintRoutine != null)
+                return;
+            timeLeft -= Time.unscaledDeltaTime;
+            if (timeLeft <= 0f)
+            {
+                timeLeft = 0f;
+                ShowTimeUp();
+            }
+            UpdateMovesHud();
+        }
+
         string LevelTypeTitle()
         {
             var tag = state.level != null ? state.level.tag : "";
             string kind = "Classic";
-            if (state.IsColor)
+            if (state.HasRule("doublespare"))
+                kind = "Double Spare";
+            else if (state.IsSpots && state.IsFrozen)
+                kind = "Spots & Frozen";
+            else if (state.IsSpots)
+                kind = "Paint Spots";
+            else if (state.IsFrozen)
+                kind = "Frozen Piece";
+            else if (state.IsColor)
                 kind = "Color Clash";
             else if (state.IsDecoy)
                 kind = "Odd One Out";
             else if (state.IsRescue)
                 kind = "Rescue";
+            else if (state.IsMustTouch)
+                kind = "Must Touch";
+            else if (state.HasRule("keystone"))
+                kind = "Keystone";
+            else if (state.HasRule("islands"))
+                kind = "Islands";
+            else if (state.IsBorder)
+                kind = "Border Seat";
+            else if (state.IsStoneHug)
+                kind = "Stone Hug";
+            else if (state.IsBigFirst)
+                kind = "Big First";
+            else if (state.HasRotateCap)
+                kind = "Turn Limit";
+            else if (state.IsNoUndo)
+                kind = "No Undo";
+            if (SpeedClockActive() && kind == "Classic")
+                kind = "Speed";
             if (tag == "boss")
                 return "Boss " + kind;
             if (tag == "hard")
@@ -3057,7 +3394,15 @@ namespace Aura
                 briefingBody.text = string.IsNullOrEmpty(body) ? "Fill every empty cell" : body;
             }
             if (briefingMoves != null)
-                briefingMoves.text = state.HasMoveLimit ? "Moves " + state.movesLeft : "";
+            {
+                if (SpeedClockActive())
+                {
+                    int secs = Mathf.Max(0, Mathf.CeilToInt(timeLeft > 0f ? timeLeft : state.level.timeLimitSec));
+                    briefingMoves.text = "Time " + (secs / 60) + ":" + (secs % 60).ToString("00");
+                }
+                else
+                    briefingMoves.text = state.HasMoveLimit ? "Moves " + state.movesLeft : "";
+            }
             if (briefingStars != null)
                 briefingStars.text = TotalStars().ToString();
         }
@@ -3218,11 +3563,81 @@ namespace Aura
 
         void ShowOutOfMoves()
         {
+            ShowFail("Out of moves!", "Retry this level, or go back to the start.");
+        }
+
+        void ShowTimeUp()
+        {
+            if (timeFailed)
+                return;
+            timeFailed = true;
+            ShowFail("Time's up!", "Retry this level, or go back to the start.");
+        }
+
+        void ShowFail(string title, string body)
+        {
             if (movesPanel == null || celebrating)
                 return;
             Haptics.Miss();
-            messageText.text = "Out of moves!";
+            if (messageText != null)
+                messageText.text = title;
+            if (movesTitle != null)
+                movesTitle.text = title;
+            if (movesBodyLabel != null)
+                movesBodyLabel.text = body;
+            NoteLevelFail();
+            if (keepGoingButton != null)
+                keepGoingButton.gameObject.SetActive(CanOfferMercy());
             ShowOverlay(movesPanel);
+            Layout();
+        }
+
+        int CurrentGlobal()
+        {
+            return state != null && state.level != null && state.level.global > 0 ? state.level.global : levelIndex + 1;
+        }
+
+        void NoteLevelFail()
+        {
+            int global = CurrentGlobal();
+            int n = PlayerPrefs.GetInt(GameState.FailCountKey(global), 0) + 1;
+            PlayerPrefs.SetInt(GameState.FailCountKey(global), n);
+            PlayerPrefs.Save();
+        }
+
+        bool CanOfferMercy()
+        {
+            int global = CurrentGlobal();
+            return PlayerPrefs.GetInt(GameState.FailCountKey(global), 0) >= 3
+                && PlayerPrefs.GetInt(GameState.MercyUsedKey(global), 0) == 0;
+        }
+
+        void ClearLevelFailStreak()
+        {
+            int global = CurrentGlobal();
+            PlayerPrefs.SetInt(GameState.FailCountKey(global), 0);
+            PlayerPrefs.SetInt(GameState.MercyUsedKey(global), 0);
+            PlayerPrefs.Save();
+        }
+
+        void OnKeepGoing()
+        {
+            int global = CurrentGlobal();
+            PlayerPrefs.SetInt(GameState.MercyUsedKey(global), 1);
+            PlayerPrefs.Save();
+            if (SpeedClockActive() || (state != null && state.HasSpeed))
+            {
+                timeLeft += 30f;
+                timeFailed = false;
+            }
+            else
+                state.GrantMercyMoves(3);
+            if (keepGoingButton != null)
+                keepGoingButton.gameObject.SetActive(false);
+            HideOverlayNow();
+            if (messageText != null)
+                messageText.text = "Keep going";
+            UpdateMovesHud();
         }
 
         int TotalStars()
@@ -3236,24 +3651,14 @@ namespace Aura
             return total;
         }
 
-        string RecordStars(int earned)
+        void RecordStars(int earned)
         {
             int global = state.level != null && state.level.global > 0 ? state.level.global : levelIndex + 1;
             string key = "GridAura.BestStars." + global;
             int prev = PlayerPrefs.GetInt(key, 0);
             if (earned > prev)
                 PlayerPrefs.SetInt(key, earned);
-            int claimed = PlayerPrefs.GetInt("GridAura.ChestsClaimed", 0);
-            int total = TotalStars();
-            string unlocked = null;
-            while (claimed < ChestAt.Length && total >= ChestAt[claimed])
-            {
-                unlocked = ChestRewards[claimed];
-                claimed++;
-            }
-            PlayerPrefs.SetInt("GridAura.ChestsClaimed", claimed);
             PlayerPrefs.Save();
-            return unlocked;
         }
 
         IEnumerator WiggleWrongPieces()
@@ -3267,6 +3672,82 @@ namespace Aura
                 if (cell != null)
                     StartCoroutine(Motion.Punch(cell, 1.1f, 0.28f));
             }
+        }
+
+        static Color SpotTint(string color)
+        {
+            switch (color)
+            {
+                case "red": return Hex("E23B3B");
+                case "blue": return Hex("2F6BFF");
+                case "yellow": return Hex("F5C400");
+                case "violet":
+                case "white": return Hex("8B5CFF");
+                default: return Color.white;
+            }
+        }
+
+        void AddSpotDot(RectTransform cell, string color, bool ring)
+        {
+            var dot = MakeRect(ring ? "SpotRing" : "Spot", cell);
+            dot.anchorMin = dot.anchorMax = new Vector2(0.5f, 0.5f);
+            dot.pivot = new Vector2(0.5f, 0.5f);
+            float size = ring ? 0.42f : 0.34f;
+            dot.anchorMin = new Vector2(0.5f - size * 0.5f, 0.5f - size * 0.5f);
+            dot.anchorMax = new Vector2(0.5f + size * 0.5f, 0.5f + size * 0.5f);
+            dot.offsetMin = dot.offsetMax = Vector2.zero;
+            var image = dot.gameObject.AddComponent<Image>();
+            image.sprite = settingsToggleKnobSprite != null ? settingsToggleKnobSprite : toggleKnobSprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            image.color = ring ? Color.white : SpotTint(color);
+        }
+
+        void AddCoveredSpotRings(RectTransform cell, PlacedPiece piece)
+        {
+            if (!state.IsSpots || piece == null || state.level == null || state.level.spots == null)
+                return;
+            string mine = state.PieceColorName(piece.id);
+            foreach (var spot in state.level.spots)
+            {
+                if (spot == null)
+                    continue;
+                if (spot.row < piece.row || spot.row >= piece.row + piece.h || spot.col < piece.col || spot.col >= piece.col + piece.w)
+                    continue;
+                if (!string.Equals(spot.color, mine, System.StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var ring = MakeRect("SpotRing", cell);
+                float x = (spot.col - piece.col + 0.5f) / piece.w;
+                float y = 1f - (spot.row - piece.row + 0.5f) / piece.h;
+                ring.anchorMin = ring.anchorMax = new Vector2(x, y);
+                ring.pivot = new Vector2(0.5f, 0.5f);
+                ring.sizeDelta = new Vector2(18f, 18f);
+                var image = ring.gameObject.AddComponent<Image>();
+                image.sprite = settingsToggleKnobSprite != null ? settingsToggleKnobSprite : toggleKnobSprite;
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+                image.color = new Color(1f, 1f, 1f, 0.9f);
+            }
+        }
+
+        void AddFrozenBadge(RectTransform cell)
+        {
+            if (cell == null || cell.Find("Frozen") != null)
+                return;
+            var badge = MakeRect("Frozen", cell);
+            badge.anchorMin = badge.anchorMax = new Vector2(0f, 1f);
+            badge.pivot = new Vector2(0f, 1f);
+            badge.anchoredPosition = new Vector2(8f, -8f);
+            badge.sizeDelta = new Vector2(28f, 28f);
+            var image = badge.gameObject.AddComponent<Image>();
+            image.sprite = settingsToggleKnobSprite != null ? settingsToggleKnobSprite : toggleKnobSprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            image.color = Hex("B8E8FF");
+            var flake = MakeText(badge, "*", 22, Hex("1A4A66"), fontBlack);
+            flake.alignment = TextAlignmentOptions.Center;
+            Stretch(flake.rectTransform);
+            flake.raycastTarget = false;
         }
 
         void AddHintBadge(RectTransform cell)
@@ -4247,6 +4728,8 @@ namespace Aura
                     face = Hex("1E7BFF"); highlight = Hex("6FB0FF"); shade = Hex("0E4DB5"); break;
                 case "yellow":
                     face = Hex("FFD21F"); highlight = Hex("FFE97A"); shade = Hex("C99A00"); break;
+                case "green":
+                    face = Hex("2E9B57"); highlight = Hex("5ED18A"); shade = Hex("1B6B3A"); break;
                 case "violet":
                 case "white":
                     face = Hex("8B5CFF"); highlight = Hex("C4A8FF"); shade = Hex("5A32C8"); break;
@@ -4318,8 +4801,9 @@ namespace Aura
             }
             hintsUsedText = MakeText(winPanel, "Hints used: 0", 42, new Color(1f, 1f, 1f, 0.85f), fontBold);
             Pin(hintsUsedText.rectTransform, 0.1f, 0.37f, 0.9f, 0.44f);
-            starsTotalText = MakeText(winPanel, "Stars 0", 36, Hex("FFD21F"), fontBold);
+            starsTotalText = MakeText(winPanel, "", 36, Hex("FFD21F"), fontBold);
             Pin(starsTotalText.rectTransform, 0.1f, 0.30f, 0.9f, 0.37f);
+            starsTotalText.gameObject.SetActive(false);
             var next = MakePill(winPanel, "Next", yellowButtonSprite, "Next Level", Hex("1A1A1A"), out nextLabel);
             nextLabel.font = tmpBlack;
             Pin(next, 0.1f, 0.21f, 0.9f, 0.35f);
@@ -4351,7 +4835,7 @@ namespace Aura
             BindButton(useHint.gameObject, UseHint);
             var more = MakePill(hintPanel, "MoreHints", greenButtonSprite, "Get More Hints", Color.white, out _);
             Pin(more, 0.1f, 0.06f, 0.9f, 0.18f);
-            BindButton(more.gameObject, () => messageText.text = "Shop coming soon");
+            BindButton(more.gameObject, OpenShopFromPlay);
 
             BuildDebugPanel();
             HideOverlayNow();
@@ -4414,7 +4898,15 @@ namespace Aura
             menuRoot = MakeRect("Menu", root);
             Stretch(menuRoot);
             var bg = menuRoot.gameObject.AddComponent<Image>();
-            bg.color = Hex("0E1016");
+            if (settingsBgSprite != null)
+            {
+                bg.sprite = settingsBgSprite;
+                bg.type = Image.Type.Simple;
+                bg.preserveAspect = false;
+                bg.color = Color.white;
+            }
+            else
+                bg.color = Hex("0E1016");
             bg.raycastTarget = true;
             var menuCanvas = menuRoot.gameObject.AddComponent<Canvas>();
             menuCanvas.overrideSorting = true;
@@ -4444,7 +4936,6 @@ namespace Aura
             homeStarLabel = MakeText(starChip, "0", 28, Hex("1A1A1A"), fontBlack);
             homeStarLabel.alignment = TextAlignmentOptions.Center;
             Pin(homeStarLabel.rectTransform, 0.42f, 0.08f, 0.92f, 0.92f);
-            BindButton(starChip.gameObject, OpenThemes);
 
             var logo = MakeRect("Logo", homePanel);
             BuildHomeLogo(logo);
@@ -4461,26 +4952,41 @@ namespace Aura
             var levels = MakePill(homePanel, "Levels", blueButtonSprite, "Levels", Color.white, out _);
             Pin(levels, 0.12f, 0.17f, 0.88f, 0.29f);
             BindButton(levels.gameObject, OpenLevels);
-            homeStatus = MakeText(homePanel, "", 26, Hex("FFD21F"), fontBold);
+            homeStatus = MakeText(homePanel, "How to Play", 28, Hex("FFD21F"), fontBold);
             Pin(homeStatus.rectTransform, 0.1f, 0.12f, 0.9f, 0.17f);
+            homeStatus.raycastTarget = true;
+            BindButton(homeStatus.gameObject, OpenHowTo);
 
             MakeHomeRound(homePanel, "SettingsBtn", settingsButtonSprite, settingsGearSprite, OpenSettingsFromHome);
-            MakeHomeRound(homePanel, "ShopBtn", yellowButtonSprite, starSprite, OpenThemes);
-            var soundBtn = MakeHomeRound(homePanel, "SoundBtn", yellowButtonSprite, hintBulbSprite, ToggleHaptics);
+            MakeHomeRound(homePanel, "ShopBtn", yellowButtonSprite, iconCartSprite != null ? iconCartSprite : starSprite, OpenShop);
+            var soundBtn = MakeHomeRound(homePanel, "SoundBtn", yellowButtonSprite, iconSoundSprite != null ? iconSoundSprite : hintBulbSprite, ToggleSound);
             var soundIconRect = soundBtn.Find("Icon");
             if (soundIconRect != null)
                 soundIcon = soundIconRect.GetComponent<Image>();
 
             levelsPanel = MakeRect("Levels", menuRoot);
             Stretch(levelsPanel);
-            var levelsTitle = MakeText(levelsPanel, "Select Level", 48, Color.white, fontBlack);
-            Pin(levelsTitle.rectTransform, 0.18f, 0.90f, 0.82f, 0.98f);
-            var levelsBack = MakePill(levelsPanel, "Back", blueButtonSprite, "Back", Color.white, out _);
-            Pin(levelsBack, 0.04f, 0.90f, 0.22f, 0.98f);
-            BindButton(levelsBack.gameObject, BackFromMenu);
+            MakeMenuHeader(levelsPanel, "Select Level");
+            var tabs = MakeRect("Tabs", levelsPanel);
+            Pin(tabs, 0.05f, 0.80f, 0.95f, 0.88f);
+            levelTabButtons.Clear();
+            for (int i = 0; i < LevelTabs.Length; i++)
+            {
+                int tab = i;
+                var btn = MakeRect(LevelTabs[i], tabs);
+                btn.anchorMin = new Vector2(i / 4f, 0f);
+                btn.anchorMax = new Vector2((i + 1) / 4f, 1f);
+                btn.offsetMin = new Vector2(6f, 8f);
+                btn.offsetMax = new Vector2(-6f, -8f);
+                PaintSliced(btn, popupCardSprite, Hex("2A303C"));
+                var label = MakeText(btn, LevelTabs[i], 28, Color.white, fontBlack);
+                Stretch(label.rectTransform);
+                BindButton(btn.gameObject, () => SelectLevelTab(tab));
+                levelTabButtons.Add(btn);
+            }
             var viewport = MakeRect("Viewport", levelsPanel);
-            Pin(viewport, 0.04f, 0.02f, 0.96f, 0.88f);
-            viewport.gameObject.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.02f);
+            Pin(viewport, 0.04f, 0.02f, 0.96f, 0.79f);
+            viewport.gameObject.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.01f);
             viewport.gameObject.AddComponent<RectMask2D>();
             levelsContent = MakeRect("Content", viewport);
             levelsContent.anchorMin = new Vector2(0f, 1f);
@@ -4493,50 +4999,35 @@ namespace Aura
             scroll.horizontal = false;
             scroll.movementType = ScrollRect.MovementType.Elastic;
             scroll.scrollSensitivity = 48f;
-            BuildLevelTiles();
 
             settingsPanel = MakeRect("Settings", menuRoot);
             Stretch(settingsPanel);
-            var setTitle = MakeText(settingsPanel, "Settings", 56, Color.white, fontBlack);
-            Pin(setTitle.rectTransform, 0.1f, 0.84f, 0.9f, 0.96f);
-            var setBack = MakePill(settingsPanel, "Back", blueButtonSprite, "Back", Color.white, out _);
-            Pin(setBack, 0.08f, 0.72f, 0.92f, 0.82f);
-            BindButton(setBack.gameObject, BackFromMenu);
-            var hap = MakePill(settingsPanel, "Haptics", yellowButtonSprite, "Haptics On", Hex("1A1A1A"), out hapticsLabel);
-            Pin(hap, 0.08f, 0.58f, 0.92f, 0.70f);
-            BindButton(hap.gameObject, ToggleHaptics);
-            var jump = MakePill(settingsPanel, "Jump", greenButtonSprite, "Jump Level", Color.white, out _);
-            Pin(jump, 0.08f, 0.44f, 0.92f, 0.56f);
-            BindButton(jump.gameObject, ShowDebugPanel);
-            var shop = MakePill(settingsPanel, "Shop", blueButtonSprite, "Hint Shop", Color.white, out _);
-            Pin(shop, 0.08f, 0.30f, 0.92f, 0.42f);
-            BindButton(shop.gameObject, ShopSoon);
+            MakeMenuHeader(settingsPanel, "Settings");
+            soundToggle = MakeSettingsToggle(settingsPanel, "Sound", 0.755f, 0.835f, iconSoundSprite, ToggleSound);
+            musicToggle = MakeSettingsToggle(settingsPanel, "Music", 0.668f, 0.748f, iconMusicSprite, ToggleMusic);
+            hapticsToggle = MakeSettingsToggle(settingsPanel, "Haptics", 0.581f, 0.661f, iconHapticsSprite, ToggleHaptics);
+            relaxedToggle = MakeSettingsToggle(settingsPanel, "Relaxed Timers", 0.494f, 0.574f, iconThemeSprite, ToggleRelaxedTimers);
+            MakeSettingsChevron(settingsPanel, "Restore", 0.367f, 0.447f, iconCartSprite, RestorePurchases);
+            var restoreLabel = settingsPanel.Find("Restore") != null ? settingsPanel.Find("Restore").Find("Caption") : null;
+            if (restoreLabel != null)
+                restoreLabel.GetComponent<TextMeshProUGUI>().text = "Restore Purchases";
+            MakeSettingsChevron(settingsPanel, "Privacy", 0.280f, 0.360f, iconShieldSprite, OpenPrivacy);
+            var privacyLabel = settingsPanel.Find("Privacy") != null ? settingsPanel.Find("Privacy").Find("Caption") : null;
+            if (privacyLabel != null)
+                privacyLabel.GetComponent<TextMeshProUGUI>().text = "Privacy Policy";
+            MakeSettingsChevron(settingsPanel, "Rate", 0.193f, 0.273f, iconStarSprite, RateUs);
+            var rateLabel = settingsPanel.Find("Rate") != null ? settingsPanel.Find("Rate").Find("Caption") : null;
+            if (rateLabel != null)
+                rateLabel.GetComponent<TextMeshProUGUI>().text = "Rate Us";
+            var version = MakeText(settingsPanel, "v1.0", 26, new Color(1f, 1f, 1f, 0.35f), fontBold);
+            Pin(version.rectTransform, 0.2f, 0.04f, 0.8f, 0.10f);
+            version.raycastTarget = true;
+            BindButton(version.gameObject, TapVersion);
 
-            themesPanel = MakeRect("Themes", menuRoot);
-            Stretch(themesPanel);
-            var themeTitle = MakeText(themesPanel, "Themes", 56, Color.white, fontBlack);
-            Pin(themeTitle.rectTransform, 0.18f, 0.90f, 0.82f, 0.98f);
-            var themeBack = MakePill(themesPanel, "Back", blueButtonSprite, "Back", Color.white, out _);
-            Pin(themeBack, 0.04f, 0.90f, 0.22f, 0.98f);
-            BindButton(themeBack.gameObject, BackFromMenu);
-            var themeNote = MakeText(themesPanel, "Unlock chests with stars.", 28, new Color(1f, 1f, 1f, 0.7f), fontBold);
-            Pin(themeNote.rectTransform, 0.08f, 0.84f, 0.92f, 0.90f);
-            themeLabels.Clear();
-            string[] names = new string[ChestRewards.Length + 1];
-            names[0] = "Classic Board";
-            for (int i = 0; i < ChestRewards.Length; i++)
-                names[i + 1] = ChestRewards[i];
-            for (int i = 0; i < names.Length; i++)
-            {
-                int theme = i;
-                var row = MakePill(themesPanel, "Theme" + i, i == 0 ? yellowButtonSprite : blueButtonSprite, names[i], i == 0 ? Hex("1A1A1A") : Color.white, out var label);
-                float yMax = 0.82f - i * 0.09f;
-                float yMin = yMax - 0.08f;
-                Pin(row, 0.08f, yMin, 0.92f, yMax);
-                themeLabels.Add(label);
-                BindButton(row.gameObject, () => EquipTheme(theme));
-            }
-
+            BuildShopPanel();
+            BuildHowToPanel();
+            BuildThemePanel();
+            BuildPrivacyPanel();
             menuRoot.gameObject.SetActive(false);
         }
 
@@ -4643,91 +5134,151 @@ namespace Aura
             FitSlice(button.GetComponent<Image>(), 36f, size * 0.42f);
         }
 
-        void BuildLevelTiles()
+        void SelectLevelTab(int tab)
         {
-            levelTiles.Clear();
-            int count = Mathf.Max(1, allLevels.Count);
-            int cols = 4;
-            float rowH = 110f;
-            float pad = 10f;
-            int rows = Mathf.CeilToInt(count / (float)cols);
-            levelsContent.sizeDelta = new Vector2(0f, rows * (rowH + pad) + pad);
-            for (int i = 0; i < count; i++)
-            {
-                int index = i;
-                var tile = MakeRect("L" + i, levelsContent);
-                var image = tile.gameObject.AddComponent<Image>();
-                image.sprite = levelSprite;
-                image.type = Image.Type.Sliced;
-                image.color = Color.white;
-                var num = MakeText(tile, (i + 1).ToString(), 36, Hex("1A1A1A"), fontBlack);
-                num.gameObject.name = "Num";
-                Pin(num.rectTransform, 0.06f, 0.42f, 0.94f, 0.92f);
-                var star = MakeText(tile, "", 22, Hex("C9A227"), fontBold);
-                star.gameObject.name = "Stars";
-                Pin(star.rectTransform, 0.06f, 0.06f, 0.94f, 0.42f);
-                BindButton(tile.gameObject, () => PlayLevelFromSelect(index));
-                levelTiles.Add(tile);
-            }
+            levelTab = Mathf.Clamp(tab, 0, 3);
+            RefreshLevelSelect();
+        }
+
+        static int TabStart(int tab)
+        {
+            if (tab <= 0)
+                return 0;
+            if (tab == 1)
+                return 50;
+            if (tab == 2)
+                return 100;
+            return 150;
+        }
+
+        int TabCount(int tab)
+        {
+            int start = TabStart(tab);
+            int end = tab >= 3 ? allLevels.Count : TabStart(tab + 1);
+            return Mathf.Max(0, Mathf.Min(end, allLevels.Count) - start);
         }
 
         void RefreshLevelSelect()
         {
-            int cols = 4;
-            float rowH = 110f;
-            float pad = 10f;
-            float width = levelsContent != null ? Mathf.Max(200f, levelsContent.rect.width) : 800f;
-            float tileW = (width - pad * (cols + 1)) / cols;
-            int rows = Mathf.CeilToInt(Mathf.Max(1, levelTiles.Count) / (float)cols);
-            if (levelsContent != null)
-                levelsContent.sizeDelta = new Vector2(0f, rows * (rowH + pad) + pad);
-            for (int i = 0; i < levelTiles.Count; i++)
+            if (levelsContent == null)
+                return;
+            for (int t = 0; t < levelTabButtons.Count; t++)
             {
+                var image = levelTabButtons[t].GetComponent<Image>();
+                if (image != null)
+                    image.color = t == levelTab ? Hex("1A1F28") : Hex("3A4150");
+            }
+            int start = TabStart(levelTab);
+            int count = TabCount(levelTab);
+            while (levelTiles.Count < count)
+            {
+                int slot = levelTiles.Count;
+                var tile = MakeLevelTile(slot);
+                levelTiles.Add(tile);
+            }
+            for (int i = 0; i < levelTiles.Count; i++)
+                levelTiles[i].gameObject.SetActive(i < count);
+
+            int cols = 5;
+            float pad = 14f;
+            float width = Mathf.Max(200f, levelsContent.rect.width);
+            if (width < 50f)
+                width = 980f;
+            float tileW = (width - pad * (cols + 1)) / cols;
+            float tileH = tileW * 1.18f;
+            int rows = Mathf.Max(1, Mathf.CeilToInt(count / (float)cols));
+            levelsContent.sizeDelta = new Vector2(0f, rows * (tileH + pad) + pad);
+            int current = ContinueIndex();
+            for (int i = 0; i < count; i++)
+            {
+                int index = start + i;
                 var tile = levelTiles[i];
                 int col = i % cols;
                 int row = i / cols;
                 tile.anchorMin = tile.anchorMax = new Vector2(0f, 1f);
                 tile.pivot = new Vector2(0f, 1f);
-                tile.sizeDelta = new Vector2(tileW, rowH);
-                tile.anchoredPosition = new Vector2(pad + col * (tileW + pad), -(pad + row * (rowH + pad)));
-                bool open = LevelUnlocked(i);
-                int stars = StarsAt(i);
-                var image = tile.GetComponent<Image>();
-                if (image != null)
-                    image.color = open ? Color.white : new Color(1f, 1f, 1f, 0.45f);
-                var num = tile.Find("Num");
+                tile.sizeDelta = new Vector2(tileW, tileH);
+                tile.anchoredPosition = new Vector2(pad + col * (tileW + pad), -(pad + row * (tileH + pad)));
+                bool open = LevelUnlocked(index);
+                int stars = StarsAt(index);
+                bool here = open && index == current && stars == 0;
+                var face = tile.Find("Face") as RectTransform;
+                var glow = tile.Find("Glow") as RectTransform;
+                var num = tile.Find("Num") != null ? tile.Find("Num").GetComponent<TextMeshProUGUI>() : null;
+                var lockIcon = tile.Find("Lock") as RectTransform;
+                if (glow != null)
+                    glow.gameObject.SetActive(here);
+                var faceImage = face != null ? face.GetComponent<Image>() : tile.GetComponent<Image>();
+                if (faceImage != null)
+                {
+                    if (!open)
+                        faceImage.color = Hex("2A2F38");
+                    else if (here)
+                        faceImage.color = Hex("1C2028");
+                    else
+                        faceImage.color = LevelCandy[col];
+                }
                 if (num != null)
                 {
-                    var text = num.GetComponent<TextMeshProUGUI>();
-                    if (text != null)
-                        text.text = GlobalOf(i).ToString();
+                    num.text = GlobalOf(index).ToString();
+                    num.color = Color.white;
+                    num.gameObject.SetActive(open);
                 }
-                var star = tile.Find("Stars");
-                if (star != null)
+                if (lockIcon != null)
+                    lockIcon.gameObject.SetActive(!open);
+                for (int s = 0; s < 3; s++)
                 {
-                    var text = star.GetComponent<TextMeshProUGUI>();
-                    if (text != null)
-                        text.text = !open ? "Locked" : (stars > 0 ? stars + " star" : "Play");
+                    var star = tile.Find("Star" + s) as RectTransform;
+                    if (star == null)
+                        continue;
+                    star.gameObject.SetActive(open && stars > 0);
+                    var starImage = star.GetComponent<Image>();
+                    if (starImage != null)
+                        starImage.color = s < stars ? Hex("FFD21F") : new Color(1f, 1f, 1f, 0.18f);
                 }
                 var press = tile.GetComponent<TapPress>();
                 if (press != null)
+                {
+                    int playIndex = index;
+                    press.click = () => PlayLevelFromSelect(playIndex);
                     press.enabled = open;
+                }
             }
         }
 
-        void RefreshThemes()
+        RectTransform MakeLevelTile(int slot)
         {
-            string[] names = new string[ChestRewards.Length + 1];
-            names[0] = "Classic Board";
-            for (int i = 0; i < ChestRewards.Length; i++)
-                names[i + 1] = ChestRewards[i];
-            for (int i = 0; i < themeLabels.Count && i < names.Length; i++)
+            var tile = MakeRect("L" + slot, levelsContent);
+            var hit = tile.gameObject.AddComponent<Image>();
+            hit.color = Color.clear;
+            hit.raycastTarget = true;
+            var glow = MakeRect("Glow", tile);
+            Stretch(glow, -8f);
+            PaintSliced(glow, popupCardSprite, Hex("FFD21F"));
+            glow.GetComponent<Image>().raycastTarget = false;
+            glow.gameObject.SetActive(false);
+            var face = MakeRect("Face", tile);
+            Stretch(face, 2f);
+            PaintSliced(face, popupCardSprite, Hex("2A2F38"));
+            face.GetComponent<Image>().raycastTarget = false;
+            var num = MakeText(tile, "", 40, Color.white, fontBlack);
+            num.gameObject.name = "Num";
+            Pin(num.rectTransform, 0.08f, 0.38f, 0.92f, 0.92f);
+            MakePadlock(tile);
+            for (int s = 0; s < 3; s++)
             {
-                bool open = ThemeUnlocked(i);
-                bool on = equippedTheme == i;
-                string mark = on ? " (On)" : (open ? "" : " (Locked)");
-                themeLabels[i].text = names[i] + mark;
+                var star = MakeRect("Star" + s, tile);
+                star.anchorMin = star.anchorMax = new Vector2(0.28f + s * 0.22f, 0.18f);
+                star.sizeDelta = new Vector2(28f, 28f);
+                star.anchoredPosition = Vector2.zero;
+                var image = star.gameObject.AddComponent<Image>();
+                image.sprite = starSprite;
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+                image.color = Hex("FFD21F");
             }
+            BindButton(tile.gameObject, () => { });
+            return tile;
         }
 
         void LayoutMenus()
@@ -4737,21 +5288,562 @@ namespace Aura
             Stretch(menuRoot);
             if (homePanel != null && homePanel.gameObject.activeSelf)
                 LayoutHome();
+            LayoutMenuHeader(levelsPanel);
+            LayoutMenuHeader(settingsPanel);
+            LayoutMenuHeader(shopPanel);
+            LayoutMenuHeader(howToPanel);
+            LayoutMenuHeader(themePanel);
+            LayoutMenuHeader(privacyPanel);
             LayoutPill(homePanel != null ? homePanel.Find("Play") as RectTransform : null, 128f);
             LayoutPill(homePanel != null ? homePanel.Find("Levels") as RectTransform : null, 118f);
-            LayoutPill(levelsPanel != null ? levelsPanel.Find("Back") as RectTransform : null, 72f);
-            LayoutPill(settingsPanel != null ? settingsPanel.Find("Back") as RectTransform : null, 100f);
-            LayoutPill(settingsPanel != null ? settingsPanel.Find("Haptics") as RectTransform : null, 100f);
-            LayoutPill(settingsPanel != null ? settingsPanel.Find("Jump") as RectTransform : null, 100f);
-            LayoutPill(settingsPanel != null ? settingsPanel.Find("Shop") as RectTransform : null, 100f);
-            LayoutPill(themesPanel != null ? themesPanel.Find("Back") as RectTransform : null, 72f);
-            if (themesPanel != null)
-            {
-                for (int i = 0; i <= ChestRewards.Length; i++)
-                    LayoutPill(themesPanel.Find("Theme" + i) as RectTransform, 88f);
-            }
+            LayoutPill(howToPanel != null ? howToPanel.Find("GotIt") as RectTransform : null, 110f);
+            LayoutPill(shopPanel != null ? shopPanel.Find("Restore") as RectTransform : null, 88f);
             if (levelsPanel != null && levelsPanel.gameObject.activeSelf)
                 RefreshLevelSelect();
+        }
+
+        void MakeMenuHeader(RectTransform panel, string title)
+        {
+            var back = MakeRect("Back", panel);
+            Pin(back, 0.04f, 0.88f, 0.16f, 0.97f);
+            PaintArt(back, settingsBackSprite != null ? settingsBackSprite : blueButtonSprite, true, false);
+            var chevron = MakeRect("Arrow", back);
+            Pin(chevron, 0.22f, 0.22f, 0.78f, 0.78f);
+            var arrow = chevron.gameObject.AddComponent<Image>();
+            arrow.sprite = iconBackSprite;
+            arrow.preserveAspect = true;
+            arrow.raycastTarget = false;
+            arrow.color = Color.white;
+            BindButton(back.gameObject, BackFromMenu);
+            var bar = MakeRect("TitleBar", panel);
+            Pin(bar, 0.20f, 0.88f, 0.72f, 0.97f);
+            PaintArt(bar, settingsTitleSprite != null ? settingsTitleSprite : levelSprite, false, true);
+            var label = MakeText(bar, title, 36, Hex("1A1A1A"), fontBlack);
+            Stretch(label.rectTransform);
+        }
+
+        void LayoutMenuHeader(RectTransform panel)
+        {
+            if (panel == null || !panel.gameObject.activeSelf)
+                return;
+            float w = panel.rect.width;
+            float h = panel.rect.height;
+            if (w < 8f || h < 8f)
+                return;
+            float pad = Mathf.Max(36f, w * 0.045f);
+            float back = Mathf.Clamp(h * 0.075f, 108f, 140f);
+            var backRect = panel.Find("Back") as RectTransform;
+            if (backRect != null)
+            {
+                backRect.anchorMin = backRect.anchorMax = new Vector2(0f, 1f);
+                backRect.pivot = new Vector2(0f, 1f);
+                backRect.anchoredPosition = new Vector2(pad, -pad);
+                backRect.sizeDelta = new Vector2(back, back);
+            }
+            var title = panel.Find("TitleBar") as RectTransform;
+            if (title != null)
+            {
+                float titleH = back * 0.9f;
+                title.anchorMin = title.anchorMax = new Vector2(0f, 1f);
+                title.pivot = new Vector2(0f, 1f);
+                title.anchoredPosition = new Vector2(pad + back + 18f, -pad - (back - titleH) * 0.5f);
+                title.sizeDelta = new Vector2(Mathf.Min(560f, w * 0.58f), titleH);
+            }
+        }
+
+        RectTransform MakeSettingsToggle(RectTransform parent, string name, float yMin, float yMax, Sprite icon, UnityEngine.Events.UnityAction action)
+        {
+            var row = MakeDarkRow(parent, name, yMin, yMax);
+            PlaceRowIcon(row, icon);
+            var caption = MakeText(row, name, 36, Color.white, fontExtraBold);
+            caption.gameObject.name = "Caption";
+            caption.alignment = TextAlignmentOptions.MidlineLeft;
+            Pin(caption.rectTransform, 0.18f, 0.1f, 0.66f, 0.9f);
+            var toggle = MakeToggle(row);
+            BindButton(row.gameObject, action);
+            return toggle;
+        }
+
+        void MakeSettingsChevron(RectTransform parent, string name, float yMin, float yMax, Sprite icon, UnityEngine.Events.UnityAction action)
+        {
+            var row = MakeDarkRow(parent, name, yMin, yMax);
+            PlaceRowIcon(row, icon);
+            var caption = MakeText(row, name, 34, Color.white, fontExtraBold);
+            caption.gameObject.name = "Caption";
+            caption.alignment = TextAlignmentOptions.MidlineLeft;
+            Pin(caption.rectTransform, 0.18f, 0.1f, 0.80f, 0.9f);
+            var arrow = MakeRect("Chevron", row);
+            Pin(arrow, 0.86f, 0.28f, 0.95f, 0.72f);
+            var image = arrow.gameObject.AddComponent<Image>();
+            image.sprite = iconChevronSprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            image.color = new Color(1f, 1f, 1f, 0.38f);
+            BindButton(row.gameObject, action);
+        }
+
+        RectTransform MakeDarkRow(Transform parent, string name, float yMin, float yMax)
+        {
+            var row = MakeRect(name, parent);
+            Pin(row, 0.055f, yMin, 0.945f, yMax);
+            PaintArt(row, settingsRowSprite != null ? settingsRowSprite : popupCardSprite, true, true);
+            if (settingsRowSprite == null)
+            {
+                var image = row.GetComponent<Image>();
+                if (image != null)
+                    image.color = Hex("22262F");
+            }
+            return row;
+        }
+
+        void PlaceRowIcon(RectTransform row, Sprite sprite)
+        {
+            var icon = MakeRect("Icon", row);
+            Pin(icon, 0.035f, 0.22f, 0.155f, 0.78f);
+            var image = icon.gameObject.AddComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            image.color = Color.white;
+        }
+
+        RectTransform MakeToggle(RectTransform row)
+        {
+            var toggle = MakeRect("Toggle", row);
+            toggle.anchorMin = toggle.anchorMax = new Vector2(1f, 0.5f);
+            toggle.pivot = new Vector2(1f, 0.5f);
+            toggle.sizeDelta = new Vector2(118f, 66f);
+            toggle.anchoredPosition = new Vector2(-24f, 0f);
+            var track = toggle.gameObject.AddComponent<Image>();
+            track.sprite = settingsToggleOnSprite != null ? settingsToggleOnSprite : toggleTrackSprite;
+            track.type = Image.Type.Sliced;
+            track.preserveAspect = false;
+            track.color = Color.white;
+            track.raycastTarget = false;
+            var knob = MakeRect("Knob", toggle);
+            knob.anchorMin = knob.anchorMax = new Vector2(0.5f, 0.5f);
+            knob.pivot = new Vector2(0.5f, 0.5f);
+            knob.sizeDelta = new Vector2(52f, 52f);
+            knob.anchoredPosition = new Vector2(26f, 0f);
+            var knobImage = knob.gameObject.AddComponent<Image>();
+            knobImage.sprite = settingsToggleKnobSprite != null ? settingsToggleKnobSprite : toggleKnobSprite;
+            knobImage.preserveAspect = true;
+            knobImage.color = Color.white;
+            knobImage.raycastTarget = false;
+            return toggle;
+        }
+
+        void SetToggle(RectTransform toggle, bool on)
+        {
+            if (toggle == null)
+                return;
+            var track = toggle.GetComponent<Image>();
+            if (track != null)
+            {
+                if (on)
+                {
+                    track.sprite = settingsToggleOnSprite != null ? settingsToggleOnSprite : toggleTrackSprite;
+                    track.color = Color.white;
+                }
+                else
+                {
+                    track.sprite = toggleTrackSprite != null ? toggleTrackSprite : settingsToggleOnSprite;
+                    track.color = Hex("4A4E58");
+                }
+                track.type = Image.Type.Sliced;
+            }
+            var knob = toggle.Find("Knob") as RectTransform;
+            if (knob != null)
+                knob.anchoredPosition = new Vector2(on ? 26f : -26f, 0f);
+        }
+
+        void PaintArt(RectTransform rect, Sprite sprite, bool hit, bool slice)
+        {
+            var image = rect.gameObject.GetComponent<Image>();
+            if (image == null)
+                image = rect.gameObject.AddComponent<Image>();
+            image.raycastTarget = hit;
+            image.color = Color.white;
+            image.sprite = sprite;
+            if (sprite != null && slice)
+                image.type = Image.Type.Sliced;
+            else
+            {
+                image.type = Image.Type.Simple;
+                image.preserveAspect = true;
+            }
+        }
+
+        void BuildShopPanel()
+        {
+            shopPanel = MakeRect("Shop", menuRoot);
+            Stretch(shopPanel);
+            MakeMenuHeader(shopPanel, "Shop");
+            MakeShopPack(shopPanel, "Pack5", 0.72f, 0.86f, 1, "5 Hints", "$0.99", false, () => BuyHints(5));
+            MakeShopPack(shopPanel, "Pack20", 0.56f, 0.70f, 3, "20 Hints", "$2.99", true, () => BuyHints(20));
+            MakeShopPack(shopPanel, "Pack50", 0.40f, 0.54f, 5, "50 Hints", "$5.99", false, () => BuyHints(50));
+            var bundle = MakeDarkRow(shopPanel, "Bundle", 0.22f, 0.38f);
+            var ring = MakeRect("Ring", bundle);
+            Stretch(ring, -6f);
+            PaintSliced(ring, popupCardSprite, Hex("7B5CFF"), false);
+            var inner = MakeRect("Inner", bundle);
+            Stretch(inner, 8f);
+            PaintSliced(inner, popupCardSprite, Hex("1B1E28"), false);
+            inner.SetAsLastSibling();
+            var mini = MakeRect("Mini", bundle);
+            Pin(mini, 0.04f, 0.18f, 0.22f, 0.82f);
+            BuildMiniGrid(mini, new[] { "red", "blue", "yellow", "violet" }, 2, 2);
+            var bundleLabel = MakeText(bundle, "Unlimited Hints\n+ Neon Theme", 30, Color.white, fontBlack);
+            bundleLabel.enableWordWrapping = true;
+            bundleLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            Pin(bundleLabel.rectTransform, 0.24f, 0.12f, 0.68f, 0.88f);
+            var bundleBuy = MakeRect("Buy", bundle);
+            Pin(bundleBuy, 0.70f, 0.28f, 0.96f, 0.72f);
+            PaintSliced(bundleBuy, greenButtonSprite, Color.white);
+            var bundlePrice = MakeText(bundleBuy, "$7.99", 30, Color.white, fontBlack);
+            Stretch(bundlePrice.rectTransform);
+            BindButton(bundleBuy.gameObject, BuyUnlimitedBundle);
+            var restore = MakePill(shopPanel, "Restore", popupCardSprite, "Restore Purchases", Color.white, out _);
+            Pin(restore, 0.12f, 0.08f, 0.88f, 0.18f);
+            var restoreImage = restore.GetComponent<Image>();
+            if (restoreImage != null)
+                restoreImage.color = Hex("22262F");
+            BindButton(restore.gameObject, RestorePurchases);
+            shopStatus = MakeText(shopPanel, "", 24, Hex("FFD21F"), fontBold);
+            Pin(shopStatus.rectTransform, 0.08f, 0.02f, 0.92f, 0.08f);
+        }
+
+        void MakeShopPack(RectTransform parent, string name, float yMin, float yMax, int bulbs, string title, string price, bool best, UnityEngine.Events.UnityAction buy)
+        {
+            var row = MakeDarkRow(parent, name, yMin, yMax);
+            var icons = MakeRect("Icons", row);
+            Pin(icons, 0.04f, 0.18f, 0.24f, 0.82f);
+            for (int i = 0; i < Mathf.Min(3, bulbs); i++)
+            {
+                var bulb = MakeRect("B" + i, icons);
+                float x = bulbs == 1 ? 0.25f : i * 0.28f;
+                float y = i == 2 ? 0.08f : 0.22f;
+                bulb.anchorMin = new Vector2(x, y);
+                bulb.anchorMax = new Vector2(x + 0.5f, y + 0.7f);
+                bulb.offsetMin = bulb.offsetMax = Vector2.zero;
+                var image = bulb.gameObject.AddComponent<Image>();
+                image.sprite = hintBulbSprite;
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+            }
+            var label = MakeText(row, title, 36, Color.white, fontBlack);
+            label.alignment = TextAlignmentOptions.MidlineLeft;
+            Pin(label.rectTransform, 0.26f, 0.18f, 0.68f, 0.82f);
+            var buyBtn = MakeRect("Buy", row);
+            Pin(buyBtn, 0.70f, 0.28f, 0.96f, 0.72f);
+            PaintSliced(buyBtn, greenButtonSprite, Color.white);
+            var priceLabel = MakeText(buyBtn, price, 30, Color.white, fontBlack);
+            Stretch(priceLabel.rectTransform);
+            BindButton(buyBtn.gameObject, buy);
+            if (!best)
+                return;
+            var badge = MakeRect("Best", row);
+            badge.anchorMin = badge.anchorMax = new Vector2(1f, 1f);
+            badge.pivot = new Vector2(1f, 1f);
+            badge.anchoredPosition = new Vector2(-12f, -8f);
+            badge.sizeDelta = new Vector2(150f, 36f);
+            PaintSliced(badge, popupCardSprite, Hex("E23B3B"));
+            var bestLabel = MakeText(badge, "Best Value", 18, Color.white, fontBlack);
+            Stretch(bestLabel.rectTransform);
+        }
+
+        void BuildHowToPanel()
+        {
+            howToPanel = MakeRect("HowTo", menuRoot);
+            Stretch(howToPanel);
+            MakeMenuHeader(howToPanel, "How to Play");
+            BuildHowToStep(howToPanel, "Step1", 0.64f, 0.88f, "1", "Drag a piece\nonto the board", true);
+            BuildHowToStep(howToPanel, "Step2", 0.38f, 0.62f, "2", "Tap to rotate", false);
+            BuildHowToStep(howToPanel, "Step3", 0.16f, 0.36f, "3", "Fill every cell to win", false);
+            var got = MakePill(howToPanel, "GotIt", yellowButtonSprite, "Got It", Hex("1A1A1A"), out _);
+            Pin(got, 0.14f, 0.04f, 0.86f, 0.14f);
+            BindButton(got.gameObject, CloseHowTo);
+        }
+
+        void BuildHowToStep(RectTransform parent, string name, float yMin, float yMax, string number, string caption, bool drag)
+        {
+            var card = MakeDarkRow(parent, name, yMin, yMax);
+            var badge = MakeRect("N", card);
+            Pin(badge, 0.04f, 0.62f, 0.14f, 0.92f);
+            PaintSliced(badge, blueButtonSprite, Color.white);
+            var n = MakeText(badge, number, 28, Color.white, fontBlack);
+            Stretch(n.rectTransform);
+            var text = MakeText(card, caption, 28, Color.white, fontBold);
+            text.enableWordWrapping = true;
+            text.alignment = TextAlignmentOptions.TopLeft;
+            Pin(text.rectTransform, 0.16f, 0.58f, 0.96f, 0.94f);
+            var art = MakeRect("Art", card);
+            Pin(art, 0.06f, 0.08f, 0.94f, 0.56f);
+            if (drag)
+            {
+                var piece = MakeRect("Piece", art);
+                Pin(piece, 0.02f, 0.28f, 0.38f, 0.72f);
+                PaintSliced(piece, redSprite, PieceTint("red"), false);
+                var arrow = MakeText(art, ">", 42, Hex("3DDC84"), fontBlack);
+                Pin(arrow.rectTransform, 0.38f, 0.2f, 0.52f, 0.8f);
+                var board = MakeRect("Board", art);
+                Pin(board, 0.54f, 0.02f, 0.98f, 0.98f);
+                BuildMiniGrid(board, new[]
+                {
+                    "empty", "empty", "empty",
+                    "green", "green", "green",
+                    "empty", "empty", "empty"
+                }, 3, 3);
+            }
+            else if (number == "2")
+            {
+                var a = MakeRect("A", art);
+                Pin(a, 0.04f, 0.28f, 0.40f, 0.72f);
+                PaintSliced(a, yellowSprite, PieceTint("yellow"), false);
+                var arrow = MakeText(art, "TURN", 26, Hex("3DDC84"), fontBlack);
+                Pin(arrow.rectTransform, 0.40f, 0.2f, 0.58f, 0.8f);
+                var b = MakeRect("B", art);
+                Pin(b, 0.60f, 0.08f, 0.82f, 0.92f);
+                PaintSliced(b, yellowSprite, PieceTint("yellow"), false);
+            }
+            else
+            {
+                var board = MakeRect("Win", art);
+                Pin(board, 0.22f, 0.0f, 0.78f, 1f);
+                BuildMiniGrid(board, new[]
+                {
+                    "red", "blue", "yellow", "empty",
+                    "blue", "black", "red", "yellow",
+                    "yellow", "red", "blue", "black",
+                    "red", "yellow", "black", "blue"
+                }, 4, 4);
+            }
+        }
+
+        void BuildThemePanel()
+        {
+            themePanel = MakeRect("Theme", menuRoot);
+            Stretch(themePanel);
+            MakeMenuHeader(themePanel, "Theme");
+            var candy = MakeDarkRow(themePanel, "Candy", 0.70f, 0.84f);
+            var candyLabel = MakeText(candy, "Candy", 36, Color.white, fontBlack);
+            candyLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            Pin(candyLabel.rectTransform, 0.08f, 0.1f, 0.7f, 0.9f);
+            BindButton(candy.gameObject, () => EquipTheme("candy"));
+            var neon = MakeDarkRow(themePanel, "Neon", 0.54f, 0.68f);
+            var neonLabel = MakeText(neon, "Neon", 36, Color.white, fontBlack);
+            neonLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            Pin(neonLabel.rectTransform, 0.08f, 0.1f, 0.7f, 0.9f);
+            BindButton(neon.gameObject, () => EquipTheme("neon"));
+            themeStatus = MakeText(themePanel, "", 26, Hex("FFD21F"), fontBold);
+            Pin(themeStatus.rectTransform, 0.08f, 0.42f, 0.92f, 0.52f);
+        }
+
+        void BuildPrivacyPanel()
+        {
+            privacyPanel = MakeRect("Privacy", menuRoot);
+            Stretch(privacyPanel);
+            MakeMenuHeader(privacyPanel, "Privacy Policy");
+            var card = MakeDarkRow(privacyPanel, "Body", 0.12f, 0.88f);
+            var body = MakeText(card, "GridAura stores progress, stars, hints, and settings on this device. No account is required. Purchases restore on this device. We do not collect personal data in this version.", 28, new Color(1f, 1f, 1f, 0.86f), fontBold);
+            body.enableWordWrapping = true;
+            body.alignment = TextAlignmentOptions.TopLeft;
+            body.overflowMode = TextOverflowModes.Overflow;
+            Pin(body.rectTransform, 0.06f, 0.06f, 0.94f, 0.94f);
+        }
+
+        void BuildMiniGrid(RectTransform grid, string[] cells, int cols, int rows)
+        {
+            for (int i = 0; i < cells.Length; i++)
+            {
+                int col = i % cols;
+                int row = i / cols;
+                var cell = MakeRect("C" + i, grid);
+                cell.anchorMin = new Vector2(col / (float)cols, 1f - (row + 1) / (float)rows);
+                cell.anchorMax = new Vector2((col + 1) / (float)cols, 1f - row / (float)rows);
+                cell.offsetMin = new Vector2(4f, 4f);
+                cell.offsetMax = new Vector2(-4f, -4f);
+                var image = cell.gameObject.AddComponent<Image>();
+                image.raycastTarget = false;
+                string color = cells[i];
+                if (color == "empty")
+                {
+                    image.sprite = emptySprite;
+                    image.color = Color.white;
+                }
+                else if (color == "black")
+                {
+                    image.sprite = blackSprite;
+                    image.color = Color.white;
+                }
+                else if (color == "green")
+                {
+                    image.sprite = emptySprite;
+                    image.color = Hex("3DDC84");
+                }
+                else
+                {
+                    image.sprite = SpriteFor(color);
+                    image.color = PieceTint(color);
+                }
+                image.type = Image.Type.Sliced;
+                if (image.sprite != null)
+                    FitSlice(image, 12f, 16f);
+            }
+        }
+
+        void MakePadlock(RectTransform tile)
+        {
+            var lockRoot = MakeRect("Lock", tile);
+            Pin(lockRoot, 0.32f, 0.22f, 0.68f, 0.72f);
+            var shackle = MakeRect("Shackle", lockRoot);
+            Pin(shackle, 0.22f, 0.48f, 0.78f, 0.98f);
+            var shackleImage = shackle.gameObject.AddComponent<Image>();
+            shackleImage.color = Hex("8B93A3");
+            shackleImage.raycastTarget = false;
+            var body = MakeRect("Body", lockRoot);
+            Pin(body, 0.08f, 0.02f, 0.92f, 0.58f);
+            PaintSliced(body, popupCardSprite, Hex("9AA3B2"), false);
+            lockRoot.gameObject.SetActive(false);
+        }
+
+        void PaintSliced(RectTransform rect, Sprite sprite, Color color, bool hit = true)
+        {
+            var image = rect.gameObject.GetComponent<Image>();
+            if (image == null)
+                image = rect.gameObject.AddComponent<Image>();
+            image.raycastTarget = hit;
+            image.color = color;
+            if (sprite != null)
+            {
+                image.sprite = sprite;
+                image.type = Image.Type.Sliced;
+                FitSlice(image, 28f, 36f);
+            }
+        }
+
+
+        int HintBank()
+        {
+            return Mathf.Max(0, PlayerPrefs.GetInt(PrefHints, 3));
+        }
+
+        bool UnlimitedHints()
+        {
+            return PlayerPrefs.GetInt(PrefUnlimited, 0) == 1;
+        }
+
+        bool NeonOwned()
+        {
+            return PlayerPrefs.GetInt(PrefNeon, 0) == 1 || UnlimitedHints();
+        }
+
+        bool NeonOn()
+        {
+            return NeonOwned() && PlayerPrefs.GetString(PrefTheme, "candy") == "neon";
+        }
+
+        void SpendHint()
+        {
+            if (state != null && state.FreeHints)
+                return;
+            if (UnlimitedHints())
+                return;
+            PlayerPrefs.SetInt(PrefHints, Mathf.Max(0, HintBank() - 1));
+            PlayerPrefs.Save();
+        }
+
+        void BuyHints(int amount)
+        {
+            PlayerPrefs.SetInt(PrefHints, HintBank() + amount);
+            PlayerPrefs.Save();
+            if (state != null && !state.FreeHints && !UnlimitedHints())
+                state.hintsLeft += amount;
+            FillShop("Added " + amount + " hints");
+            Haptics.Tick();
+        }
+
+        void BuyUnlimitedBundle()
+        {
+            PlayerPrefs.SetInt(PrefUnlimited, 1);
+            PlayerPrefs.SetInt(PrefNeon, 1);
+            PlayerPrefs.SetString(PrefTheme, "neon");
+            PlayerPrefs.Save();
+            if (state != null)
+                state.hintsLeft = int.MaxValue;
+            FillShop("Unlimited hints unlocked");
+            FillTheme();
+            Haptics.Tick();
+        }
+
+        void RestorePurchases()
+        {
+            FillShop(UnlimitedHints() || HintBank() > 0 ? "Purchases restored" : "Nothing to restore");
+            FillTheme();
+            Haptics.Tick();
+        }
+
+        void FillShop(string note = null)
+        {
+            if (shopStatus == null)
+                return;
+            if (!string.IsNullOrEmpty(note))
+                shopStatus.text = note;
+            else if (UnlimitedHints())
+                shopStatus.text = "Unlimited hints on";
+            else
+                shopStatus.text = "Hints: " + HintBank();
+        }
+
+        void FillTheme()
+        {
+            if (themeStatus == null)
+                return;
+            string current = PlayerPrefs.GetString(PrefTheme, "candy");
+            themeStatus.text = NeonOn() ? "Neon equipped" : (current == "neon" && !NeonOwned() ? "Buy Neon in the Shop" : "Candy equipped");
+        }
+
+        void EquipTheme(string theme)
+        {
+            if (theme == "neon" && !NeonOwned())
+            {
+                FillTheme();
+                OpenShop();
+                FillShop("Unlock Neon with Unlimited Hints");
+                return;
+            }
+            PlayerPrefs.SetString(PrefTheme, theme);
+            PlayerPrefs.Save();
+            FillTheme();
+        }
+
+        void RateUs()
+        {
+            Application.OpenURL("https://apps.apple.com");
+        }
+
+        void TapVersion()
+        {
+            versionTaps++;
+            if (versionTaps < 8)
+                return;
+            versionTaps = 0;
+            ShowDebugPanel();
+        }
+
+        void CloseHowTo()
+        {
+            PlayerPrefs.SetInt(PrefHowTo, 1);
+            PlayerPrefs.Save();
+            settingsFromPlay = false;
+            ShowMenu(homePanel);
+        }
+
+        void OpenShopFromPlay()
+        {
+            HideOverlayNow();
+            settingsFromPlay = true;
+            ShowMenu(shopPanel);
         }
 
         RectTransform MakeCard(string name)
@@ -4828,21 +5920,13 @@ namespace Aura
             nextLabel.text = last ? "Home" : "Next Level";
             hintsUsedText.text = "Hints used: " + state.hintsUsed;
             winEarnedStars = state.hintsUsed <= 0 ? 3 : (state.hintsUsed == 1 ? 2 : 1);
-            string chest = RecordStars(winEarnedStars);
+            RecordStars(winEarnedStars);
             if (starsTotalText != null)
-            {
-                int total = TotalStars();
-                int claimed = PlayerPrefs.GetInt("GridAura.ChestsClaimed", 0);
-                if (!string.IsNullOrEmpty(chest))
-                    starsTotalText.text = "Chest unlocked: " + chest;
-                else if (claimed >= ChestAt.Length)
-                    starsTotalText.text = "Stars " + total;
-                else
-                    starsTotalText.text = "Stars " + total + "  ·  " + (ChestAt[claimed] - total) + " to chest";
-            }
+                starsTotalText.text = "";
             LayoutWinStars();
             bool first = !celebrating;
             celebrating = true;
+            ClearLevelFailStreak();
             if (first)
             {
                 foreach (Transform child in placedLayer)
@@ -5203,13 +6287,18 @@ namespace Aura
         }
     }
 
-    public class PieceControl : MonoBehaviour, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerUpHandler
+    public class PieceControl : MonoBehaviour, IPointerDownHandler, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerUpHandler
     {
         public GameScreen screen;
         public string pieceId;
         public bool onBoard;
 
         public void OnPointerDown(PointerEventData eventData) { screen.PointerDown(this, eventData); }
+        public void OnInitializePotentialDrag(PointerEventData eventData)
+        {
+            if (onBoard)
+                eventData.useDragThreshold = false;
+        }
         public void OnBeginDrag(PointerEventData eventData) { screen.PointerBeginDrag(this, eventData); }
         public void OnDrag(PointerEventData eventData) { screen.PointerDrag(this, eventData); }
         public void OnEndDrag(PointerEventData eventData) { screen.PointerEndDrag(this, eventData); }
